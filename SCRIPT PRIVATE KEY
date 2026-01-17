@@ -39,7 +39,7 @@ local Tab = Window:MakeTab({
     PremiumOnly = false
 })
 
-Tab:AddLabel("✅ Access STAFF)
+Tab:AddLabel("✅ Access Granted")
 Tab:AddLabel("👤 Username: "..Player.Name)
 
 OrionLib:Init()
