@@ -29,7 +29,7 @@ end
 
 -- UI hanya muncul jika lulus whitelist
 local Window = OrionLib:MakeWindow({
-    Name = "Private Script",
+    Name = "STAFF ONLY",
     SaveConfig = false,
     IntroEnabled = true
 })
@@ -39,12 +39,12 @@ local Tab = Window:MakeTab({
     PremiumOnly = false
 })
 
-Tab:AddLabel("✅ Access Granted")
+Tab:AddLabel("✅ DONE ACCESS")
 Tab:AddLabel("👤 Username: "..Player.Name)
 
 OrionLib:Init()
             local Window = OrionLib:MakeWindow({
-                Name = "PROGRAM BY FIQQZR7",
+                Name = "STAFF ONLY PRVT",
                 HidePremium = false,
                 SaveConfig = true,
                 ConfigFolder = "OrionTest"
