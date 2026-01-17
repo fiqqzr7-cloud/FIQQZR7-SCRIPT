@@ -1,5 +1,43 @@
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Orion/main/source"))()
 
+-- WHITELIST
+local Whitelist = {
+    "AmmarNajmie"
+    "2sxvkk"
+    "4leppp10"
+}
+
+local Player = game:GetService("Players").LocalPlayer
+local Allowed = false
+
+for _, v in pairs(Whitelist) do
+    if Player.Name == v then
+        Allowed = true
+    end
+end
+
+if not Allowed then
+    Player:Kick("❌  KO BUAT STAFF KIMAK  MAMPUS KO AQ KICK BABI")
+    return
+end
+
+-- UI hanya muncul kalau whitelist
+local Window = OrionLib:MakeWindow({
+    Name = "Private Script",
+    HidePremium = false,
+    SaveConfig = false,
+    IntroEnabled = true
+})
+
+local Tab = Window:MakeTab({
+    Name = "Main",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+Tab:AddLabel("✅ Access Granted: "..Player.Name)
+
+OrionLib:Init()
             local Window = OrionLib:MakeWindow({
                 Name = "PROGRAM BY FIQQZR7",
                 HidePremium = false,
