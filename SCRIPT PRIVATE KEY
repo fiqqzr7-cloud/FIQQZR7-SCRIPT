@@ -117,6 +117,19 @@ local MainTab = Window:CreateTab("MainV2", 4483362458)
 
 -- Button
 MainTab:CreateButton({
+   Name = "DEX EXPLORE",
+   Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Dex-Explorer-DPP-73687"))()
+      Rayfield:Notify({
+         Title = "Berjaya exucute",
+         Content = "THANKS EQUIP",
+         Duration = 4
+      })
+   end
+})
+
+-- Button
+MainTab:CreateButton({
    Name = "MUSIC BY FAYINT",
    Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/FayintXhub/FayintExploit/refs/heads/main/Global-Music"))()
@@ -171,6 +184,19 @@ MainTab:CreateButton({
 -- TAB MAIN
 -- =========================
 local MainTab = Window:CreateTab("mainV3", 4483362458)
+
+-- Button
+MainTab:CreateButton({
+   Name = "AUTO WALK ALL MAP",
+   Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/0x-rullzsy/crack/refs/heads/main/DavidStoreCrack.lua"))()
+      Rayfield:Notify({
+         Title = "Berjaya exucute",
+         Content = "THANKS EQUIP",
+         Duration = 4
+      })
+   end
+})
 
 -- Button
 MainTab:CreateButton({
@@ -245,6 +271,42 @@ MainTab:CreateButton({
    Name = "FISH IT LYNXZ",
    Callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/4LynxX/Lynx/refs/heads/main/LynxxMain.lua"))()
+      Rayfield:Notify({
+         Title = "Berjaya exucute",
+         Content = "THANKS EQUIP",
+         Duration = 4
+      })
+   end
+})
+
+MainTab:CreateButton({
+   Name = "FISH IT CHOE",
+   Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/MajestySkie/Chloe-X/main/Main/ChloeX"))()
+      Rayfield:Notify({
+         Title = "Berjaya exucute",
+         Content = "THANKS EQUIP",
+         Duration = 4
+      })
+   end
+})
+
+MainTab:CreateButton({
+   Name = "FISH IT NEXO HUB",
+   Callback = function()
+        loadstring(game:HttpGet("https://pastefy.app/JFZnEeGk/raw"))()
+      Rayfield:Notify({
+         Title = "Berjaya exucute",
+         Content = "THANKS EQUIP",
+         Duration = 4
+      })
+   end
+})
+
+MainTab:CreateButton({
+   Name = "FLING PLAYER FISH IT",
+   Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/rafkaray8-prog/VoidX-Project/refs/heads/main/main.lua"))()
       Rayfield:Notify({
          Title = "Berjaya exucute",
          Content = "THANKS EQUIP",
