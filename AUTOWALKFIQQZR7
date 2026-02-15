@@ -1,16 +1,41 @@
-local player = game.Players.LocalPlayer
+-- FIQQZR7 AUTOWALlocal player = game.Players.LocalPlayer
 repeat task.wait() until player and player:FindFirstChild("PlayerGui")
 
 -- Variables
 local recording = false
 local playing = false
-local path = {}
+local currentPath = {}
 local speed = 1.0
 local conn = nil
+local humanoid = nil
 
--- Create UI (PALING SIMPLE)
+-- Function to get humanoid
+local function getHumanoid()
+    if player.Character then
+        return player.Character:FindFirstChild("Humanoid")
+    end
+    return nil
+end
+
+-- Function to set walk animation
+local function setWalkAnimation(speedMultiplier)
+    humanoid = getHumanoid()
+    if humanoid then
+        humanoid.WalkSpeed = 16 * speedMultiplier
+    end
+end
+
+-- Function to reset animation
+local function resetAnimation()
+    humanoid = getHumanoid()
+    if humanoid then
+        humanoid.WalkSpeed = 16
+    end
+end
+
+-- Create UI (lebih kecil)
 local gui = Instance.new("ScreenGui")
-gui.Name = "FIQAUTOWALK"
+gui.Name = "AutoWalk"
 gui.Parent = player.PlayerGui
 
 local frame = Instance.new("Frame")
@@ -27,9 +52,9 @@ frame.Parent = gui
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 30)
 title.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-title.Text = "FIQAUTOWALK"
+title.Text = "FIQQAUTOWALK"
 title.TextColor3 = Color3.fromRGB(0, 160, 255)
-title.TextSize = 14
+title.TextSize = 12
 title.Font = Enum.Font.GothamBold
 title.Parent = frame
 
@@ -75,29 +100,33 @@ local function createButton(y, text, color, callback)
     end)
 end
 
--- Record button
+-- RECORD BUTTON
 createButton(75, "⏺️ RECORD", Color3.fromRGB(0, 200, 100), function()
     if recording then
         recording = false
-        status.Text = "● STOPPED"
+        status.Text = "⏹️ STOPPED"
         status.TextColor3 = Color3.fromRGB(255, 200, 0)
-        points.Text = #path .. " pts"
+        points.Text = #currentPath .. " pts"
         task.wait(0.5)
         status.Text = "● READY"
         status.TextColor3 = Color3.fromRGB(255, 255, 255)
     else
+        if playing then
+            playing = false
+            if conn then conn:Disconnect() end
+            resetAnimation()
+        end
         recording = true
-        playing = false
-        path = {}
+        currentPath = {}
         status.Text = "● RECORDING"
         status.TextColor3 = Color3.fromRGB(255, 80, 80)
         points.Text = "0 pts"
     end
 end)
 
--- Play button
+-- PLAY BUTTON
 createButton(110, "▶️ PLAY", Color3.fromRGB(0, 160, 255), function()
-    if #path == 0 then
+    if #currentPath == 0 then
         status.Text = "❌ NO PATH"
         status.TextColor3 = Color3.fromRGB(255, 80, 80)
         task.wait(1)
@@ -109,39 +138,43 @@ createButton(110, "▶️ PLAY", Color3.fromRGB(0, 160, 255), function()
     if playing then
         playing = false
         if conn then conn:Disconnect() end
-        status.Text = "● STOPPED"
+        resetAnimation()
+        status.Text = "⏹️ STOPPED"
         status.TextColor3 = Color3.fromRGB(255, 200, 0)
         task.wait(0.5)
         status.Text = "● READY"
         status.TextColor3 = Color3.fromRGB(255, 255, 255)
     else
+        if recording then
+            recording = false
+        end
         playing = true
-        recording = false
-        local idx = 1
         local start = tick()
         status.Text = "● PLAYING"
         status.TextColor3 = Color3.fromRGB(0, 200, 100)
         
+        setWalkAnimation(speed)
+        
         if conn then conn:Disconnect() end
         conn = game:GetService("RunService").Heartbeat:Connect(function()
-            if not playing then return end
+            if not playing or not player.Character then return end
             
             local elapsed = (tick() - start) * speed
             local target = math.floor(elapsed * 30) + 1
             
-            if target > #path then
+            if target > #currentPath then
                 start = tick()
                 target = 1
             end
             
             if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                player.Character.HumanoidRootPart.CFrame = CFrame.new(path[target])
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(currentPath[target])
             end
         end)
     end
 end)
 
--- Speed buttons
+-- Speed controls
 local speedText = Instance.new("TextLabel")
 speedText.Size = UDim2.new(0.3, 0, 0, 25)
 speedText.Position = UDim2.new(0.35, 0, 0, 145)
@@ -152,7 +185,6 @@ speedText.TextSize = 11
 speedText.Font = Enum.Font.GothamBold
 speedText.Parent = frame
 
--- Speed down
 local speedDown = Instance.new("TextButton")
 speedDown.Size = UDim2.new(0, 25, 0, 25)
 speedDown.Position = UDim2.new(0.2, 0, 0, 145)
@@ -166,9 +198,11 @@ speedDown.Parent = frame
 speedDown.MouseButton1Click:Connect(function()
     speed = math.max(0.2, speed - 0.2)
     speedText.Text = "⚡ " .. string.format("%.1f", speed) .. "x"
+    if playing then
+        setWalkAnimation(speed)
+    end
 end)
 
--- Speed up
 local speedUp = Instance.new("TextButton")
 speedUp.Size = UDim2.new(0, 25, 0, 25)
 speedUp.Position = UDim2.new(0.65, 0, 0, 145)
@@ -180,13 +214,16 @@ speedUp.TextSize = 14
 speedUp.Parent = frame
 
 speedUp.MouseButton1Click:Connect(function()
-    speed = math.min(3.0, speed + 0.2)
+    speed = math.min(10.0, speed + 0.2)
     speedText.Text = "⚡ " .. string.format("%.1f", speed) .. "x"
+    if playing then
+        setWalkAnimation(speed)
+    end
 end)
 
 -- Clear button
 createButton(175, "🗑️ CLEAR", Color3.fromRGB(255, 200, 0), function()
-    path = {}
+    currentPath = {}
     points.Text = "0 pts"
     status.Text = "✓ CLEARED"
     status.TextColor3 = Color3.fromRGB(255, 200, 0)
@@ -207,15 +244,38 @@ close.TextSize = 11
 close.Parent = frame
 
 close.MouseButton1Click:Connect(function()
+    if playing then
+        playing = false
+        if conn then conn:Disconnect() end
+        resetAnimation()
+    end
     gui:Destroy()
 end)
 
 -- Recording loop
 game:GetService("RunService").Heartbeat:Connect(function()
     if recording and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        table.insert(path, player.Character.HumanoidRootPart.Position)
-        points.Text = #path .. " pts"
+        table.insert(currentPath, player.Character.HumanoidRootPart.Position)
+        points.Text = #currentPath .. " pts"
     end
 end)
 
-print("✅ AUTOWALK MINIMAL LOADED!")
+-- Character respawn handler
+player.CharacterAdded:Connect(function()
+    task.wait(1)
+    if playing then
+        playing = false
+        if conn then conn:Disconnect() end
+        resetAnimation()
+        status.Text = "● READY"
+        status.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+    if recording then
+        recording = false
+    end
+end)
+
+print("✅ AUTWALK FIQQZR7")
+print("⏺️ RECORD - tekan untuk mula/stop rakam")
+print("▶️ PLAY - tekan untuk main/stop balik")
+print("⚡ Speed: 0.2x - 10.0x")
