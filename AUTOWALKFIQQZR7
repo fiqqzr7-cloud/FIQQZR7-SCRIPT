@@ -1,4 +1,5 @@
--- FIQQZR7 AUTOWALlocal player = game.Players.LocalPlayer
+-- FIQQZR7 AUTOWALK FIXED
+local player = game.Players.LocalPlayer
 repeat task.wait() until player and player:FindFirstChild("PlayerGui")
 
 -- Variables
@@ -13,6 +14,16 @@ local humanoid = nil
 local function getHumanoid()
     if player.Character then
         return player.Character:FindFirstChild("Humanoid")
+    end
+    return nil
+end
+
+-- Function to get root part
+local function getRootPart()
+    if player.Character then
+        return player.Character:FindFirstChild("HumanoidRootPart") or 
+               player.Character:FindFirstChild("Torso") or 
+               player.Character:FindFirstChild("UpperTorso")
     end
     return nil
 end
@@ -33,10 +44,11 @@ local function resetAnimation()
     end
 end
 
--- Create UI (lebih kecil)
+-- Create UI
 local gui = Instance.new("ScreenGui")
 gui.Name = "AutoWalk"
 gui.Parent = player.PlayerGui
+gui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 200, 0, 250)
@@ -52,7 +64,7 @@ frame.Parent = gui
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 30)
 title.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-title.Text = "FIQQAUTOWALK"
+title.Text = "⚡ FIQQZR7 AUTOWALK"
 title.TextColor3 = Color3.fromRGB(0, 160, 255)
 title.TextSize = 12
 title.Font = Enum.Font.GothamBold
@@ -124,7 +136,7 @@ createButton(75, "⏺️ RECORD", Color3.fromRGB(0, 200, 100), function()
     end
 end)
 
--- PLAY BUTTON
+-- PLAY BUTTON (FIXED)
 createButton(110, "▶️ PLAY", Color3.fromRGB(0, 160, 255), function()
     if #currentPath == 0 then
         status.Text = "❌ NO PATH"
@@ -157,7 +169,10 @@ createButton(110, "▶️ PLAY", Color3.fromRGB(0, 160, 255), function()
         
         if conn then conn:Disconnect() end
         conn = game:GetService("RunService").Heartbeat:Connect(function()
-            if not playing or not player.Character then return end
+            if not playing then return end
+            
+            local rootPart = getRootPart()
+            if not rootPart or not player.Character then return end
             
             local elapsed = (tick() - start) * speed
             local target = math.floor(elapsed * 30) + 1
@@ -167,9 +182,7 @@ createButton(110, "▶️ PLAY", Color3.fromRGB(0, 160, 255), function()
                 target = 1
             end
             
-            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                player.Character.HumanoidRootPart.CFrame = CFrame.new(currentPath[target])
-            end
+            rootPart.CFrame = CFrame.new(currentPath[target])
         end)
     end
 end)
@@ -254,9 +267,12 @@ end)
 
 -- Recording loop
 game:GetService("RunService").Heartbeat:Connect(function()
-    if recording and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        table.insert(currentPath, player.Character.HumanoidRootPart.Position)
-        points.Text = #currentPath .. " pts"
+    if recording then
+        local rootPart = getRootPart()
+        if rootPart then
+            table.insert(currentPath, rootPart.Position)
+            points.Text = #currentPath .. " pts"
+        end
     end
 end)
 
@@ -275,7 +291,7 @@ player.CharacterAdded:Connect(function()
     end
 end)
 
-print("✅ AUTWALK FIQQZR7")
+print("✅ FIQQZR7 AUTOWALK FIXED!")
 print("⏺️ RECORD - tekan untuk mula/stop rakam")
 print("▶️ PLAY - tekan untuk main/stop balik")
 print("⚡ Speed: 0.2x - 10.0x")
