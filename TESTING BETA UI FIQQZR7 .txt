@@ -1,0 +1,674 @@
+-- FIQQZR7 PREMIUM HUB - DENGAN 3 CUSTOM BUTTON
+local player = game.Players.LocalPlayer
+
+-- Tunggu player
+repeat task.wait() until player and player:FindFirstChild("PlayerGui")
+
+-- Services
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+-- ==============================================
+-- LOADING SCREEN CANTIK
+-- ==============================================
+local loading = Instance.new("ScreenGui")
+loading.Name = "Loading"
+loading.Parent = player.PlayerGui
+
+local loadingCard = Instance.new("Frame")
+loadingCard.Size = UDim2.new(0, 240, 0, 120)
+loadingCard.Position = UDim2.new(0.5, -120, 0.5, -60)
+loadingCard.BackgroundColor3 = Color3.fromRGB(18, 22, 30)
+loadingCard.BorderColor3 = Color3.fromRGB(0, 180, 255)
+loadingCard.BorderSizePixel = 2
+loadingCard.Parent = loading
+
+local cardCorner = Instance.new("UICorner")
+cardCorner.CornerRadius = UDim.new(0, 12)
+cardCorner.Parent = loadingCard
+
+local loadingTitle = Instance.new("TextLabel")
+loadingTitle.Size = UDim2.new(1, 0, 0, 35)
+loadingTitle.Position = UDim2.new(0, 0, 0, 15)
+loadingTitle.BackgroundTransparency = 1
+loadingTitle.Text = "⚡ FIQQZR7 PREMIUM"
+loadingTitle.TextColor3 = Color3.fromRGB(0, 180, 255)
+loadingTitle.TextSize = 18
+loadingTitle.Font = Enum.Font.GothamBold
+loadingTitle.Parent = loadingCard
+
+local loadingText = Instance.new("TextLabel")
+loadingText.Size = UDim2.new(1, 0, 0, 25)
+loadingText.Position = UDim2.new(0, 0, 0, 50)
+loadingText.BackgroundTransparency = 1
+loadingText.Text = "LOADING SYSTEM"
+loadingText.TextColor3 = Color3.fromRGB(150, 160, 180)
+loadingText.TextSize = 12
+loadingText.Font = Enum.Font.Gotham
+loadingText.Parent = loadingCard
+
+local progressBg = Instance.new("Frame")
+progressBg.Size = UDim2.new(0.8, 0, 0, 6)
+progressBg.Position = UDim2.new(0.1, 0, 0, 85)
+progressBg.BackgroundColor3 = Color3.fromRGB(30, 35, 42)
+progressBg.BorderColor3 = Color3.fromRGB(0, 180, 255)
+progressBg.BorderSizePixel = 1
+progressBg.Parent = loadingCard
+
+local progressFill = Instance.new("Frame")
+progressFill.Size = UDim2.new(0, 0, 1, 0)
+progressFill.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+progressFill.Parent = progressBg
+
+for i = 1, 100 do
+    progressFill.Size = UDim2.new(i/100, 0, 1, 0)
+    loadingText.Text = "LOADING " .. i .. "%"
+    task.wait(0.01)
+end
+
+TweenService:Create(loadingCard, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+task.wait(0.3)
+loading:Destroy()
+
+-- ==============================================
+-- MAIN UI CANTIK (280x380)
+-- ==============================================
+local gui = Instance.new("ScreenGui")
+gui.Name = "FIQQZR7_Premium"
+gui.Parent = player.PlayerGui
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 280, 0, 380)
+main.Position = UDim2.new(0.5, -140, 0.5, -190)
+main.BackgroundColor3 = Color3.fromRGB(14, 18, 26)
+main.BorderColor3 = Color3.fromRGB(0, 180, 255)
+main.BorderSizePixel = 2
+main.Active = true
+main.Draggable = true
+main.ClipsDescendants = true
+main.Parent = gui
+
+-- Rounded corners
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 14)
+mainCorner.Parent = main
+
+-- Background Gradient
+local bgGradient = Instance.new("UIGradient")
+bgGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 24, 34)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(16, 20, 30)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(12, 16, 26))
+})
+bgGradient.Rotation = 45
+bgGradient.Parent = main
+
+-- Title Bar Premium
+local bar = Instance.new("Frame")
+bar.Size = UDim2.new(1, 0, 0, 35)
+bar.BackgroundColor3 = Color3.fromRGB(10, 14, 22)
+bar.BorderSizePixel = 0
+bar.Parent = main
+
+local barCorner = Instance.new("UICorner")
+barCorner.CornerRadius = UDim.new(0, 14)
+barCorner.Parent = bar
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0.5, 0, 1, 0)
+title.Position = UDim2.new(0, 15, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "⚡ FIQQZR7"
+title.TextColor3 = Color3.fromRGB(0, 180, 255)
+title.TextSize = 16
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = bar
+
+-- Version Badge
+local badge = Instance.new("Frame")
+badge.Size = UDim2.new(0, 45, 0, 20)
+badge.Position = UDim2.new(0.5, -22, 0.5, -10)
+badge.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+badge.BackgroundTransparency = 0.2
+badge.BorderSizePixel = 0
+badge.Parent = bar
+
+local badgeCorner = Instance.new("UICorner")
+badgeCorner.CornerRadius = UDim.new(0, 10)
+badgeCorner.Parent = badge
+
+local badgeText = Instance.new("TextLabel")
+badgeText.Size = UDim2.new(1, 0, 1, 0)
+badgeText.BackgroundTransparency = 1
+badgeText.Text = "v2.0"
+badgeText.TextColor3 = Color3.fromRGB(255, 255, 255)
+badgeText.TextSize = 11
+badgeText.Font = Enum.Font.GothamBold
+badgeText.Parent = badge
+
+-- ==============================================
+-- HIDE BUTTON & CLOSE BUTTON
+-- ==============================================
+local hideBtn = Instance.new("TextButton")
+hideBtn.Size = UDim2.new(0, 22, 0, 22)
+hideBtn.Position = UDim2.new(1, -52, 0.5, -11)
+hideBtn.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+hideBtn.TextColor3 = Color3.fromRGB(0, 180, 255)
+hideBtn.Text = "−"
+hideBtn.Font = Enum.Font.GothamBold
+hideBtn.TextSize = 18
+hideBtn.Parent = bar
+
+local hideCorner = Instance.new("UICorner")
+hideCorner.CornerRadius = UDim.new(0, 6)
+hideCorner.Parent = hideBtn
+
+local close = Instance.new("TextButton")
+close.Size = UDim2.new(0, 22, 0, 22)
+close.Position = UDim2.new(1, -27, 0.5, -11)
+close.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+close.TextColor3 = Color3.fromRGB(255, 100, 100)
+close.Text = "✕"
+close.Font = Enum.Font.GothamBold
+close.TextSize = 14
+close.Parent = bar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 6)
+closeCorner.Parent = close
+
+-- ==============================================
+-- CONTENT CONTAINER
+-- ==============================================
+local contentContainer = Instance.new("Frame")
+contentContainer.Size = UDim2.new(1, -20, 1, -50)
+contentContainer.Position = UDim2.new(0, 10, 0, 45)
+contentContainer.BackgroundTransparency = 1
+contentContainer.Parent = main
+
+-- ==============================================
+-- TAB BAR CANTIK
+-- ==============================================
+local tabBar = Instance.new("Frame")
+tabBar.Size = UDim2.new(1, 0, 0, 35)
+tabBar.BackgroundColor3 = Color3.fromRGB(18, 22, 32)
+tabBar.BorderColor3 = Color3.fromRGB(0, 180, 255)
+tabBar.BorderSizePixel = 1
+tabBar.Parent = contentContainer
+
+local tabCorner = Instance.new("UICorner")
+tabCorner.CornerRadius = UDim.new(0, 10)
+tabCorner.Parent = tabBar
+
+local tabs = {"MAIN", "PLAYER", "MISC", "FISH"}
+local tabY = 5
+local tabWidth = 62
+
+for i = 1, 4 do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, tabWidth, 0, 24)
+    btn.Position = UDim2.new(0, 5 + (i-1) * (tabWidth + 5), 0, tabY)
+    btn.BackgroundColor3 = i == 1 and Color3.fromRGB(0, 180, 255) or Color3.fromRGB(22, 26, 36)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Text = tabs[i]
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 11
+    btn.Parent = tabBar
+    btn.Name = tabs[i] .. "Btn"
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 8)
+    btnCorner.Parent = btn
+end
+
+-- ==============================================
+-- CONTENT FRAMES (SCROLLABLE)
+-- ==============================================
+local contentY = 40
+local contentHeight = 260
+
+-- MAIN CONTENT
+local mainContent = Instance.new("ScrollingFrame")
+mainContent.Size = UDim2.new(1, 0, 0, contentHeight)
+mainContent.Position = UDim2.new(0, 0, 0, contentY)
+mainContent.BackgroundTransparency = 1
+mainContent.BorderSizePixel = 0
+mainContent.CanvasSize = UDim2.new(0, 0, 0, 320)
+mainContent.ScrollBarThickness = 5
+mainContent.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+mainContent.Visible = true
+mainContent.Parent = contentContainer
+mainContent.Name = "MAINContent"
+
+-- PLAYER CONTENT
+local playerContent = Instance.new("ScrollingFrame")
+playerContent.Size = UDim2.new(1, 0, 0, contentHeight)
+playerContent.Position = UDim2.new(0, 0, 0, contentY)
+playerContent.BackgroundTransparency = 1
+playerContent.BorderSizePixel = 0
+playerContent.CanvasSize = UDim2.new(0, 0, 0, 250)
+playerContent.ScrollBarThickness = 5
+playerContent.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+playerContent.Visible = false
+playerContent.Parent = contentContainer
+playerContent.Name = "PLAYERContent"
+
+-- MISC CONTENT
+local miscContent = Instance.new("ScrollingFrame")
+miscContent.Size = UDim2.new(1, 0, 0, contentHeight)
+miscContent.Position = UDim2.new(0, 0, 0, contentY)
+miscContent.BackgroundTransparency = 1
+miscContent.BorderSizePixel = 0
+miscContent.CanvasSize = UDim2.new(0, 0, 0, 250)
+miscContent.ScrollBarThickness = 5
+miscContent.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+miscContent.Visible = false
+miscContent.Parent = contentContainer
+miscContent.Name = "MISCContent"
+
+-- FISH CONTENT
+local fishContent = Instance.new("ScrollingFrame")
+fishContent.Size = UDim2.new(1, 0, 0, contentHeight)
+fishContent.Position = UDim2.new(0, 0, 0, contentY)
+fishContent.BackgroundTransparency = 1
+fishContent.BorderSizePixel = 0
+fishContent.CanvasSize = UDim2.new(0, 0, 0, 250)
+fishContent.ScrollBarThickness = 5
+fishContent.ScrollBarImageColor3 = Color3.fromRGB(0, 180, 255)
+fishContent.Visible = false
+fishContent.Parent = contentContainer
+fishContent.Name = "FISHContent"
+
+-- ==============================================
+-- TAB CLICK HANDLERS
+-- ==============================================
+local function switchTab(tabName)
+    for _, t in ipairs(tabs) do
+        contentContainer[t .. "Btn"].BackgroundColor3 = Color3.fromRGB(22, 26, 36)
+        contentContainer[t .. "Content"].Visible = false
+    end
+    contentContainer[tabName .. "Btn"].BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+    contentContainer[tabName .. "Content"].Visible = true
+end
+
+for _, t in ipairs(tabs) do
+    contentContainer[t .. "Btn"].MouseButton1Click:Connect(function()
+        switchTab(t)
+    end)
+end
+
+-- ==============================================
+-- HIDE FUNCTION
+-- ==============================================
+local contentVisible = true
+hideBtn.MouseButton1Click:Connect(function()
+    contentVisible = not contentVisible
+    
+    if contentVisible then
+        TweenService:Create(main, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 380)}):Play()
+        task.wait(0.1)
+        contentContainer.Visible = true
+        hideBtn.Text = "−"
+        hideBtn.TextColor3 = Color3.fromRGB(0, 180, 255)
+    else
+        contentContainer.Visible = false
+        TweenService:Create(main, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 35)}):Play()
+        hideBtn.Text = "+"
+        hideBtn.TextColor3 = Color3.fromRGB(255, 200, 0)
+    end
+end)
+
+close.MouseButton1Click:Connect(function()
+    TweenService:Create(main, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+    task.wait(0.3)
+    gui:Destroy()
+end)
+
+-- ==============================================
+-- FUNCTION UNTUK BUAT BUTTON CANTIK
+-- ==============================================
+local function addButton(parent, y, text, color, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.9, 0, 0, 28)
+    btn.Position = UDim2.new(0.05, 0, 0, y)
+    btn.BackgroundColor3 = color or Color3.fromRGB(25, 30, 38)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Text = text
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 11
+    btn.Parent = parent
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 10)
+    btnCorner.Parent = btn
+    
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(0, 180, 255),
+            Size = UDim2.new(0.92, 0, 0, 29)
+        }):Play()
+        btn.Position = UDim2.new(0.04, 0, 0, y-0.5)
+    end)
+    
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {
+            BackgroundColor3 = color or Color3.fromRGB(25, 30, 38),
+            Size = UDim2.new(0.9, 0, 0, 28)
+        }):Play()
+        btn.Position = UDim2.new(0.05, 0, 0, y)
+    end)
+    
+    btn.MouseButton1Click:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(0, 220, 255)}):Play()
+        task.wait(0.1)
+        TweenService:Create(btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(0, 180, 255)}):Play()
+        task.wait(0.1)
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = color or Color3.fromRGB(25, 30, 38)}):Play()
+        pcall(callback)
+    end)
+    
+    return btn
+end
+
+-- ==============================================
+-- MAIN TAB BUTTONS (DENGAN 3 CUSTOM BUTTON)
+-- ==============================================
+-- Existing buttons
+addButton(mainContent, 5, "🔍 SCAN BACKDOOR", Color3.fromRGB(25, 30, 38), function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/ZfY3N0WS"))()
+end)
+
+addButton(mainContent, 38, "👤 TP PLAYER", Color3.fromRGB(25, 30, 38), function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/4Tiiq5dT"))()
+end)
+
+addButton(mainContent, 71, "🎥 RECORD AUTOWALK", Color3.fromRGB(25, 30, 38), function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Fiqqzr7-Exploits/FIQQZR7-SCRIPT/refs/heads/main/AUTOWALKFIQQZR7"))()
+end)
+
+addButton(mainContent, 104, "👁️ ESP LINE", Color3.fromRGB(25, 30, 38), function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/M8ebdvPg"))()
+end)
+
+addButton(mainContent, 137, "🌀 FLING PLAYER", Color3.fromRGB(25, 30, 38), function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/ZuxLUdkM"))()
+end)
+
+addButton(mainContent, 170, "📦 BRING PART", Color3.fromRGB(25, 30, 38), function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/jsymenu/JSY/refs/heads/main/guiv2.txt"))()
+end)
+
+addButton(mainContent, 203, "🔧 DEX EXPLORER", Color3.fromRGB(25, 30, 38), function()
+    loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Dex-Explorer-DPP-73687"))()
+end)
+
+-- ==============================================
+-- 3 CUSTOM BUTTON KOSONG (UNTUK SCRIPT SENDIRI)
+-- ==============================================
+addButton(mainContent, 236, "📌 CUSTOM 1", Color3.fromRGB(45, 50, 60), function()
+    print("🔧 Custom Button 1 - Isi script lu di sini!")
+    -- GANTI DENGAN SCRIPT LU
+    -- Contoh: loadstring(game:HttpGet("link script lu"))()
+end)
+
+addButton(mainContent, 269, "📌 CUSTOM 2", Color3.fromRGB(45, 50, 60), function()
+    print("🔧 Custom Button 2 - Isi script lu di sini!")
+    -- GANTI DENGAN SCRIPT LU
+end)
+
+addButton(mainContent, 302, "📌 CUSTOM 3", Color3.fromRGB(45, 50, 60), function()
+    print("🔧 Custom Button 3 - Isi script lu di sini!")
+    -- GANTI DENGAN SCRIPT LU
+end)
+
+-- ==============================================
+-- PLAYER TAB BUTTONS
+-- ==============================================
+local jumpVal = 50
+
+local jumpLabel = Instance.new("TextLabel")
+jumpLabel.Size = UDim2.new(0.9, 0, 0, 20)
+jumpLabel.Position = UDim2.new(0.05, 0, 0, 5)
+jumpLabel.BackgroundTransparency = 1
+jumpLabel.Text = "⚡ JUMP POWER"
+jumpLabel.TextColor3 = Color3.fromRGB(0, 180, 255)
+jumpLabel.TextSize = 11
+jumpLabel.Font = Enum.Font.GothamBold
+jumpLabel.TextXAlignment = Enum.TextXAlignment.Left
+jumpLabel.Parent = playerContent
+
+local jumpDisplay = Instance.new("TextLabel")
+jumpDisplay.Size = UDim2.new(0, 35, 0, 22)
+jumpDisplay.Position = UDim2.new(0.7, 0, 0, 4)
+jumpDisplay.BackgroundColor3 = Color3.fromRGB(25, 30, 38)
+jumpDisplay.TextColor3 = Color3.fromRGB(0, 180, 255)
+jumpDisplay.Text = tostring(jumpVal)
+jumpDisplay.TextSize = 11
+jumpDisplay.Font = Enum.Font.GothamBold
+jumpDisplay.Parent = playerContent
+
+local jumpDown = Instance.new("TextButton")
+jumpDown.Size = UDim2.new(0, 22, 0, 22)
+jumpDown.Position = UDim2.new(0.55, 0, 0, 4)
+jumpDown.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+jumpDown.TextColor3 = Color3.fromRGB(255, 255, 255)
+jumpDown.Text = "-"
+jumpDown.Font = Enum.Font.GothamBold
+jumpDown.TextSize = 14
+jumpDown.Parent = playerContent
+
+jumpDown.MouseButton1Click:Connect(function()
+    jumpVal = math.max(50, jumpVal - 5)
+    jumpDisplay.Text = tostring(jumpVal)
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.JumpPower = jumpVal
+    end
+end)
+
+local jumpUp = Instance.new("TextButton")
+jumpUp.Size = UDim2.new(0, 22, 0, 22)
+jumpUp.Position = UDim2.new(0.85, 0, 0, 4)
+jumpUp.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+jumpUp.TextColor3 = Color3.fromRGB(255, 255, 255)
+jumpUp.Text = "+"
+jumpUp.Font = Enum.Font.GothamBold
+jumpUp.TextSize = 14
+jumpUp.Parent = playerContent
+
+jumpUp.MouseButton1Click:Connect(function()
+    jumpVal = math.min(300, jumpVal + 5)
+    jumpDisplay.Text = tostring(jumpVal)
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.JumpPower = jumpVal
+    end
+end)
+
+-- Walk Speed
+local walkVal = 30
+local walkEnabled = false
+
+local walkLabel = Instance.new("TextLabel")
+walkLabel.Size = UDim2.new(0.9, 0, 0, 20)
+walkLabel.Position = UDim2.new(0.05, 0, 0, 35)
+walkLabel.BackgroundTransparency = 1
+walkLabel.Text = "⚡ WALK SPEED"
+walkLabel.TextColor3 = Color3.fromRGB(0, 180, 255)
+walkLabel.TextSize = 11
+walkLabel.Font = Enum.Font.GothamBold
+walkLabel.TextXAlignment = Enum.TextXAlignment.Left
+walkLabel.Parent = playerContent
+
+local walkToggle = Instance.new("TextButton")
+walkToggle.Size = UDim2.new(0, 35, 0, 22)
+walkToggle.Position = UDim2.new(0.7, 0, 0, 34)
+walkToggle.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+walkToggle.TextColor3 = Color3.fromRGB(150, 150, 150)
+walkToggle.Text = "OFF"
+walkToggle.Font = Enum.Font.GothamBold
+walkToggle.TextSize = 10
+walkToggle.Parent = playerContent
+
+walkToggle.MouseButton1Click:Connect(function()
+    walkEnabled = not walkEnabled
+    walkToggle.Text = walkEnabled and "ON" or "OFF"
+    walkToggle.BackgroundColor3 = walkEnabled and Color3.fromRGB(0, 180, 255) or Color3.fromRGB(30, 35, 45)
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = walkEnabled and walkVal or 16
+    end
+end)
+
+local walkDisplay = Instance.new("TextLabel")
+walkDisplay.Size = UDim2.new(0, 35, 0, 22)
+walkDisplay.Position = UDim2.new(0.7, 0, 0, 64)
+walkDisplay.BackgroundColor3 = Color3.fromRGB(25, 30, 38)
+walkDisplay.TextColor3 = Color3.fromRGB(0, 180, 255)
+walkDisplay.Text = tostring(walkVal)
+walkDisplay.TextSize = 11
+walkDisplay.Font = Enum.Font.GothamBold
+walkDisplay.Parent = playerContent
+
+local walkDown = Instance.new("TextButton")
+walkDown.Size = UDim2.new(0, 22, 0, 22)
+walkDown.Position = UDim2.new(0.55, 0, 0, 64)
+walkDown.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+walkDown.TextColor3 = Color3.fromRGB(255, 255, 255)
+walkDown.Text = "-"
+walkDown.Font = Enum.Font.GothamBold
+walkDown.TextSize = 14
+walkDown.Parent = playerContent
+
+walkDown.MouseButton1Click:Connect(function()
+    walkVal = math.max(16, walkVal - 2)
+    walkDisplay.Text = tostring(walkVal)
+    if walkEnabled and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = walkVal
+    end
+end)
+
+local walkUp = Instance.new("TextButton")
+walkUp.Size = UDim2.new(0, 22, 0, 22)
+walkUp.Position = UDim2.new(0.85, 0, 0, 64)
+walkUp.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+walkUp.TextColor3 = Color3.fromRGB(255, 255, 255)
+walkUp.Text = "+"
+walkUp.Font = Enum.Font.GothamBold
+walkUp.TextSize = 14
+walkUp.Parent = playerContent
+
+walkUp.MouseButton1Click:Connect(function()
+    walkVal = math.min(150, walkVal + 2)
+    walkDisplay.Text = tostring(walkVal)
+    if walkEnabled and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = walkVal
+    end
+end)
+
+addButton(playerContent, 95, "🔄 RESET CHARACTER", Color3.fromRGB(25, 30, 38), function()
+    if player.Character then
+        player.Character:BreakJoints()
+    end
+end)
+
+-- ==============================================
+-- MISC TAB BUTTONS
+-- ==============================================
+local afkState = false
+local kickState = false
+
+addButton(miscContent, 5, "🔄 REJOIN SERVER", Color3.fromRGB(25, 30, 38), function()
+    TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player)
+end)
+
+addButton(miscContent, 38, "🌍 SERVER HOP", Color3.fromRGB(25, 30, 38), function()
+    local success, res = pcall(function()
+        return game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100")
+    end)
+    
+    if success then
+        local data = game:GetService("HttpService"):JSONDecode(res)
+        for _, v in ipairs(data.data) do
+            if v.playing < v.maxPlayers and v.id ~= game.JobId then
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, v.id, player)
+                break
+            end
+        end
+    end
+end)
+
+local afkBtn = addButton(miscContent, 71, "💤 ANTI-AFK: OFF", Color3.fromRGB(25, 30, 38), function()
+    afkState = not afkState
+    afkBtn.Text = afkState and "💤 ANTI-AFK: ON" or "💤 ANTI-AFK: OFF"
+end)
+
+local kickBtn = addButton(miscContent, 104, "🛡️ ANTI-KICK: OFF", Color3.fromRGB(25, 30, 38), function()
+    kickState = not kickState
+    kickBtn.Text = kickState and "🛡️ ANTI-KICK: ON" or "🛡️ ANTI-KICK: OFF"
+end)
+
+addButton(miscContent, 137, "📋 PLAYER LIST", Color3.fromRGB(25, 30, 38), function()
+    local names = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        table.insert(names, p.Name)
+    end
+    print("Players: " .. table.concat(names, ", "))
+end)
+
+-- ==============================================
+-- FISH TAB BUTTONS
+-- ==============================================
+addButton(fishContent, 5, "🐟 FISH IT V1", Color3.fromRGB(25, 30, 38), function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameFishIt.lua"))()
+end)
+
+addButton(fishContent, 38, "🐟 FISH IT LYNXZ", Color3.fromRGB(25, 30, 38), function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/4LynxX/Lynx/refs/heads/main/LynxxMain.lua"))()
+end)
+
+addButton(fishContent, 71, "🐟 FISH IT CHLOE", Color3.fromRGB(25, 30, 38), function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/MajestySkie/Chloe-X/main/Main/ChloeX"))()
+end)
+
+addButton(fishContent, 104, "🐟 FISH IT NEXO", Color3.fromRGB(25, 30, 38), function()
+    loadstring(game:HttpGet("https://pastefy.app/JFZnEeGk/raw"))()
+end)
+
+addButton(fishContent, 137, "🐟 FLING PLAYER", Color3.fromRGB(25, 30, 38), function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/rafkaray8-prog/VoidX-Project/refs/heads/main/main.lua"))()
+end)
+
+-- ==============================================
+-- BACKGROUND PROCESSES
+-- ==============================================
+spawn(function()
+    while true do
+        if afkState then
+            local vu = game:GetService("VirtualUser")
+            vu:CaptureController()
+            vu:ClickButton2(Vector2.new())
+        end
+        task.wait(60)
+    end
+end)
+
+player.OnKick:Connect(function()
+    if kickState then
+        task.wait(1)
+        TeleportService:Teleport(game.PlaceId, player)
+    end
+end)
+
+player.CharacterAdded:Connect(function()
+    task.wait(1)
+    if walkEnabled and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = walkVal
+    end
+end)
+
+print("✅ FIQQZR7 PREMIUM HUB - DENGAN 3 CUSTOM BUTTON!")
+print("📌 MAIN TAB: 7 Script + 3 Custom Button Kosong")
+print("✨ UI Cantik dengan rounded corners & gradient")
