@@ -1,0 +1,801 @@
+-- FIQQZR7 BRING TARGET - DENGAN TEXTBOX RADIUS & POWER
+local player = game.Players.LocalPlayer
+repeat task.wait() until player and player:FindFirstChild("PlayerGui")
+
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+-- ==============================================
+-- KONFIGURASI
+-- ==============================================
+local config = {
+    radius = 5000,
+    power = 999999,
+    showNotifications = true
+}
+
+-- ==============================================
+-- VARIABLES
+-- ==============================================
+local isPulling = false
+local pullConnection = nil
+local selectedTarget = nil
+local playerList = {}
+local partsFound = 0
+local nearbyPlayers = 0
+local scrollOffset = 0
+local maxVisible = 3
+local uiVisible = true
+
+-- References
+local targetListContainer = nil
+local partsCountLabel = nil
+local nearbyCountLabel = nil
+local pullBtn = nil
+local refreshBtn = nil
+local main = nil
+local contentContainer = nil
+
+-- ==============================================
+-- FUNGSI NOTIFIKASI
+-- ==============================================
+local function notify(msg)
+    if config.showNotifications then
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "🔵 FIQQZR7 BRING PART",
+            Text = msg,
+            Duration = 1
+        })
+    end
+end
+
+-- ==============================================
+-- FUNGSI DAPATKAN SEMUA PLAYER
+-- ==============================================
+local function getAllPlayers()
+    local players = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player then
+            table.insert(players, plr)
+        end
+    end
+    return players
+end
+
+-- ==============================================
+-- FUNGSI KIRA PARTS
+-- ==============================================
+local function countParts()
+    local count = 0
+    for _, v in ipairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") and not v:IsDescendantOf(player.Character) and v.Parent ~= player.Character then
+            if v.Name ~= "Baseplate" and v.Size.Magnitude < 50 then
+                count = count + 1
+            end
+        end
+    end
+    return count
+end
+
+-- ==============================================
+-- FUNGSI KIRA PLAYER BERDEKATAN
+-- ==============================================
+local function countNearbyPlayers()
+    local count = 0
+    local myPos = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    
+    if not myPos then return 0 end
+    
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = plr.Character.HumanoidRootPart
+            local dist = (hrp.Position - myPos.Position).Magnitude
+            if dist <= config.radius then
+                count = count + 1
+            end
+        end
+    end
+    return count
+end
+
+-- ==============================================
+-- FUNGSI UPDATE SENARAI TARGET
+-- ==============================================
+local function updateTargetList()
+    playerList = {}
+    local myPos = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    
+    if not myPos then 
+        task.wait(0.5)
+        updateTargetList()
+        return 
+    end
+    
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = plr.Character.HumanoidRootPart
+            local dist = (hrp.Position - myPos.Position).Magnitude
+            
+            table.insert(playerList, {
+                name = plr.Name,
+                distance = math.floor(dist),
+                player = plr,
+                hrp = hrp
+            })
+        end
+    end
+    
+    table.sort(playerList, function(a, b)
+        return a.distance < b.distance
+    end)
+    
+    refreshTargetList()
+    updateCounts()
+end
+
+-- ==============================================
+-- FUNGSI REFRESH LIST DISPLAY
+-- ==============================================
+local function refreshTargetList()
+    if not targetListContainer then return end
+    
+    for _, child in pairs(targetListContainer:GetChildren()) do
+        if child:IsA("Frame") then
+            child:Destroy()
+        end
+    end
+    
+    local startIdx = scrollOffset + 1
+    local endIdx = math.min(startIdx + maxVisible - 1, #playerList)
+    local yPos = 0
+    
+    if #playerList == 0 then
+        local emptyRow = Instance.new("Frame")
+        emptyRow.Size = UDim2.new(1, -10, 0, 35)
+        emptyRow.Position = UDim2.new(0, 5, 0, 0)
+        emptyRow.BackgroundTransparency = 1
+        emptyRow.Parent = targetListContainer
+        
+        local emptyLabel = Instance.new("TextLabel")
+        emptyLabel.Size = UDim2.new(1, 0, 1, 0)
+        emptyLabel.BackgroundTransparency = 1
+        emptyLabel.Text = "Tiada player"
+        emptyLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+        emptyLabel.TextSize = 11
+        emptyLabel.Font = Enum.Font.Gotham
+        emptyLabel.Parent = emptyRow
+    end
+    
+    for i = startIdx, endIdx do
+        local target = playerList[i]
+        local isSelected = (selectedTarget and selectedTarget.name == target.name)
+        
+        local row = Instance.new("Frame")
+        row.Size = UDim2.new(1, -10, 0, 32)
+        row.Position = UDim2.new(0, 5, 0, yPos)
+        row.BackgroundColor3 = isSelected and Color3.fromRGB(0, 70, 140) or Color3.fromRGB(15, 25, 40)
+        row.BorderColor3 = Color3.fromRGB(0, 150, 255)
+        row.BorderSizePixel = isSelected and 2 or 1
+        row.Parent = targetListContainer
+        
+        local rowCorner = Instance.new("UICorner")
+        rowCorner.CornerRadius = UDim.new(0, 4)
+        rowCorner.Parent = row
+        
+        local nameLabel = Instance.new("TextLabel")
+        nameLabel.Size = UDim2.new(0.5, 0, 0.6, 0)
+        nameLabel.Position = UDim2.new(0, 6, 0, 2)
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Text = target.name
+        nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        nameLabel.TextSize = 10
+        nameLabel.Font = Enum.Font.GothamBold
+        nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+        nameLabel.Parent = row
+        
+        local distLabel = Instance.new("TextLabel")
+        distLabel.Size = UDim2.new(0.5, 0, 0.4, 0)
+        distLabel.Position = UDim2.new(0, 6, 0, 16)
+        distLabel.BackgroundTransparency = 1
+        distLabel.Text = target.distance .. "s"
+        distLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
+        distLabel.TextSize = 8
+        distLabel.Font = Enum.Font.Gotham
+        distLabel.TextXAlignment = Enum.TextXAlignment.Left
+        distLabel.Parent = row
+        
+        local selectBtn = Instance.new("TextButton")
+        selectBtn.Size = UDim2.new(0, 40, 0, 22)
+        selectBtn.Position = UDim2.new(1, -48, 0.5, -11)
+        selectBtn.BackgroundColor3 = isSelected and Color3.fromRGB(0, 180, 80) or Color3.fromRGB(0, 90, 170)
+        selectBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        selectBtn.Text = isSelected and "✓" or "PILIH"
+        selectBtn.Font = Enum.Font.GothamBold
+        selectBtn.TextSize = 8
+        selectBtn.Parent = row
+        
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, 3)
+        btnCorner.Parent = selectBtn
+        
+        selectBtn.MouseButton1Click:Connect(function()
+            if selectedTarget and selectedTarget.name == target.name then
+                selectedTarget = nil
+            else
+                selectedTarget = target
+            end
+            refreshTargetList()
+            updatePullButton()
+        end)
+        
+        yPos = yPos + 35
+    end
+    
+    if targetListContainer.Parent then
+        local totalHeight = math.max(#playerList, 1) * 35
+        targetListContainer.Size = UDim2.new(1, 0, 0, totalHeight)
+        targetListContainer.Parent.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
+    end
+end
+
+-- ==============================================
+-- FUNGSI UPDATE PULL BUTTON
+-- ==============================================
+local function updatePullButton()
+    if pullBtn then
+        if selectedTarget then
+            if isPulling then
+                pullBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+                pullBtn.Text = "⏹️ HENTI"
+            else
+                pullBtn.BackgroundColor3 = Color3.fromRGB(0, 130, 60)
+                pullBtn.Text = "🚀 TARIK"
+            end
+        else
+            pullBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+            pullBtn.Text = "🚀 TARIK"
+        end
+    end
+end
+
+-- ==============================================
+-- FUNGSI UPDATE COUNTS
+-- ==============================================
+local function updateCounts()
+    partsFound = countParts()
+    nearbyPlayers = countNearbyPlayers()
+    
+    if partsCountLabel then
+        partsCountLabel.Text = tostring(partsFound)
+    end
+    if nearbyCountLabel then
+        nearbyCountLabel.Text = tostring(nearbyPlayers)
+    end
+end
+
+-- ==============================================
+-- FUNGSI TARIK PARTS KE TARGET
+-- ==============================================
+local function pullPartsToTarget(target)
+    if not target or not target.hrp then return 0 end
+    
+    local targetPos = target.hrp.Position
+    local pulledCount = 0
+    
+    for _, v in ipairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") and not v:IsDescendantOf(player.Character) then
+            -- Abaikan baseplate dan part besar
+            if v.Name ~= "Baseplate" and v.Size.Magnitude < 100 then
+                local dist = (v.Position - targetPos).Magnitude
+                if dist <= config.radius then
+                    -- Buang bodyvelocity lama kalau ada
+                    for _, child in pairs(v:GetChildren()) do
+                        if child:IsA("BodyVelocity") then
+                            child:Destroy()
+                        end
+                    end
+                    
+                    -- Create new BodyVelocity
+                    local bv = Instance.new("BodyVelocity")
+                    bv.Velocity = (targetPos - v.Position).Unit * config.power
+                    bv.MaxForce = Vector3.new(9e4, 9e4, 9e4)
+                    bv.P = 5000
+                    bv.Parent = v
+                    
+                    -- Auto cleanup dalam 3 saat
+                    task.delay(3, function()
+                        if bv and bv.Parent then
+                            bv:Destroy()
+                        end
+                    end)
+                    
+                    pulledCount = pulledCount + 1
+                end
+            end
+        end
+    end
+    
+    return pulledCount
+end
+
+-- ==============================================
+-- FUNGSI MULA TARIK
+-- ==============================================
+local function startPulling()
+    if not selectedTarget then
+        notify("❌ Pilih target dulu!")
+        return
+    end
+    
+    if isPulling then
+        stopPulling()
+        return
+    end
+    
+    isPulling = true
+    updatePullButton()
+    notify("🚀 Menarik ke " .. selectedTarget.name)
+    
+    -- Loop untuk tarik berterusan
+    pullConnection = RunService.Heartbeat:Connect(function()
+        if not isPulling or not selectedTarget or not selectedTarget.hrp or not selectedTarget.hrp.Parent then
+            stopPulling()
+            return
+        end
+        
+        local count = pullPartsToTarget(selectedTarget)
+        if count > 0 then
+            -- Update parts count maybe
+            updateCounts()
+        end
+        
+        task.wait(0.2)  -- Delay sikit supaya tak terlalu heavy
+    end)
+end
+
+local function stopPulling()
+    isPulling = false
+    if pullConnection then
+        pullConnection:Disconnect()
+        pullConnection = nil
+    end
+    updatePullButton()
+    notify("⏹️ Berhenti")
+end
+
+-- ==============================================
+-- CREATE MAIN GUI
+-- ==============================================
+local gui = Instance.new("ScreenGui")
+gui.Name = "FIQQZR7_Bring"
+gui.Parent = player.PlayerGui
+gui.ResetOnSpawn = false
+
+main = Instance.new("Frame")
+main.Size = UDim2.new(0, 260, 0, 380)
+main.Position = UDim2.new(0.5, -130, 0.5, -190)
+main.BackgroundColor3 = Color3.fromRGB(5, 15, 30)
+main.BorderColor3 = Color3.fromRGB(0, 150, 255)
+main.BorderSizePixel = 2
+main.Active = true
+main.Draggable = true
+main.ClipsDescendants = true
+main.Parent = gui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = main
+
+-- ==============================================
+-- TITLE BAR
+-- ==============================================
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.BackgroundColor3 = Color3.fromRGB(0, 60, 120)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = main
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 10)
+titleCorner.Parent = titleBar
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0.6, 0, 1, 0)
+title.Position = UDim2.new(0, 8, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "⚡BRING TARGET FIQQZR7"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 12
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
+
+-- Hide Button
+local hideBtn = Instance.new("TextButton")
+hideBtn.Size = UDim2.new(0, 22, 0, 22)
+hideBtn.Position = UDim2.new(1, -52, 0.5, -11)
+hideBtn.BackgroundColor3 = Color3.fromRGB(30, 90, 160)
+hideBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+hideBtn.Text = "−"
+hideBtn.Font = Enum.Font.GothamBold
+hideBtn.TextSize = 14
+hideBtn.Parent = titleBar
+
+local hideCorner = Instance.new("UICorner")
+hideCorner.CornerRadius = UDim.new(0, 4)
+hideCorner.Parent = hideBtn
+
+-- Close Button
+local close = Instance.new("TextButton")
+close.Size = UDim2.new(0, 22, 0, 22)
+close.Position = UDim2.new(1, -26, 0.5, -11)
+close.BackgroundColor3 = Color3.fromRGB(30, 90, 160)
+close.TextColor3 = Color3.fromRGB(255, 255, 255)
+close.Text = "✕"
+close.Font = Enum.Font.GothamBold
+close.TextSize = 12
+close.Parent = titleBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 4)
+closeCorner.Parent = close
+
+-- Content Container
+contentContainer = Instance.new("Frame")
+contentContainer.Size = UDim2.new(1, -12, 1, -38)
+contentContainer.Position = UDim2.new(0, 6, 0, 32)
+contentContainer.BackgroundTransparency = 1
+contentContainer.Parent = main
+
+-- Hide Function
+hideBtn.MouseButton1Click:Connect(function()
+    uiVisible = not uiVisible
+    
+    if uiVisible then
+        TweenService:Create(main, TweenInfo.new(0.3), {Size = UDim2.new(0, 260, 0, 380)}):Play()
+        task.wait(0.1)
+        contentContainer.Visible = true
+        hideBtn.Text = "−"
+    else
+        contentContainer.Visible = false
+        TweenService:Create(main, TweenInfo.new(0.3), {Size = UDim2.new(0, 260, 0, 30)}):Play()
+        hideBtn.Text = "+"
+    end
+end)
+
+close.MouseButton1Click:Connect(function()
+    if isPulling then stopPulling() end
+    gui:Destroy()
+end)
+
+-- ==============================================
+-- CONTENT
+-- ==============================================
+local content = contentContainer
+
+-- ==============================================
+-- STATUS BAR
+-- ==============================================
+local statusBar = Instance.new("Frame")
+statusBar.Size = UDim2.new(1, 0, 0, 28)
+statusBar.Position = UDim2.new(0, 0, 0, 0)
+statusBar.BackgroundColor3 = Color3.fromRGB(10, 25, 45)
+statusBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
+statusBar.BorderSizePixel = 1
+statusBar.Parent = content
+
+local statusCorner = Instance.new("UICorner")
+statusCorner.CornerRadius = UDim.new(0, 5)
+statusCorner.Parent = statusBar
+
+-- Parts
+local partsIcon = Instance.new("TextLabel")
+partsIcon.Size = UDim2.new(0, 12, 1, 0)
+partsIcon.Position = UDim2.new(0, 6, 0, 0)
+partsIcon.BackgroundTransparency = 1
+partsIcon.Text = "📦"
+partsIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+partsIcon.TextSize = 12
+partsIcon.Parent = statusBar
+
+partsCountLabel = Instance.new("TextLabel")
+partsCountLabel.Size = UDim2.new(0.25, 0, 1, 0)
+partsCountLabel.Position = UDim2.new(0.1, 0, 0, 0)
+partsCountLabel.BackgroundTransparency = 1
+partsCountLabel.Text = "0"
+partsCountLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+partsCountLabel.TextSize = 14
+partsCountLabel.Font = Enum.Font.GothamBold
+partsCountLabel.Parent = statusBar
+
+-- Nearby
+local nearbyIcon = Instance.new("TextLabel")
+nearbyIcon.Size = UDim2.new(0, 12, 1, 0)
+nearbyIcon.Position = UDim2.new(0.45, 0, 0, 0)
+nearbyIcon.BackgroundTransparency = 1
+nearbyIcon.Text = "👤"
+nearbyIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+nearbyIcon.TextSize = 12
+nearbyIcon.Parent = statusBar
+
+nearbyCountLabel = Instance.new("TextLabel")
+nearbyCountLabel.Size = UDim2.new(0.25, 0, 1, 0)
+nearbyCountLabel.Position = UDim2.new(0.55, 0, 0, 0)
+nearbyCountLabel.BackgroundTransparency = 1
+nearbyCountLabel.Text = "0"
+nearbyCountLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+nearbyCountLabel.TextSize = 14
+nearbyCountLabel.Font = Enum.Font.GothamBold
+nearbyCountLabel.Parent = statusBar
+
+-- ==============================================
+-- SETTINGS DENGAN TEXTBOX
+-- ==============================================
+local settingsHeader = Instance.new("TextLabel")
+settingsHeader.Size = UDim2.new(1, 0, 0, 14)
+settingsHeader.Position = UDim2.new(0, 0, 0, 32)
+settingsHeader.BackgroundTransparency = 1
+settingsHeader.Text = "⚙️ SETTINGS"
+settingsHeader.TextColor3 = Color3.fromRGB(100, 200, 255)
+settingsHeader.TextSize = 9
+settingsHeader.Font = Enum.Font.GothamBold
+settingsHeader.TextXAlignment = Enum.TextXAlignment.Left
+settingsHeader.Parent = content
+
+-- Radius TextBox
+local radiusFrame = Instance.new("Frame")
+radiusFrame.Size = UDim2.new(0.44, 0, 0, 30)
+radiusFrame.Position = UDim2.new(0, 0, 0, 47)
+radiusFrame.BackgroundColor3 = Color3.fromRGB(15, 25, 40)
+radiusFrame.BorderColor3 = Color3.fromRGB(0, 150, 255)
+radiusFrame.BorderSizePixel = 1
+radiusFrame.Parent = content
+
+local radiusFrameCorner = Instance.new("UICorner")
+radiusFrameCorner.CornerRadius = UDim.new(0, 4)
+radiusFrameCorner.Parent = radiusFrame
+
+local radiusLabel = Instance.new("TextLabel")
+radiusLabel.Size = UDim2.new(1, -8, 0, 12)
+radiusLabel.Position = UDim2.new(0, 4, 0, 2)
+radiusLabel.BackgroundTransparency = 1
+radiusLabel.Text = "Radius:"
+radiusLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
+radiusLabel.TextSize = 8
+radiusLabel.Font = Enum.Font.Gotham
+radiusLabel.TextXAlignment = Enum.TextXAlignment.Left
+radiusLabel.Parent = radiusFrame
+
+local radiusInput = Instance.new("TextBox")
+radiusInput.Size = UDim2.new(1, -8, 0, 14)
+radiusInput.Position = UDim2.new(0, 4, 0, 14)
+radiusInput.BackgroundColor3 = Color3.fromRGB(30, 40, 60)
+radiusInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+radiusInput.PlaceholderColor3 = Color3.fromRGB(100, 150, 200)
+radiusInput.PlaceholderText = "500"
+radiusInput.Text = tostring(config.radius)
+radiusInput.Font = Enum.Font.GothamBold
+radiusInput.TextSize = 10
+radiusInput.ClearTextOnFocus = false
+radiusInput.Parent = radiusFrame
+
+local radiusCorner = Instance.new("UICorner")
+radiusCorner.CornerRadius = UDim.new(0, 3)
+radiusCorner.Parent = radiusInput
+
+radiusInput.FocusLost:Connect(function()
+    local val = tonumber(radiusInput.Text)
+    if val and val > 0 then
+        config.radius = math.min(5000, math.max(50, val))
+        radiusInput.Text = tostring(config.radius)
+        updateCounts()
+        notify("Radius: " .. config.radius)
+    else
+        radiusInput.Text = tostring(config.radius)
+    end
+end)
+
+-- Power TextBox
+local powerFrame = Instance.new("Frame")
+powerFrame.Size = UDim2.new(0.44, 0, 0, 30)
+powerFrame.Position = UDim2.new(0.56, 0, 0, 47)
+powerFrame.BackgroundColor3 = Color3.fromRGB(15, 25, 40)
+powerFrame.BorderColor3 = Color3.fromRGB(0, 150, 255)
+powerFrame.BorderSizePixel = 1
+powerFrame.Parent = content
+
+local powerFrameCorner = Instance.new("UICorner")
+powerFrameCorner.CornerRadius = UDim.new(0, 4)
+powerFrameCorner.Parent = powerFrame
+
+local powerLabel = Instance.new("TextLabel")
+powerLabel.Size = UDim2.new(1, -8, 0, 12)
+powerLabel.Position = UDim2.new(0, 4, 0, 2)
+powerLabel.BackgroundTransparency = 1
+powerLabel.Text = "Power:"
+powerLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
+powerLabel.TextSize = 8
+powerLabel.Font = Enum.Font.Gotham
+powerLabel.TextXAlignment = Enum.TextXAlignment.Left
+powerLabel.Parent = powerFrame
+
+local powerInput = Instance.new("TextBox")
+powerInput.Size = UDim2.new(1, -8, 0, 14)
+powerInput.Position = UDim2.new(0, 4, 0, 14)
+powerInput.BackgroundColor3 = Color3.fromRGB(30, 40, 60)
+powerInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+powerInput.PlaceholderColor3 = Color3.fromRGB(100, 150, 200)
+powerInput.PlaceholderText = "50000"
+powerInput.Text = tostring(config.power)
+powerInput.Font = Enum.Font.GothamBold
+powerInput.TextSize = 10
+powerInput.ClearTextOnFocus = false
+powerInput.Parent = powerFrame
+
+local powerCorner = Instance.new("UICorner")
+powerCorner.CornerRadius = UDim.new(0, 3)
+powerCorner.Parent = powerInput
+
+powerInput.FocusLost:Connect(function()
+    local val = tonumber(powerInput.Text)
+    if val and val > 0 then
+        config.power = math.min(500000, math.max(5000, val))
+        powerInput.Text = tostring(config.power)
+        notify("Power: " .. config.power)
+    else
+        powerInput.Text = tostring(config.power)
+    end
+end)
+
+-- ==============================================
+-- TARGET LIST HEADER
+-- ==============================================
+local targetHeader = Instance.new("TextLabel")
+targetHeader.Size = UDim2.new(1, 0, 0, 14)
+targetHeader.Position = UDim2.new(0, 0, 0, 85)
+targetHeader.BackgroundTransparency = 1
+targetHeader.Text = "🎯 SELECT TARGET"
+targetHeader.TextColor3 = Color3.fromRGB(100, 200, 255)
+targetHeader.TextSize = 9
+targetHeader.Font = Enum.Font.GothamBold
+targetHeader.TextXAlignment = Enum.TextXAlignment.Left
+targetHeader.Parent = content
+
+-- ==============================================
+-- TARGET LIST
+-- ==============================================
+local listBg = Instance.new("Frame")
+listBg.Size = UDim2.new(1, 0, 0, 120)
+listBg.Position = UDim2.new(0, 0, 0, 100)
+listBg.BackgroundColor3 = Color3.fromRGB(5, 15, 30)
+listBg.BorderColor3 = Color3.fromRGB(0, 150, 255)
+listBg.BorderSizePixel = 1
+listBg.Parent = content
+
+local listBgCorner = Instance.new("UICorner")
+listBgCorner.CornerRadius = UDim.new(0, 5)
+listBgCorner.Parent = listBg
+
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Size = UDim2.new(1, -6, 1, -6)
+scrollingFrame.Position = UDim2.new(0, 3, 0, 3)
+scrollingFrame.BackgroundTransparency = 1
+scrollingFrame.BorderSizePixel = 0
+scrollingFrame.ScrollBarThickness = 3
+scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+scrollingFrame.Parent = listBg
+
+targetListContainer = Instance.new("Frame")
+targetListContainer.Size = UDim2.new(1, 0, 0, 0)
+targetListContainer.BackgroundTransparency = 1
+targetListContainer.Parent = scrollingFrame
+
+-- Scroll buttons
+local scrollUp = Instance.new("TextButton")
+scrollUp.Size = UDim2.new(0.5, -1, 0, 16)
+scrollUp.Position = UDim2.new(0, 0, 0, 223)
+scrollUp.BackgroundColor3 = Color3.fromRGB(0, 50, 90)
+scrollUp.TextColor3 = Color3.fromRGB(255, 255, 255)
+scrollUp.Text = "▲"
+scrollUp.Font = Enum.Font.GothamBold
+scrollUp.TextSize = 10
+scrollUp.Parent = content
+
+local scrollDown = Instance.new("TextButton")
+scrollDown.Size = UDim2.new(0.5, -1, 0, 16)
+scrollDown.Position = UDim2.new(0.5, 1, 0, 223)
+scrollDown.BackgroundColor3 = Color3.fromRGB(0, 50, 90)
+scrollDown.TextColor3 = Color3.fromRGB(255, 255, 255)
+scrollDown.Text = "▼"
+scrollDown.Font = Enum.Font.GothamBold
+scrollDown.TextSize = 10
+scrollDown.Parent = content
+
+scrollUp.MouseButton1Click:Connect(function()
+    scrollOffset = math.max(0, scrollOffset - 1)
+    refreshTargetList()
+end)
+
+scrollDown.MouseButton1Click:Connect(function()
+    scrollOffset = math.min(#playerList - maxVisible, scrollOffset + 1)
+    refreshTargetList()
+end)
+
+-- ==============================================
+-- ACTION BUTTONS
+-- ==============================================
+local actionFrame = Instance.new("Frame")
+actionFrame.Size = UDim2.new(1, 0, 0, 32)
+actionFrame.Position = UDim2.new(0, 0, 1, -32)
+actionFrame.BackgroundTransparency = 1
+actionFrame.Parent = content
+
+-- PULL button
+pullBtn = Instance.new("TextButton")
+pullBtn.Size = UDim2.new(0.7, 0, 0, 26)
+pullBtn.Position = UDim2.new(0, 0, 0.5, -13)
+pullBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+pullBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+pullBtn.Text = "🚀 TARIK"
+pullBtn.Font = Enum.Font.GothamBold
+pullBtn.TextSize = 10
+pullBtn.Parent = actionFrame
+
+local pullCorner = Instance.new("UICorner")
+pullCorner.CornerRadius = UDim.new(0, 4)
+pullCorner.Parent = pullBtn
+
+pullBtn.MouseButton1Click:Connect(function()
+    if selectedTarget then
+        if isPulling then
+            stopPulling()
+        else
+            startPulling()
+        end
+    else
+        notify("❌ Pilih target dulu!")
+    end
+end)
+
+-- REFRESH button
+refreshBtn = Instance.new("TextButton")
+refreshBtn.Size = UDim2.new(0.25, 0, 0, 26)
+refreshBtn.Position = UDim2.new(0.75, 0, 0.5, -13)
+refreshBtn.BackgroundColor3 = Color3.fromRGB(0, 80, 150)
+refreshBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+refreshBtn.Text = "🔄"
+refreshBtn.Font = Enum.Font.GothamBold
+refreshBtn.TextSize = 12
+refreshBtn.Parent = actionFrame
+
+local refreshCorner = Instance.new("UICorner")
+refreshCorner.CornerRadius = UDim.new(0, 4)
+refreshCorner.Parent = refreshBtn
+
+refreshBtn.MouseButton1Click:Connect(function()
+    updateTargetList()
+    notify("✅ List refreshed")
+end)
+
+-- ==============================================
+-- INITIAL UPDATE
+-- ==============================================
+task.wait(1)
+updateTargetList()
+
+-- Auto-refresh every 5 seconds
+task.spawn(function()
+    while true do
+        task.wait(5)
+        if not isPulling then
+            updateTargetList()
+        end
+    end
+end)
+
+print("✅ FIQQZR7 BRING - DENGAN TEXTBOX RADIUS & POWER")
+print("👥 Players: " .. #Players:GetPlayers())
