@@ -1,0 +1,449 @@
+-- FIQQZR7 SPEED & JUMP POWER - ULTRA COMPACT (220x120)
+local player = game.Players.LocalPlayer
+repeat task.wait() until player and player:FindFirstChild("PlayerGui")
+
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+
+-- ==============================================
+-- KONFIGURASI
+-- ==============================================
+local config = {
+    speed = {
+        value = 100,
+        enabled = false,
+        min = 16,
+        max = 500
+    },
+    jump = {
+        value = 180,
+        enabled = false,
+        min = 50,
+        max = 500
+    }
+}
+
+-- ==============================================
+-- VARIABLES
+-- ==============================================
+local uiVisible = true
+
+-- References
+local main = nil
+local contentContainer = nil
+local speedValueLabel = nil
+local jumpValueLabel = nil
+local speedToggleBtn = nil
+local jumpToggleBtn = nil
+
+-- ==============================================
+-- FUNGSI NOTIFIKASI
+-- ==============================================
+local function notify(msg)
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "🔵 FIQQZR7",
+        Text = msg,
+        Duration = 0.8
+    })
+end
+
+-- ==============================================
+-- FUNGSI UPDATE SPEED
+-- ==============================================
+local function updateSpeed()
+    if not player.Character then return end
+    local humanoid = player.Character:FindFirstChild("Humanoid")
+    if not humanoid then return end
+    humanoid.WalkSpeed = config.speed.enabled and config.speed.value or 16
+end
+
+-- ==============================================
+-- FUNGSI UPDATE JUMP
+-- ==============================================
+local function updateJump()
+    if not player.Character then return end
+    local humanoid = player.Character:FindFirstChild("Humanoid")
+    if not humanoid then return end
+    humanoid.JumpPower = config.jump.enabled and config.jump.value or 50
+end
+
+-- ==============================================
+-- FUNGSI TOGGLE
+-- ==============================================
+local function toggleSpeed()
+    config.speed.enabled = not config.speed.enabled
+    if speedToggleBtn then
+        speedToggleBtn.BackgroundColor3 = config.speed.enabled and Color3.fromRGB(0, 150, 50) or Color3.fromRGB(100, 100, 100)
+        speedToggleBtn.Text = config.speed.enabled and "ON" or "OFF"
+    end
+    updateSpeed()
+    notify("Speed " .. (config.speed.enabled and "ON" or "OFF"))
+end
+
+local function toggleJump()
+    config.jump.enabled = not config.jump.enabled
+    if jumpToggleBtn then
+        jumpToggleBtn.BackgroundColor3 = config.jump.enabled and Color3.fromRGB(0, 150, 50) or Color3.fromRGB(100, 100, 100)
+        jumpToggleBtn.Text = config.jump.enabled and "ON" or "OFF"
+    end
+    updateJump()
+    notify("Jump " .. (config.jump.enabled and "ON" or "OFF"))
+end
+
+-- ==============================================
+-- FUNGSI ADJUST
+-- ==============================================
+local function speedAdjust(amount)
+    local newVal = config.speed.value + amount
+    if newVal >= config.speed.min and newVal <= config.speed.max then
+        config.speed.value = newVal
+        if speedValueLabel then speedValueLabel.Text = tostring(config.speed.value) end
+        if config.speed.enabled then updateSpeed() end
+    end
+end
+
+local function jumpAdjust(amount)
+    local newVal = config.jump.value + amount
+    if newVal >= config.jump.min and newVal <= config.jump.max then
+        config.jump.value = newVal
+        if jumpValueLabel then jumpValueLabel.Text = tostring(config.jump.value) end
+        if config.jump.enabled then updateJump() end
+    end
+end
+
+-- ==============================================
+-- HANDLE CHARACTER
+-- ==============================================
+local function onCharacterAdded(char)
+    task.wait(0.5)
+    if config.speed.enabled then updateSpeed() end
+    if config.jump.enabled then updateJump() end
+end
+
+if player.Character then onCharacterAdded(player.Character) end
+player.CharacterAdded:Connect(onCharacterAdded)
+
+-- ==============================================
+-- CREATE GUI (220x120)
+-- ==============================================
+local gui = Instance.new("ScreenGui")
+gui.Name = "FIQQZR7_SpeedJump"
+gui.Parent = player.PlayerGui
+gui.ResetOnSpawn = false
+
+main = Instance.new("Frame")
+main.Size = UDim2.new(0, 220, 0, 120)
+main.Position = UDim2.new(0.5, -110, 0.5, -60)
+main.BackgroundColor3 = Color3.fromRGB(4, 10, 22)
+main.BorderColor3 = Color3.fromRGB(0, 130, 240)
+main.BorderSizePixel = 2
+main.Active = true
+main.Draggable = true
+main.ClipsDescendants = true
+main.Parent = gui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 6)
+corner.Parent = main
+
+-- ==============================================
+-- TITLE BAR (25px)
+-- ==============================================
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 25)
+titleBar.BackgroundColor3 = Color3.fromRGB(0, 50, 100)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = main
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 6)
+titleCorner.Parent = titleBar
+
+-- Title "the_godishere"
+local title1 = Instance.new("TextLabel")
+title1.Size = UDim2.new(0.4, 0, 0.5, 0)
+title1.Position = UDim2.new(0, 4, 0, 2)
+title1.BackgroundTransparency = 1
+title1.Text = "SPEED&JUMPPOWER"
+title1.TextColor3 = Color3.fromRGB(255, 255, 255)
+title1.TextSize = 7
+title1.Font = Enum.Font.GothamBold
+title1.TextXAlignment = Enum.TextXAlignment.Left
+title1.Parent = titleBar
+
+-- "Bababanbanhbao"
+local title2 = Instance.new("TextLabel")
+title2.Size = UDim2.new(0.4, 0, 0.5, 0)
+title2.Position = UDim2.new(0, 4, 0, 12)
+title2.BackgroundTransparency = 1
+title2.Text = "FIQZR7ONTHETOP"
+title2.TextColor3 = Color3.fromRGB(180, 180, 255)
+title2.TextSize = 7
+title2.Font = Enum.Font.Gotham
+title2.TextXAlignment = Enum.TextXAlignment.Left
+title2.Parent = titleBar
+
+-- FIQQZR7 tag
+local tag = Instance.new("TextLabel")
+tag.Size = UDim2.new(0.2, 0, 1, 0)
+tag.Position = UDim2.new(0.8, -20, 0, 0)
+tag.BackgroundTransparency = 1
+tag.Text = ""
+tag.TextColor3 = Color3.fromRGB(130, 180, 255)
+tag.TextSize = 8
+tag.Font = Enum.Font.GothamBold
+tag.TextXAlignment = Enum.TextXAlignment.Right
+tag.Parent = titleBar
+
+-- Hide Button
+local hideBtn = Instance.new("TextButton")
+hideBtn.Size = UDim2.new(0, 16, 0, 16)
+hideBtn.Position = UDim2.new(1, -36, 0.5, -8)
+hideBtn.BackgroundColor3 = Color3.fromRGB(25, 70, 130)
+hideBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+hideBtn.Text = "−"
+hideBtn.Font = Enum.Font.GothamBold
+hideBtn.TextSize = 12
+hideBtn.Parent = titleBar
+
+local hideCorner = Instance.new("UICorner")
+hideCorner.CornerRadius = UDim.new(0, 3)
+hideCorner.Parent = hideBtn
+
+-- Close Button
+local close = Instance.new("TextButton")
+close.Size = UDim2.new(0, 16, 0, 16)
+close.Position = UDim2.new(1, -18, 0.5, -8)
+close.BackgroundColor3 = Color3.fromRGB(25, 70, 130)
+close.TextColor3 = Color3.fromRGB(255, 255, 255)
+close.Text = "✕"
+close.Font = Enum.Font.GothamBold
+close.TextSize = 10
+close.Parent = titleBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 3)
+closeCorner.Parent = close
+
+-- Content Container
+contentContainer = Instance.new("Frame")
+contentContainer.Size = UDim2.new(1, -8, 1, -30)
+contentContainer.Position = UDim2.new(0, 4, 0, 27)
+contentContainer.BackgroundTransparency = 1
+contentContainer.Parent = main
+
+-- Hide Function
+hideBtn.MouseButton1Click:Connect(function()
+    uiVisible = not uiVisible
+    if uiVisible then
+        TweenService:Create(main, TweenInfo.new(0.3), {Size = UDim2.new(0, 220, 0, 120)}):Play()
+        task.wait(0.1)
+        contentContainer.Visible = true
+        hideBtn.Text = "−"
+    else
+        contentContainer.Visible = false
+        TweenService:Create(main, TweenInfo.new(0.3), {Size = UDim2.new(0, 220, 0, 25)}):Play()
+        hideBtn.Text = "+"
+    end
+end)
+
+close.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
+
+-- ==============================================
+-- CONTENT
+-- ==============================================
+local content = contentContainer
+
+-- ==============================================
+-- SPEED ROW (38px)
+-- ==============================================
+local speedRow = Instance.new("Frame")
+speedRow.Size = UDim2.new(1, 0, 0, 38)
+speedRow.Position = UDim2.new(0, 0, 0, 2)
+speedRow.BackgroundTransparency = 1
+speedRow.Parent = content
+
+-- Speed Label
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Size = UDim2.new(0.2, 0, 1, 0)
+speedLabel.Position = UDim2.new(0, 2, 0, 0)
+speedLabel.BackgroundTransparency = 1
+speedLabel.Text = "Speed"
+speedLabel.TextColor3 = Color3.fromRGB(180, 180, 255)
+speedLabel.TextSize = 11
+speedLabel.Font = Enum.Font.GothamBold
+speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+speedLabel.Parent = speedRow
+
+-- Speed Toggle
+speedToggleBtn = Instance.new("TextButton")
+speedToggleBtn.Size = UDim2.new(0, 35, 0, 20)
+speedToggleBtn.Position = UDim2.new(0.2, 2, 0.5, -10)
+speedToggleBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+speedToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedToggleBtn.Text = "OFF"
+speedToggleBtn.Font = Enum.Font.GothamBold
+speedToggleBtn.TextSize = 8
+speedToggleBtn.Parent = speedRow
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(0, 3)
+toggleCorner.Parent = speedToggleBtn
+
+-- Speed Value Box
+local speedBox = Instance.new("Frame")
+speedBox.Size = UDim2.new(0, 40, 0, 22)
+speedBox.Position = UDim2.new(0.4, 0, 0.5, -11)
+speedBox.BackgroundColor3 = Color3.fromRGB(8, 16, 28)
+speedBox.BorderColor3 = Color3.fromRGB(0, 130, 240)
+speedBox.BorderSizePixel = 1
+speedBox.Parent = speedRow
+
+local speedBoxCorner = Instance.new("UICorner")
+speedBoxCorner.CornerRadius = UDim.new(0, 3)
+speedBoxCorner.Parent = speedBox
+
+speedValueLabel = Instance.new("TextLabel")
+speedValueLabel.Size = UDim2.new(1, 0, 1, 0)
+speedValueLabel.BackgroundTransparency = 1
+speedValueLabel.Text = tostring(config.speed.value)
+speedValueLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedValueLabel.TextSize = 14
+speedValueLabel.Font = Enum.Font.GothamBold
+speedValueLabel.Parent = speedBox
+
+-- Minus Button
+local speedMinus = Instance.new("TextButton")
+speedMinus.Size = UDim2.new(0, 18, 0, 18)
+speedMinus.Position = UDim2.new(0.65, -5, 0.5, -9)
+speedMinus.BackgroundColor3 = Color3.fromRGB(0, 70, 140)
+speedMinus.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedMinus.Text = "-"
+speedMinus.Font = Enum.Font.GothamBold
+speedMinus.TextSize = 14
+speedMinus.Parent = speedRow
+
+local minusCorner = Instance.new("UICorner")
+minusCorner.CornerRadius = UDim.new(0, 3)
+minusCorner.Parent = speedMinus
+
+-- Plus Button
+local speedPlus = Instance.new("TextButton")
+speedPlus.Size = UDim2.new(0, 18, 0, 18)
+speedPlus.Position = UDim2.new(0.8, -5, 0.5, -9)
+speedPlus.BackgroundColor3 = Color3.fromRGB(0, 70, 140)
+speedPlus.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedPlus.Text = "+"
+speedPlus.Font = Enum.Font.GothamBold
+speedPlus.TextSize = 14
+speedPlus.Parent = speedRow
+
+local plusCorner = Instance.new("UICorner")
+plusCorner.CornerRadius = UDim.new(0, 3)
+plusCorner.Parent = speedPlus
+
+-- ==============================================
+-- JUMP ROW (38px)
+-- ==============================================
+local jumpRow = Instance.new("Frame")
+jumpRow.Size = UDim2.new(1, 0, 0, 38)
+jumpRow.Position = UDim2.new(0, 0, 0, 42)
+jumpRow.BackgroundTransparency = 1
+jumpRow.Parent = content
+
+-- JumpP Label
+local jumpLabel = Instance.new("TextLabel")
+jumpLabel.Size = UDim2.new(0.2, 0, 1, 0)
+jumpLabel.Position = UDim2.new(0, 2, 0, 0)
+jumpLabel.BackgroundTransparency = 1
+jumpLabel.Text = "JumpP"
+jumpLabel.TextColor3 = Color3.fromRGB(180, 180, 255)
+jumpLabel.TextSize = 11
+jumpLabel.Font = Enum.Font.GothamBold
+jumpLabel.TextXAlignment = Enum.TextXAlignment.Left
+jumpLabel.Parent = jumpRow
+
+-- Jump Toggle
+jumpToggleBtn = Instance.new("TextButton")
+jumpToggleBtn.Size = UDim2.new(0, 35, 0, 20)
+jumpToggleBtn.Position = UDim2.new(0.2, 2, 0.5, -10)
+jumpToggleBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+jumpToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+jumpToggleBtn.Text = "OFF"
+jumpToggleBtn.Font = Enum.Font.GothamBold
+jumpToggleBtn.TextSize = 8
+jumpToggleBtn.Parent = jumpRow
+
+local jumpToggleCorner = Instance.new("UICorner")
+jumpToggleCorner.CornerRadius = UDim.new(0, 3)
+jumpToggleCorner.Parent = jumpToggleBtn
+
+-- Jump Value Box
+local jumpBox = Instance.new("Frame")
+jumpBox.Size = UDim2.new(0, 40, 0, 22)
+jumpBox.Position = UDim2.new(0.4, 0, 0.5, -11)
+jumpBox.BackgroundColor3 = Color3.fromRGB(8, 16, 28)
+jumpBox.BorderColor3 = Color3.fromRGB(0, 130, 240)
+jumpBox.BorderSizePixel = 1
+jumpBox.Parent = jumpRow
+
+local jumpBoxCorner = Instance.new("UICorner")
+jumpBoxCorner.CornerRadius = UDim.new(0, 3)
+jumpBoxCorner.Parent = jumpBox
+
+jumpValueLabel = Instance.new("TextLabel")
+jumpValueLabel.Size = UDim2.new(1, 0, 1, 0)
+jumpValueLabel.BackgroundTransparency = 1
+jumpValueLabel.Text = tostring(config.jump.value)
+jumpValueLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+jumpValueLabel.TextSize = 14
+jumpValueLabel.Font = Enum.Font.GothamBold
+jumpValueLabel.Parent = jumpBox
+
+-- Jump Minus
+local jumpMinus = Instance.new("TextButton")
+jumpMinus.Size = UDim2.new(0, 18, 0, 18)
+jumpMinus.Position = UDim2.new(0.65, -5, 0.5, -9)
+jumpMinus.BackgroundColor3 = Color3.fromRGB(0, 70, 140)
+jumpMinus.TextColor3 = Color3.fromRGB(255, 255, 255)
+jumpMinus.Text = "-"
+jumpMinus.Font = Enum.Font.GothamBold
+jumpMinus.TextSize = 14
+jumpMinus.Parent = jumpRow
+
+local jumpMinusCorner = Instance.new("UICorner")
+jumpMinusCorner.CornerRadius = UDim.new(0, 3)
+jumpMinusCorner.Parent = jumpMinus
+
+-- Jump Plus
+local jumpPlus = Instance.new("TextButton")
+jumpPlus.Size = UDim2.new(0, 18, 0, 18)
+jumpPlus.Position = UDim2.new(0.8, -5, 0.5, -9)
+jumpPlus.BackgroundColor3 = Color3.fromRGB(0, 70, 140)
+jumpPlus.TextColor3 = Color3.fromRGB(255, 255, 255)
+jumpPlus.Text = "+"
+jumpPlus.Font = Enum.Font.GothamBold
+jumpPlus.TextSize = 14
+jumpPlus.Parent = jumpRow
+
+local jumpPlusCorner = Instance.new("UICorner")
+jumpPlusCorner.CornerRadius = UDim.new(0, 3)
+jumpPlusCorner.Parent = jumpPlus
+
+-- ==============================================
+-- BUTTON FUNCTIONS
+-- ==============================================
+speedToggleBtn.MouseButton1Click:Connect(toggleSpeed)
+jumpToggleBtn.MouseButton1Click:Connect(toggleJump)
+
+speedMinus.MouseButton1Click:Connect(function() speedAdjust(-10) end)
+speedPlus.MouseButton1Click:Connect(function() speedAdjust(10) end)
+
+jumpMinus.MouseButton1Click:Connect(function() jumpAdjust(-10) end)
+jumpPlus.MouseButton1Click:Connect(function() jumpAdjust(10) end)
+
+print("✅ FIQQZR7 SPEED & JUMP - 220x120 ULTRA COMPACT")
