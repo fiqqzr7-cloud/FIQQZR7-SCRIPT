@@ -1,4 +1,4 @@
--- FIQQZR7 MAERECORDER - DENGAN HIDE BUTTON PADA TITLE BAR
+-- FIQQZR7 MAERECORDER - SMOOTH JUMP FIX (ROBLOX NATIVE)
 local player = game.Players.LocalPlayer
 repeat task.wait() until player and player:FindFirstChild("PlayerGui")
 
@@ -6,6 +6,7 @@ repeat task.wait() until player and player:FindFirstChild("PlayerGui")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
 -- Variables
 local recording = false
@@ -18,8 +19,13 @@ local conn = nil
 local humanoid = nil
 local loopMode = false
 local uiVisible = true
+local targetIndex = 1
+local startTime = 0
+local lastJumpState = false
+local jumpPressTime = 0
+local jumpActive = false
 
--- Function to get humanoid
+-- Function untuk get humanoid
 local function getHumanoid()
     if player.Character then
         return player.Character:FindFirstChild("Humanoid")
@@ -27,7 +33,7 @@ local function getHumanoid()
     return nil
 end
 
--- Function to get root part
+-- Function untuk get root part
 local function getRootPart()
     if player.Character then
         return player.Character:FindFirstChild("HumanoidRootPart") or 
@@ -37,7 +43,7 @@ local function getRootPart()
     return nil
 end
 
--- Function to set walk animation
+-- Function untuk set walk animation
 local function setWalkAnimation(speedMultiplier)
     humanoid = getHumanoid()
     if humanoid then
@@ -45,199 +51,590 @@ local function setWalkAnimation(speedMultiplier)
     end
 end
 
--- Function to reset animation
+-- Function untuk reset animation
 local function resetAnimation()
     humanoid = getHumanoid()
     if humanoid then
         humanoid.WalkSpeed = 16
+        humanoid.Jump = false
+        jumpActive = false
     end
 end
 
 -- ==============================================
--- CREATE UI
+-- SMOOTH JUMP FUNCTION (MACAM ORIGINAL)
+-- ==============================================
+local function handleJump(jumpState)
+    humanoid = getHumanoid()
+    if not humanoid then return end
+    
+    -- Reset jump setiap frame untuk elak stuck
+    humanoid.Jump = false
+    
+    -- Kalau nak jump
+    if jumpState then
+        -- Trigger jump exactly macam player tekan space
+        humanoid.Jump = true
+        
+        -- Track jump active
+        jumpActive = true
+        jumpPressTime = tick()
+        
+        -- Auto release selepas animation (0.2 saat)
+        task.spawn(function()
+            task.wait(0.2)
+            if humanoid and playing then
+                humanoid.Jump = false
+                jumpActive = false
+            end
+        end)
+    else
+        jumpActive = false
+    end
+end
+
+-- ==============================================
+-- MODERN UI SETUP (GLASSMORPHISM + NEON BLUE)
 -- ==============================================
 local gui = Instance.new("ScreenGui")
-gui.Name = "MaeRecorder"
-gui.Parent = player.PlayerGui
+gui.Name = "FIQQZR7_MaeRecorder"
 gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.Parent = player.PlayerGui
 
--- Main Frame
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 280, 0, 280)
-frame.Position = UDim2.new(0.5, -140, 0.5, -140)
-frame.BackgroundColor3 = Color3.fromRGB(15, 18, 22)
-frame.BorderColor3 = Color3.fromRGB(0, 150, 255)
-frame.BorderSizePixel = 2
-frame.Active = true
-frame.Draggable = true
-frame.ClipsDescendants = true
-frame.Parent = gui
+-- Main Container
+local Container = Instance.new("Frame")
+Container.Size = UDim2.new(0, 300, 0, 420)
+Container.Position = UDim2.new(0.5, -150, 0.5, -210)
+Container.BackgroundTransparency = 1
+Container.Active = true
+Container.Draggable = true
+Container.Parent = gui
 
--- ==============================================
--- TITLE BAR DENGAN HIDE BUTTON
--- ==============================================
-local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 35)
-titleBar.BackgroundColor3 = Color3.fromRGB(10, 12, 16)
-titleBar.BorderSizePixel = 0
-titleBar.Parent = frame
+-- Main Frame (Glass Effect)
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(1, 0, 1, 0)
+Main.Position = UDim2.new(0, 0, 0, 0)
+Main.BackgroundColor3 = Color3.fromRGB(8, 12, 20)
+Main.BackgroundTransparency = 0.1
+Main.BorderColor3 = Color3.fromRGB(0, 150, 255)
+Main.BorderSizePixel = 2
+Main.ClipsDescendants = true
+Main.Parent = Container
 
-local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0, 8)
-titleCorner.Parent = titleBar
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 20)
+MainCorner.Parent = Main
 
-local titleText = Instance.new("TextLabel")
-titleText.Size = UDim2.new(0.6, 0, 1, 0)
-titleText.Position = UDim2.new(0, 10, 0, 0)
-titleText.BackgroundTransparency = 1
-titleText.Text = "FIQQZR7 AUTOWALK"
-titleText.TextColor3 = Color3.fromRGB(0, 150, 255)
-titleText.TextSize = 14
-titleText.Font = Enum.Font.GothamBold
-titleText.TextXAlignment = Enum.TextXAlignment.Left
-titleText.Parent = titleBar
+-- Glass Blur Effect
+local Blur = Instance.new("Frame")
+Blur.Size = UDim2.new(1, 0, 1, 0)
+Blur.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
+Blur.BackgroundTransparency = 0.6
+Blur.BorderSizePixel = 0
+Blur.ZIndex = 0
+Blur.Parent = Main
 
--- HIDE BUTTON (SEBELAH CLOSE)
-local hideBtn = Instance.new("TextButton")
-hideBtn.Size = UDim2.new(0, 22, 0, 22)
-hideBtn.Position = UDim2.new(1, -55, 0.5, -11)
-hideBtn.BackgroundColor3 = Color3.fromRGB(30, 35, 40)
-hideBtn.TextColor3 = Color3.fromRGB(0, 150, 255)
-hideBtn.Text = "−"
-hideBtn.Font = Enum.Font.GothamBold
-hideBtn.TextSize = 16
-hideBtn.Parent = titleBar
+local BlurCorner = Instance.new("UICorner")
+BlurCorner.CornerRadius = UDim.new(0, 20)
+BlurCorner.Parent = Blur
 
-local hideCorner = Instance.new("UICorner")
-hideCorner.CornerRadius = UDim.new(0, 6)
-hideCorner.Parent = hideBtn
+-- Neon Glow Border
+local Glow = Instance.new("Frame")
+Glow.Size = UDim2.new(1, 8, 1, 8)
+Glow.Position = UDim2.new(0, -4, 0, -4)
+Glow.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+Glow.BackgroundTransparency = 0.8
+Glow.BorderSizePixel = 0
+Glow.ZIndex = 0
+Glow.Parent = Container
 
--- CLOSE BUTTON
-local close = Instance.new("TextButton")
-close.Size = UDim2.new(0, 22, 0, 22)
-close.Position = UDim2.new(1, -28, 0.5, -11)
-close.BackgroundColor3 = Color3.fromRGB(30, 35, 40)
-close.TextColor3 = Color3.fromRGB(255, 80, 80)
-close.Text = "✕"
-close.Font = Enum.Font.GothamBold
-close.TextSize = 14
-close.Parent = titleBar
+local GlowCorner = Instance.new("UICorner")
+GlowCorner.CornerRadius = UDim.new(0, 22)
+GlowCorner.Parent = Glow
 
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 6)
-closeCorner.Parent = close
+-- Inner Glow
+local InnerGlow = Instance.new("Frame")
+InnerGlow.Size = UDim2.new(1, 4, 1, 4)
+InnerGlow.Position = UDim2.new(0, -2, 0, -2)
+InnerGlow.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+InnerGlow.BackgroundTransparency = 0.7
+InnerGlow.BorderSizePixel = 0
+InnerGlow.ZIndex = 0
+InnerGlow.Parent = Container
 
--- Content Container (semua content kecuali title bar)
-local contentContainer = Instance.new("Frame")
-contentContainer.Size = UDim2.new(1, 0, 1, -35)
-contentContainer.Position = UDim2.new(0, 0, 0, 35)
-contentContainer.BackgroundTransparency = 1
-contentContainer.Parent = frame
+local InnerGlowCorner = Instance.new("UICorner")
+InnerGlowCorner.CornerRadius = UDim.new(0, 21)
+InnerGlowCorner.Parent = InnerGlow
 
--- ==============================================
--- SCROLLING FRAME DALAM CONTENT CONTAINER
--- ==============================================
-local scrollingFrame = Instance.new("ScrollingFrame")
-scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
-scrollingFrame.BackgroundTransparency = 1
-scrollingFrame.BorderSizePixel = 0
-scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 350)
-scrollingFrame.ScrollBarThickness = 6
-scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
-scrollingFrame.Parent = contentContainer
+-- Gradient Background
+local Gradient = Instance.new("UIGradient")
+Gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 20, 40)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(5, 15, 35)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 10, 30))
+})
+Gradient.Rotation = 45
+Gradient.Parent = Main
 
 -- ==============================================
--- STATUS BAR
+-- TITLE BAR MODERN
 -- ==============================================
-local statusBar = Instance.new("Frame")
-statusBar.Size = UDim2.new(0.9, 0, 0, 25)
-statusBar.Position = UDim2.new(0.05, 0, 0, 5)
-statusBar.BackgroundColor3 = Color3.fromRGB(20, 25, 30)
-statusBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
-statusBar.BorderSizePixel = 1
-statusBar.Parent = scrollingFrame
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, -16, 0, 50)
+TitleBar.Position = UDim2.new(0, 8, 0, 8)
+TitleBar.BackgroundColor3 = Color3.fromRGB(10, 15, 30)
+TitleBar.BackgroundTransparency = 0.3
+TitleBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
+TitleBar.BorderSizePixel = 1
+TitleBar.Parent = Main
 
-local statusText = Instance.new("TextLabel")
-statusText.Size = UDim2.new(1, -10, 1, 0)
-statusText.Position = UDim2.new(0, 5, 0, 0)
-statusText.BackgroundTransparency = 1
-statusText.Text = "● READY"
-statusText.TextColor3 = Color3.fromRGB(0, 150, 255)
-statusText.TextSize = 11
-statusText.Font = Enum.Font.GothamBold
-statusText.TextXAlignment = Enum.TextXAlignment.Left
-statusText.Parent = statusBar
+local TitleBarCorner = Instance.new("UICorner")
+TitleBarCorner.CornerRadius = UDim.new(0, 12)
+TitleBarCorner.Parent = TitleBar
+
+-- Icon
+local Icon = Instance.new("TextLabel")
+Icon.Size = UDim2.new(0, 40, 1, 0)
+Icon.Position = UDim2.new(0, 8, 0, 0)
+Icon.BackgroundTransparency = 1
+Icon.Text = "👣"
+Icon.TextColor3 = Color3.fromRGB(0, 200, 255)
+Icon.TextSize = 22
+Icon.Font = Enum.Font.GothamBold
+Icon.Parent = TitleBar
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(0.6, 0, 1, 0)
+Title.Position = UDim2.new(0, 50, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "RECORD FIQQZR7"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 14
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = TitleBar
+
+-- Hide Button (Modern)
+local HideBtn = Instance.new("TextButton")
+HideBtn.Size = UDim2.new(0, 28, 0, 28)
+HideBtn.Position = UDim2.new(1, -65, 0.5, -14)
+HideBtn.BackgroundColor3 = Color3.fromRGB(10, 25, 45)
+HideBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+HideBtn.BorderSizePixel = 1
+HideBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
+HideBtn.Text = "−"
+HideBtn.Font = Enum.Font.GothamBold
+HideBtn.TextSize = 18
+HideBtn.Parent = TitleBar
+
+local HideCorner = Instance.new("UICorner")
+HideCorner.CornerRadius = UDim.new(0, 8)
+HideCorner.Parent = HideBtn
+
+-- Close Button
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 28, 0, 28)
+CloseBtn.Position = UDim2.new(1, -32, 0.5, -14)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 20, 45)
+CloseBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+CloseBtn.BorderSizePixel = 1
+CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+CloseBtn.Text = "✕"
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 14
+CloseBtn.Parent = TitleBar
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseBtn
 
 -- ==============================================
--- RECORD & RESUME BUTTONS
+-- CONTENT CONTAINER
 -- ==============================================
-local recordBtn = Instance.new("TextButton")
-recordBtn.Size = UDim2.new(0.43, 0, 0, 30)
-recordBtn.Position = UDim2.new(0.05, 0, 0, 35)
-recordBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-recordBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-recordBtn.Text = "⏺️ RECORD"
-recordBtn.Font = Enum.Font.GothamBold
-recordBtn.TextSize = 11
-recordBtn.Parent = scrollingFrame
+local ContentContainer = Instance.new("Frame")
+ContentContainer.Size = UDim2.new(1, -16, 1, -70)
+ContentContainer.Position = UDim2.new(0, 8, 0, 62)
+ContentContainer.BackgroundTransparency = 1
+ContentContainer.Parent = Main
 
-recordBtn.MouseButton1Click:Connect(function()
-    if recording then
-        recording = false
-        statusText.Text = "⏹️ STOPPED"
-        statusText.TextColor3 = Color3.fromRGB(255, 200, 100)
-        recordBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-        recordBtn.Text = "⏺️ RECORD"
-    else
-        if playing then
-            playing = false
-            if conn then conn:Disconnect() end
-            resetAnimation()
-        end
-        recording = true
-        currentPath = {}
-        statusText.Text = "● RECORDING"
-        statusText.TextColor3 = Color3.fromRGB(255, 100, 100)
-        recordBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-        recordBtn.Text = "⏺️ RECORDING"
+-- ==============================================
+-- SCROLLING FRAME
+-- ==============================================
+local ScrollingFrame = Instance.new("ScrollingFrame")
+ScrollingFrame.Size = UDim2.new(1, 0, 1, 0)
+ScrollingFrame.BackgroundTransparency = 1
+ScrollingFrame.BorderSizePixel = 0
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 520)
+ScrollingFrame.ScrollBarThickness = 4
+ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
+ScrollingFrame.Parent = ContentContainer
+
+-- ==============================================
+-- MODERN CARD FUNCTION
+-- ==============================================
+local function createCard(y, title, subtitle)
+    local Card = Instance.new("Frame")
+    Card.Size = UDim2.new(0.95, 0, 0, 40)
+    Card.Position = UDim2.new(0.025, 0, 0, y)
+    Card.BackgroundColor3 = Color3.fromRGB(10, 15, 30)
+    Card.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    Card.BorderSizePixel = 1
+    Card.Parent = ScrollingFrame
+
+    local CardCorner = Instance.new("UICorner")
+    CardCorner.CornerRadius = UDim.new(0, 12)
+    CardCorner.Parent = Card
+
+    -- Inner gradient for card
+    local CardGradient = Instance.new("UIGradient")
+    CardGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 20, 35)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 12, 25))
+    })
+    CardGradient.Rotation = 90
+    CardGradient.Parent = Card
+
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(0.7, 0, 0.5, 0)
+    Title.Position = UDim2.new(0, 12, 0, 6)
+    Title.BackgroundTransparency = 1
+    Title.Text = title
+    Title.TextColor3 = Color3.fromRGB(0, 200, 255)
+    Title.TextSize = 13
+    Title.Font = Enum.Font.GothamBold
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.Parent = Card
+
+    if subtitle then
+        local Subtitle = Instance.new("TextLabel")
+        Subtitle.Size = UDim2.new(0.7, 0, 0.4, 0)
+        Subtitle.Position = UDim2.new(0, 12, 0, 22)
+        Subtitle.BackgroundTransparency = 1
+        Subtitle.Text = subtitle
+        Subtitle.TextColor3 = Color3.fromRGB(140, 180, 255)
+        Subtitle.TextSize = 9
+        Subtitle.Font = Enum.Font.Gotham
+        Subtitle.TextXAlignment = Enum.TextXAlignment.Left
+        Subtitle.Parent = Card
     end
-end)
 
-local resumeBtn = Instance.new("TextButton")
-resumeBtn.Size = UDim2.new(0.43, 0, 0, 30)
-resumeBtn.Position = UDim2.new(0.52, 0, 0, 35)
-resumeBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
-resumeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-resumeBtn.Text = "▶️ RESUME"
-resumeBtn.Font = Enum.Font.GothamBold
-resumeBtn.TextSize = 11
-resumeBtn.Parent = scrollingFrame
+    return Card
+end
 
 -- ==============================================
--- FUNGSI PLAYBACK DENGAN LOMPAT
+-- STATUS BAR (MODERN)
+-- ==============================================
+local StatusCard = createCard(5, "STATUS", "Current system state")
+local StatusText = Instance.new("TextLabel")
+StatusText.Size = UDim2.new(0.4, 0, 1, 0)
+StatusText.Position = UDim2.new(0.6, -10, 0, 0)
+StatusText.BackgroundTransparency = 1
+StatusText.Text = "● READY"
+StatusText.TextColor3 = Color3.fromRGB(0, 150, 255)
+StatusText.TextSize = 12
+StatusText.Font = Enum.Font.GothamBold
+StatusText.TextXAlignment = Enum.TextXAlignment.Right
+StatusText.Parent = StatusCard
+
+-- ==============================================
+-- CONTROL BUTTONS (MODERN)
+-- ==============================================
+local RecordCard = createCard(50, "RECORDING", "Start/stop path recording")
+local RecordBtn = Instance.new("TextButton")
+RecordBtn.Size = UDim2.new(0.3, 0, 0, 28)
+RecordBtn.Position = UDim2.new(0.65, -10, 0.5, -14)
+RecordBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+RecordBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+RecordBtn.BorderSizePixel = 1
+RecordBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+RecordBtn.Text = "⏺ REC"
+RecordBtn.Font = Enum.Font.GothamBold
+RecordBtn.TextSize = 11
+RecordBtn.Parent = RecordCard
+
+local RecordCorner = Instance.new("UICorner")
+RecordCorner.CornerRadius = UDim.new(0, 8)
+RecordCorner.Parent = RecordBtn
+
+-- Playback Card
+local PlayCard = createCard(95, "PLAYBACK", "Control path playback")
+local PlayBtn = Instance.new("TextButton")
+PlayBtn.Size = UDim2.new(0.3, 0, 0, 28)
+PlayBtn.Position = UDim2.new(0.65, -10, 0.5, -14)
+PlayBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+PlayBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+PlayBtn.BorderSizePixel = 1
+PlayBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+PlayBtn.Text = "▶ PLAY"
+PlayBtn.Font = Enum.Font.GothamBold
+PlayBtn.TextSize = 11
+PlayBtn.Parent = PlayCard
+
+local PlayCorner = Instance.new("UICorner")
+PlayCorner.CornerRadius = UDim.new(0, 8)
+PlayCorner.Parent = PlayBtn
+
+-- ==============================================
+-- SPEED CONTROL (MODERN)
+-- ==============================================
+local SpeedCard = createCard(140, "SPEED", "Adjust playback speed")
+local SpeedValue = Instance.new("TextLabel")
+SpeedValue.Size = UDim2.new(0.15, 0, 1, 0)
+SpeedValue.Position = UDim2.new(0.5, 0, 0, 0)
+SpeedValue.BackgroundTransparency = 1
+SpeedValue.Text = "1.0x"
+SpeedValue.TextColor3 = Color3.fromRGB(0, 200, 255)
+SpeedValue.TextSize = 14
+SpeedValue.Font = Enum.Font.GothamBold
+SpeedValue.TextXAlignment = Enum.TextXAlignment.Center
+SpeedValue.Parent = SpeedCard
+
+local SpeedDown = Instance.new("TextButton")
+SpeedDown.Size = UDim2.new(0.15, 0, 0, 24)
+SpeedDown.Position = UDim2.new(0.65, -5, 0.5, -12)
+SpeedDown.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+SpeedDown.BorderColor3 = Color3.fromRGB(0, 150, 255)
+SpeedDown.BorderSizePixel = 1
+SpeedDown.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedDown.Text = "−"
+SpeedDown.Font = Enum.Font.GothamBold
+SpeedDown.TextSize = 16
+SpeedDown.Parent = SpeedCard
+
+local SpeedDownCorner = Instance.new("UICorner")
+SpeedDownCorner.CornerRadius = UDim.new(0, 6)
+SpeedDownCorner.Parent = SpeedDown
+
+local SpeedUp = Instance.new("TextButton")
+SpeedUp.Size = UDim2.new(0.15, 0, 0, 24)
+SpeedUp.Position = UDim2.new(0.8, 0, 0.5, -12)
+SpeedUp.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+SpeedUp.BorderColor3 = Color3.fromRGB(0, 150, 255)
+SpeedUp.BorderSizePixel = 1
+SpeedUp.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedUp.Text = "+"
+SpeedUp.Font = Enum.Font.GothamBold
+SpeedUp.TextSize = 16
+SpeedUp.Parent = SpeedCard
+
+local SpeedUpCorner = Instance.new("UICorner")
+SpeedUpCorner.CornerRadius = UDim.new(0, 6)
+SpeedUpCorner.Parent = SpeedUp
+
+-- ==============================================
+-- LOOP TOGGLE (MODERN)
+-- ==============================================
+local LoopCard = createCard(185, "LOOP MODE", "Repeat path continuously")
+local LoopBtn = Instance.new("TextButton")
+LoopBtn.Size = UDim2.new(0.2, 0, 0, 28)
+LoopBtn.Position = UDim2.new(0.75, -10, 0.5, -14)
+LoopBtn.BackgroundColor3 = Color3.fromRGB(25, 30, 40)
+LoopBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+LoopBtn.BorderSizePixel = 1
+LoopBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+LoopBtn.Text = "OFF"
+LoopBtn.Font = Enum.Font.GothamBold
+LoopBtn.TextSize = 11
+LoopBtn.Parent = LoopCard
+
+local LoopCorner = Instance.new("UICorner")
+LoopCorner.CornerRadius = UDim.new(0, 8)
+LoopCorner.Parent = LoopBtn
+
+-- ==============================================
+-- SAVE SECTION (MODERN)
+-- ==============================================
+local SaveCard = createCard(230, "SAVE PATH", "Name and save current path")
+
+local NameBox = Instance.new("TextBox")
+NameBox.Size = UDim2.new(0.45, 0, 0, 28)
+NameBox.Position = UDim2.new(0.5, -75, 0.5, -14)
+NameBox.BackgroundColor3 = Color3.fromRGB(20, 25, 35)
+NameBox.BorderColor3 = Color3.fromRGB(0, 150, 255)
+NameBox.BorderSizePixel = 1
+NameBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+NameBox.PlaceholderText = "Name..."
+NameBox.PlaceholderColor3 = Color3.fromRGB(100, 120, 150)
+NameBox.Text = ""
+NameBox.Font = Enum.Font.Gotham
+NameBox.TextSize = 11
+NameBox.ClearTextOnFocus = false
+NameBox.Parent = SaveCard
+
+local NameCorner = Instance.new("UICorner")
+NameCorner.CornerRadius = UDim.new(0, 8)
+NameCorner.Parent = NameBox
+
+local SaveBtn = Instance.new("TextButton")
+SaveBtn.Size = UDim2.new(0.2, 0, 0, 28)
+SaveBtn.Position = UDim2.new(0.75, 0, 0.5, -14)
+SaveBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+SaveBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+SaveBtn.BorderSizePixel = 1
+SaveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SaveBtn.Text = "💾 SAVE"
+SaveBtn.Font = Enum.Font.GothamBold
+SaveBtn.TextSize = 10
+SaveBtn.Parent = SaveCard
+
+local SaveCorner = Instance.new("UICorner")
+SaveCorner.CornerRadius = UDim.new(0, 8)
+SaveCorner.Parent = SaveBtn
+
+-- ==============================================
+-- SAVED PATHS HEADER
+-- ==============================================
+local HeaderCard = createCard(285, "📋 SAVED PATHS", "Click to load")
+
+-- ==============================================
+-- SAVED PATHS LIST (MODERN)
+-- ==============================================
+local ListContainer = Instance.new("Frame")
+ListContainer.Size = UDim2.new(0.95, 0, 0, 140)
+ListContainer.Position = UDim2.new(0.025, 0, 0, 330)
+ListContainer.BackgroundColor3 = Color3.fromRGB(8, 12, 20)
+ListContainer.BorderColor3 = Color3.fromRGB(0, 150, 255)
+ListContainer.BorderSizePixel = 1
+ListContainer.Parent = ScrollingFrame
+
+local ListCorner = Instance.new("UICorner")
+ListCorner.CornerRadius = UDim.new(0, 12)
+ListCorner.Parent = ListContainer
+
+local ListScroller = Instance.new("ScrollingFrame")
+ListScroller.Size = UDim2.new(1, -10, 1, -10)
+ListScroller.Position = UDim2.new(0, 5, 0, 5)
+ListScroller.BackgroundTransparency = 1
+ListScroller.BorderSizePixel = 0
+ListScroller.CanvasSize = UDim2.new(0, 0, 0, 0)
+ListScroller.ScrollBarThickness = 4
+ListScroller.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
+ListScroller.Parent = ListContainer
+
+-- ==============================================
+-- FUNGSI REFRESH PATH LIST
+-- ==============================================
+function refreshPathList()
+    for _, child in ipairs(ListScroller:GetChildren()) do
+        if child:IsA("Frame") then
+            child:Destroy()
+        end
+    end
+    
+    ListScroller.CanvasSize = UDim2.new(0, 0, 0, #savedPaths * 45)
+    
+    for i, path in ipairs(savedPaths) do
+        local Item = Instance.new("Frame")
+        Item.Size = UDim2.new(1, -5, 0, 40)
+        Item.Position = UDim2.new(0, 0, 0, (i-1) * 45)
+        Item.BackgroundColor3 = Color3.fromRGB(12, 18, 28)
+        Item.BorderColor3 = Color3.fromRGB(0, 150, 255)
+        Item.BorderSizePixel = 1
+        Item.Parent = ListScroller
+
+        local ItemCorner = Instance.new("UICorner")
+        ItemCorner.CornerRadius = UDim.new(0, 8)
+        ItemCorner.Parent = Item
+
+        local NameLabel = Instance.new("TextLabel")
+        NameLabel.Size = UDim2.new(0.5, 0, 0.5, 0)
+        NameLabel.Position = UDim2.new(0, 10, 0, 6)
+        NameLabel.BackgroundTransparency = 1
+        NameLabel.Text = path.name
+        NameLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+        NameLabel.TextSize = 11
+        NameLabel.Font = Enum.Font.GothamBold
+        NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+        NameLabel.Parent = Item
+
+        local PointsLabel = Instance.new("TextLabel")
+        PointsLabel.Size = UDim2.new(0.3, 0, 0.3, 0)
+        PointsLabel.Position = UDim2.new(0, 10, 0, 22)
+        PointsLabel.BackgroundTransparency = 1
+        PointsLabel.Text = #path.data .. " points"
+        PointsLabel.TextColor3 = Color3.fromRGB(140, 180, 255)
+        PointsLabel.TextSize = 8
+        PointsLabel.Font = Enum.Font.Gotham
+        PointsLabel.TextXAlignment = Enum.TextXAlignment.Left
+        PointsLabel.Parent = Item
+
+        local LoadBtn = Instance.new("TextButton")
+        LoadBtn.Size = UDim2.new(0.2, 0, 0, 24)
+        LoadBtn.Position = UDim2.new(0.6, 0, 0.5, -12)
+        LoadBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+        LoadBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+        LoadBtn.BorderSizePixel = 1
+        LoadBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        LoadBtn.Text = "LOAD"
+        LoadBtn.Font = Enum.Font.GothamBold
+        LoadBtn.TextSize = 9
+        LoadBtn.Parent = Item
+
+        local LoadCorner = Instance.new("UICorner")
+        LoadCorner.CornerRadius = UDim.new(0, 6)
+        LoadCorner.Parent = LoadBtn
+
+        local DeleteBtn = Instance.new("TextButton")
+        DeleteBtn.Size = UDim2.new(0.15, 0, 0, 24)
+        DeleteBtn.Position = UDim2.new(0.8, 0, 0.5, -12)
+        DeleteBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        DeleteBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+        DeleteBtn.BorderSizePixel = 1
+        DeleteBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        DeleteBtn.Text = "✕"
+        DeleteBtn.Font = Enum.Font.GothamBold
+        DeleteBtn.TextSize = 10
+        DeleteBtn.Parent = Item
+
+        local DeleteCorner = Instance.new("UICorner")
+        DeleteCorner.CornerRadius = UDim.new(0, 6)
+        DeleteCorner.Parent = DeleteBtn
+
+        -- Load button functionality
+        LoadBtn.MouseButton1Click:Connect(function()
+            currentPath = {table.unpack(path.data)}
+            StatusText.Text = "✓ LOADED"
+            StatusText.TextColor3 = Color3.fromRGB(0, 255, 100)
+            task.wait(1)
+            StatusText.Text = "● READY"
+            StatusText.TextColor3 = Color3.fromRGB(0, 150, 255)
+        end)
+
+        -- Delete button functionality
+        DeleteBtn.MouseButton1Click:Connect(function()
+            table.remove(savedPaths, i)
+            refreshPathList()
+        end)
+    end
+end
+
+-- ==============================================
+-- SMOOTH PLAYBACK FUNCTION (FIXED JUMP)
 -- ==============================================
 local function startPlayback()
     if #currentPath == 0 then
-        statusText.Text = "❌ NO PATH"
-        statusText.TextColor3 = Color3.fromRGB(255, 100, 100)
+        StatusText.Text = "❌ NO PATH"
+        StatusText.TextColor3 = Color3.fromRGB(255, 100, 100)
         task.wait(1)
-        statusText.Text = "● READY"
-        statusText.TextColor3 = Color3.fromRGB(0, 150, 255)
+        StatusText.Text = "● READY"
+        StatusText.TextColor3 = Color3.fromRGB(0, 150, 255)
         return
     end
     
     playing = true
     paused = false
     recording = false
-    local startTime = tick()
-    local targetIndex = 1
-    local lastJumpState = false
+    startTime = tick()
+    targetIndex = 1
+    lastJumpState = false
+    jumpActive = false
     
-    statusText.Text = "● PLAYING"
-    statusText.TextColor3 = Color3.fromRGB(100, 255, 100)
-    resumeBtn.Text = "⏸️ PAUSE"
-    resumeBtn.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
+    StatusText.Text = "● PLAYING"
+    StatusText.TextColor3 = Color3.fromRGB(100, 255, 100)
+    PlayBtn.Text = "⏸ PAUSE"
+    PlayBtn.BackgroundColor3 = Color3.fromRGB(200, 150, 50)
     
     setWalkAnimation(speed)
     
@@ -256,15 +653,16 @@ local function startPlayback()
             if loopMode then
                 startTime = tick()
                 targetIndex = 1
+                lastJumpState = false
+                jumpActive = false
             else
                 playing = false
                 paused = false
-                resumeBtn.Text = "▶️ RESUME"
-                resumeBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
-                statusText.Text = "● READY"
-                statusText.TextColor3 = Color3.fromRGB(0, 150, 255)
-                humanoid.WalkSpeed = 16
-                humanoid.Jump = false
+                PlayBtn.Text = "▶ PLAY"
+                PlayBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+                StatusText.Text = "● READY"
+                StatusText.TextColor3 = Color3.fromRGB(0, 150, 255)
+                resetAnimation()
                 return
             end
         end
@@ -274,13 +672,36 @@ local function startPlayback()
         rootPart.CFrame = CFrame.new(frameData.pos)
         rootPart.Velocity = frameData.vel * speed
         
+        -- ===== SMOOTH JUMP FIX =====
+        -- Reset jump setiap frame (tapi jangan reset kalau dalam animation)
+        if not jumpActive then
+            humanoid.Jump = false
+        end
+        
+        -- Trigger jump baru
         if frameData.jump and not lastJumpState then
             humanoid.Jump = true
-            lastJumpState = true
-        elseif not frameData.jump then
-            humanoid.Jump = false
-            lastJumpState = false
+            jumpActive = true
+            jumpPressTime = tick()
+            
+            -- Auto release selepas 0.2 saat (animation length)
+            task.spawn(function()
+                task.wait(0.2)
+                if humanoid and playing then
+                    humanoid.Jump = false
+                    jumpActive = false
+                end
+            end)
         end
+        
+        -- Auto release kalau dah lama sangat jump
+        if jumpActive and tick() - jumpPressTime > 0.25 then
+            humanoid.Jump = false
+            jumpActive = false
+        end
+        
+        lastJumpState = frameData.jump
+        -- ============================
         
         if targetIndex < #currentPath then
             local nextPos = currentPath[targetIndex + 1].pos
@@ -292,11 +713,35 @@ local function startPlayback()
     end)
 end
 
--- Resume button click
-resumeBtn.MouseButton1Click:Connect(function()
+-- ==============================================
+-- BUTTON CONNECTIONS
+-- ==============================================
+RecordBtn.MouseButton1Click:Connect(function()
+    if recording then
+        recording = false
+        StatusText.Text = "⏹ STOPPED"
+        StatusText.TextColor3 = Color3.fromRGB(255, 200, 100)
+        RecordBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        RecordBtn.Text = "⏺ REC"
+    else
+        if playing then
+            playing = false
+            if conn then conn:Disconnect() end
+            resetAnimation()
+        end
+        recording = true
+        currentPath = {}
+        StatusText.Text = "● RECORDING"
+        StatusText.TextColor3 = Color3.fromRGB(255, 100, 100)
+        RecordBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+        RecordBtn.Text = "⏺ REC"
+    end
+end)
+
+PlayBtn.MouseButton1Click:Connect(function()
     if playing then
         paused = not paused
-        resumeBtn.Text = paused and "⏸️ PAUSED" or "⏸️ PAUSE"
+        PlayBtn.Text = paused and "⏸ PAUSED" or "⏸ PAUSE"
         if not paused then
             startTime = tick() - (targetIndex * (1/30))
         end
@@ -305,112 +750,41 @@ resumeBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- ==============================================
--- SPEED CONTROL
--- ==============================================
-local speedFrame = Instance.new("Frame")
-speedFrame.Size = UDim2.new(0.9, 0, 0, 30)
-speedFrame.Position = UDim2.new(0.05, 0, 0, 70)
-speedFrame.BackgroundColor3 = Color3.fromRGB(20, 25, 30)
-speedFrame.BorderColor3 = Color3.fromRGB(0, 150, 255)
-speedFrame.BorderSizePixel = 1
-speedFrame.Parent = scrollingFrame
-
-local speedLabel = Instance.new("TextLabel")
-speedLabel.Size = UDim2.new(0.3, 0, 1, 0)
-speedLabel.Position = UDim2.new(0, 5, 0, 0)
-speedLabel.BackgroundTransparency = 1
-speedLabel.Text = "⚡"
-speedLabel.TextColor3 = Color3.fromRGB(0, 150, 255)
-speedLabel.TextSize = 14
-speedLabel.Font = Enum.Font.GothamBold
-speedLabel.TextXAlignment = Enum.TextXAlignment.Left
-speedLabel.Parent = speedFrame
-
-local speedValue = Instance.new("TextLabel")
-speedValue.Size = UDim2.new(0.2, 0, 1, 0)
-speedValue.Position = UDim2.new(0.35, 0, 0, 0)
-speedValue.BackgroundTransparency = 1
-speedValue.Text = "1.0x"
-speedValue.TextColor3 = Color3.fromRGB(0, 200, 255)
-speedValue.TextSize = 12
-speedValue.Font = Enum.Font.GothamBold
-speedValue.Parent = speedFrame
-
-local speedDown = Instance.new("TextButton")
-speedDown.Size = UDim2.new(0.15, 0, 0, 20)
-speedDown.Position = UDim2.new(0.65, 0, 0.5, -10)
-speedDown.BackgroundColor3 = Color3.fromRGB(30, 35, 40)
-speedDown.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedDown.Text = "-"
-speedDown.Font = Enum.Font.GothamBold
-speedDown.TextSize = 14
-speedDown.Parent = speedFrame
-
-speedDown.MouseButton1Click:Connect(function()
+SpeedDown.MouseButton1Click:Connect(function()
     speed = math.max(0.2, speed - 0.2)
-    speedValue.Text = string.format("%.1fx", speed)
+    SpeedValue.Text = string.format("%.1fx", speed)
     if playing then
         setWalkAnimation(speed)
     end
 end)
 
-local speedUp = Instance.new("TextButton")
-speedUp.Size = UDim2.new(0.15, 0, 0, 20)
-speedUp.Position = UDim2.new(0.8, 0, 0.5, -10)
-speedUp.BackgroundColor3 = Color3.fromRGB(30, 35, 40)
-speedUp.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedUp.Text = "+"
-speedUp.Font = Enum.Font.GothamBold
-speedUp.TextSize = 14
-speedUp.Parent = speedFrame
-
-speedUp.MouseButton1Click:Connect(function()
+SpeedUp.MouseButton1Click:Connect(function()
     speed = math.min(10.0, speed + 0.2)
-    speedValue.Text = string.format("%.1fx", speed)
+    SpeedValue.Text = string.format("%.1fx", speed)
     if playing then
         setWalkAnimation(speed)
     end
 end)
 
--- ==============================================
--- CHECKPOINT NAME & SAVE BUTTON
--- ==============================================
-local nameBox = Instance.new("TextBox")
-nameBox.Size = UDim2.new(0.9, 0, 0, 25)
-nameBox.Position = UDim2.new(0.05, 0, 0, 105)
-nameBox.BackgroundColor3 = Color3.fromRGB(20, 25, 30)
-nameBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-nameBox.PlaceholderText = "Checkpoint name..."
-nameBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
-nameBox.Text = ""
-nameBox.Font = Enum.Font.Gotham
-nameBox.TextSize = 11
-nameBox.ClearTextOnFocus = false
-nameBox.Parent = scrollingFrame
+LoopBtn.MouseButton1Click:Connect(function()
+    loopMode = not loopMode
+    LoopBtn.Text = loopMode and "ON" or "OFF"
+    LoopBtn.BackgroundColor3 = loopMode and Color3.fromRGB(0, 80, 0) or Color3.fromRGB(25, 30, 40)
+    LoopBtn.TextColor3 = loopMode and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(200, 200, 200)
+end)
 
-local saveBtn = Instance.new("TextButton")
-saveBtn.Size = UDim2.new(0.9, 0, 0, 25)
-saveBtn.Position = UDim2.new(0.05, 0, 0, 135)
-saveBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
-saveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-saveBtn.Text = "💾 SAVE"
-saveBtn.Font = Enum.Font.GothamBold
-saveBtn.TextSize = 11
-saveBtn.Parent = scrollingFrame
-
-saveBtn.MouseButton1Click:Connect(function()
-    local name = nameBox.Text
+SaveBtn.MouseButton1Click:Connect(function()
+    local name = NameBox.Text
     if name == "" then
         name = "Path " .. #savedPaths + 1
     end
     
     if #currentPath == 0 then
-        statusText.Text = "❌ NO PATH"
-        statusText.TextColor3 = Color3.fromRGB(255, 80, 80)
+        StatusText.Text = "❌ NO PATH"
+        StatusText.TextColor3 = Color3.fromRGB(255, 80, 80)
         task.wait(1)
-        statusText.Text = "● READY"
-        statusText.TextColor3 = Color3.fromRGB(0, 150, 255)
+        StatusText.Text = "● READY"
+        StatusText.TextColor3 = Color3.fromRGB(0, 150, 255)
         return
     end
     
@@ -419,165 +793,36 @@ saveBtn.MouseButton1Click:Connect(function()
         data = {table.unpack(currentPath)}
     })
     
-    statusText.Text = "✓ SAVED: " .. name
-    statusText.TextColor3 = Color3.fromRGB(0, 255, 100)
+    StatusText.Text = "✓ SAVED"
+    StatusText.TextColor3 = Color3.fromRGB(0, 255, 100)
     refreshPathList()
-    nameBox.Text = ""
+    NameBox.Text = ""
     task.wait(1)
-    statusText.Text = "● READY"
-    statusText.TextColor3 = Color3.fromRGB(0, 150, 255)
+    StatusText.Text = "● READY"
+    StatusText.TextColor3 = Color3.fromRGB(0, 150, 255)
 end)
-
--- ==============================================
--- LOOP TOGGLE
--- ==============================================
-local loopBtn = Instance.new("TextButton")
-loopBtn.Size = UDim2.new(0.9, 0, 0, 25)
-loopBtn.Position = UDim2.new(0.05, 0, 0, 165)
-loopBtn.BackgroundColor3 = Color3.fromRGB(25, 30, 35)
-loopBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-loopBtn.Text = "🔄 Loop: OFF"
-loopBtn.Font = Enum.Font.Gotham
-loopBtn.TextSize = 11
-loopBtn.Parent = scrollingFrame
-
-loopBtn.MouseButton1Click:Connect(function()
-    loopMode = not loopMode
-    loopBtn.Text = "🔄 Loop: " .. (loopMode and "ON" or "OFF")
-    loopBtn.BackgroundColor3 = loopMode and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(25, 30, 35)
-end)
-
--- ==============================================
--- SAVED PATHS HEADER
--- ==============================================
-local savedHeader = Instance.new("TextLabel")
-savedHeader.Size = UDim2.new(0.9, 0, 0, 20)
-savedHeader.Position = UDim2.new(0.05, 0, 0, 195)
-savedHeader.BackgroundTransparency = 1
-savedHeader.Text = "📋 SAVED PATHS"
-savedHeader.TextColor3 = Color3.fromRGB(0, 150, 255)
-savedHeader.TextSize = 11
-savedHeader.Font = Enum.Font.GothamBold
-savedHeader.TextXAlignment = Enum.TextXAlignment.Left
-savedHeader.Parent = scrollingFrame
-
--- ==============================================
--- SCROLLABLE SAVED PATHS LIST
--- ==============================================
-local listFrame = Instance.new("Frame")
-listFrame.Size = UDim2.new(0.9, 0, 0, 80)
-listFrame.Position = UDim2.new(0.05, 0, 0, 215)
-listFrame.BackgroundColor3 = Color3.fromRGB(18, 22, 28)
-listFrame.BorderColor3 = Color3.fromRGB(0, 150, 255)
-listFrame.BorderSizePixel = 1
-listFrame.Parent = scrollingFrame
-
-local listContainer = Instance.new("ScrollingFrame")
-listContainer.Size = UDim2.new(1, -10, 0, 70)
-listContainer.Position = UDim2.new(0, 5, 0, 5)
-listContainer.BackgroundTransparency = 1
-listContainer.BorderSizePixel = 0
-listContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
-listContainer.ScrollBarThickness = 5
-listContainer.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
-listContainer.Parent = listFrame
-
-function refreshPathList()
-    for _, child in ipairs(listContainer:GetChildren()) do
-        if child:IsA("Frame") then
-            child:Destroy()
-        end
-    end
-    
-    listContainer.CanvasSize = UDim2.new(0, 0, 0, #savedPaths * 30)
-    
-    for i, path in ipairs(savedPaths) do
-        local itemFrame = Instance.new("Frame")
-        itemFrame.Size = UDim2.new(1, -5, 0, 25)
-        itemFrame.Position = UDim2.new(0, 0, 0, (i-1) * 30)
-        itemFrame.BackgroundColor3 = Color3.fromRGB(22, 26, 34)
-        itemFrame.BorderColor3 = Color3.fromRGB(0, 150, 255)
-        itemFrame.BorderSizePixel = 1
-        itemFrame.Parent = listContainer
-        
-        local nameLabel = Instance.new("TextLabel")
-        nameLabel.Size = UDim2.new(0.5, 0, 1, 0)
-        nameLabel.Position = UDim2.new(0, 5, 0, 0)
-        nameLabel.BackgroundTransparency = 1
-        nameLabel.Text = path.name
-        nameLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-        nameLabel.TextSize = 9
-        nameLabel.Font = Enum.Font.Gotham
-        nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-        nameLabel.Parent = itemFrame
-        
-        local pointsLabel = Instance.new("TextLabel")
-        pointsLabel.Size = UDim2.new(0.2, 0, 1, 0)
-        pointsLabel.Position = UDim2.new(0.5, 0, 0, 0)
-        pointsLabel.BackgroundTransparency = 1
-        pointsLabel.Text = "(" .. #path.data .. ")"
-        pointsLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-        pointsLabel.TextSize = 8
-        pointsLabel.Font = Enum.Font.Gotham
-        pointsLabel.Parent = itemFrame
-        
-        local loadBtn = Instance.new("TextButton")
-        loadBtn.Size = UDim2.new(0.2, 0, 0, 18)
-        loadBtn.Position = UDim2.new(0.7, 0, 0.5, -9)
-        loadBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-        loadBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        loadBtn.Text = "LOAD"
-        loadBtn.Font = Enum.Font.GothamBold
-        loadBtn.TextSize = 7
-        loadBtn.Parent = itemFrame
-        
-        loadBtn.MouseButton1Click:Connect(function()
-            currentPath = {table.unpack(path.data)}
-            statusText.Text = "✓ LOADED: " .. path.name
-            statusText.TextColor3 = Color3.fromRGB(0, 255, 100)
-            task.wait(1)
-            statusText.Text = "● READY"
-            statusText.TextColor3 = Color3.fromRGB(0, 150, 255)
-        end)
-        
-        local delBtn = Instance.new("TextButton")
-        delBtn.Size = UDim2.new(0.15, 0, 0, 18)
-        delBtn.Position = UDim2.new(0.9, 0, 0.5, -9)
-        delBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-        delBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        delBtn.Text = "✕"
-        delBtn.Font = Enum.Font.GothamBold
-        delBtn.TextSize = 8
-        delBtn.Parent = itemFrame
-        
-        delBtn.MouseButton1Click:Connect(function()
-            table.remove(savedPaths, i)
-            refreshPathList()
-        end)
-    end
-end
 
 -- ==============================================
 -- HIDE FUNCTION
 -- ==============================================
-hideBtn.MouseButton1Click:Connect(function()
+HideBtn.MouseButton1Click:Connect(function()
     uiVisible = not uiVisible
     
     if uiVisible then
-        TweenService:Create(frame, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 280)}):Play()
+        TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(0, 300, 0, 420)}):Play()
         task.wait(0.1)
-        contentContainer.Visible = true
-        hideBtn.Text = "−"
-        hideBtn.TextColor3 = Color3.fromRGB(0, 150, 255)
+        ContentContainer.Visible = true
+        HideBtn.Text = "−"
+        HideBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
     else
-        contentContainer.Visible = false
-        TweenService:Create(frame, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 35)}):Play()
-        hideBtn.Text = "+"
-        hideBtn.TextColor3 = Color3.fromRGB(255, 200, 0)
+        ContentContainer.Visible = false
+        TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(0, 300, 0, 50)}):Play()
+        HideBtn.Text = "+"
+        HideBtn.TextColor3 = Color3.fromRGB(255, 200, 0)
     end
 end)
 
-close.MouseButton1Click:Connect(function()
+CloseBtn.MouseButton1Click:Connect(function()
     if playing then
         playing = false
         if conn then conn:Disconnect() end
@@ -603,5 +848,8 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-print("✅ MAERECORDER - DENGAN HIDE BUTTON!")
-print("🏃 Tekan − untuk hide/show content")
+-- Initialize path list
+refreshPathList()
+
+print("✅ MAERECORDER - SMOOTH JUMP LIKE ORIGINAL")
+print("🎯 Lompat sekarang smooth macam main sendiri!")
