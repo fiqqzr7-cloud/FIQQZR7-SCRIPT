@@ -1,4 +1,4 @@
--- FIQQZR7 SPECTATOR - SUPER ULTRA COMPACT (260x380) TANPA BUTTON PILIH
+-- FIQQZR7 SPECTATOR - MODERN UI (OMEGA-NULL BLUE EDITION)
 local player = game.Players.LocalPlayer
 repeat task.wait() until player and player:FindFirstChild("PlayerGui")
 
@@ -25,13 +25,14 @@ local statusCount = nil
 local currentTargetLabel = nil
 local main = nil
 local contentContainer = nil
+local spectateBtn = nil
 
 -- ==============================================
 -- FUNGSI NOTIFIKASI
 -- ==============================================
 local function notify(msg)
     game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "🔵 FIQQZR7ONTHETOP",
+        Title = "🔵 FIQQZR7 SPECTATOR",
         Text = msg,
         Duration = 0.8
     })
@@ -53,13 +54,21 @@ local function getPlayerList()
                 hrp = nil,
                 position = nil,
                 distance = 0,
-                hasCharacter = false
+                hasCharacter = false,
+                health = 0,
+                maxHealth = 100
             }
             
             if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
                 plrData.hrp = plr.Character.HumanoidRootPart
                 plrData.position = plrData.hrp.Position
                 plrData.hasCharacter = true
+                
+                local humanoid = plr.Character:FindFirstChild("Humanoid")
+                if humanoid then
+                    plrData.health = math.floor(humanoid.Health)
+                    plrData.maxHealth = math.floor(humanoid.MaxHealth)
+                end
                 
                 if myPos then
                     plrData.distance = math.floor((plrData.position - myPos.Position).Magnitude)
@@ -82,7 +91,7 @@ end
 -- ==============================================
 local function spectateTarget(target)
     if not target or not target.hasCharacter or not target.hrp then
-        notify("❌ No char")
+        notify("❌ No character")
         return
     end
     
@@ -97,6 +106,11 @@ local function spectateTarget(target)
     camera.CameraType = Enum.CameraType.Custom
     
     isSpectating = true
+    
+    if spectateBtn then
+        spectateBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+        spectateBtn.Text = "⏹️ STOP VIEW"
+    end
     
     spectateConnection = RunService.Heartbeat:Connect(function()
         if not currentTarget or not currentTarget.player or not currentTarget.player.Character then
@@ -143,6 +157,11 @@ local function stopSpectating()
         camera.CameraType = Enum.CameraType.Custom
     end
     
+    if spectateBtn then
+        spectateBtn.BackgroundColor3 = Color3.fromRGB(0, 80, 150)
+        spectateBtn.Text = "👁️ VIEW MODE"
+    end
+    
     refreshDisplay()
     notify("⏹️ Stopped")
 end
@@ -152,12 +171,12 @@ end
 -- ==============================================
 local function teleportToTarget(target)
     if not target or not target.hasCharacter or not target.hrp then
-        notify("❌ No char")
+        notify("❌ No character")
         return
     end
     
     if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
-        notify("❌ No char")
+        notify("❌ You have no character")
         return
     end
     
@@ -166,7 +185,7 @@ local function teleportToTarget(target)
     
     myHrp.CFrame = CFrame.new(targetPos.X, targetPos.Y + 5, targetPos.Z)
     
-    notify("🚀 " .. target.name)
+    notify("🚀 Teleported to " .. target.name)
     
     task.wait(0.5)
     refreshDisplay()
@@ -190,7 +209,7 @@ local function refreshDisplay()
     if statusLabel and statusCount then
         if isSpectating and currentTarget then
             statusLabel.Text = "SPECTATING"
-            statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+            statusLabel.TextColor3 = Color3.fromRGB(0, 255, 200)
             statusCount.Text = (currentTarget.displayName or currentTarget.name):sub(1, 8)
         else
             statusLabel.Text = "STANDBY"
@@ -202,18 +221,21 @@ local function refreshDisplay()
     -- Update target info
     if currentTarget and currentTargetLabel then
         if currentTarget.hasCharacter and currentTarget.position then
-            currentTargetLabel.Text = string.format("%s %dm %d %d %d",
-                (currentTarget.displayName or currentTarget.name):sub(1, 8),
+            currentTargetLabel.Text = string.format("%s | %dm | %d %d %d | HP: %d",
+                (currentTarget.displayName or currentTarget.name):sub(1, 6),
                 currentTarget.distance,
                 math.floor(currentTarget.position.X),
                 math.floor(currentTarget.position.Y),
-                math.floor(currentTarget.position.Z)
+                math.floor(currentTarget.position.Z),
+                currentTarget.health
             )
         else
-            currentTargetLabel.Text = (currentTarget.name):sub(1, 12) .. " -"
+            currentTargetLabel.Text = (currentTarget.name):sub(1, 12) .. " | OFFLINE"
+            currentTargetLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
         end
     elseif currentTargetLabel then
-        currentTargetLabel.Text = "No target"
+        currentTargetLabel.Text = "No target selected"
+        currentTargetLabel.TextColor3 = Color3.fromRGB(160, 160, 255)
     end
     
     local startIdx = scrollOffset + 1
@@ -222,103 +244,150 @@ local function refreshDisplay()
     
     for i = startIdx, endIdx do
         local target = playerList[i]
+        local isCurrent = (currentTarget and currentTarget.name == target.name)
         
-        -- Row (35px tinggi - lebih rendah sebab 2 button je)
-        local row = Instance.new("Frame")
-        row.Size = UDim2.new(1, -6, 0, 35)
-        row.Position = UDim2.new(0, 3, 0, yPos)
-        row.BackgroundColor3 = Color3.fromRGB(10, 18, 28)
-        row.BorderColor3 = Color3.fromRGB(0, 140, 255)
-        row.BorderSizePixel = 1
-        row.Parent = targetListContainer
+        -- Modern card untuk setiap player
+        local card = Instance.new("Frame")
+        card.Size = UDim2.new(1, -6, 0, 48)
+        card.Position = UDim2.new(0, 3, 0, yPos)
+        card.BackgroundColor3 = isCurrent and Color3.fromRGB(0, 50, 90) or Color3.fromRGB(8, 16, 28)
+        card.BorderColor3 = isCurrent and Color3.fromRGB(0, 200, 255) or Color3.fromRGB(0, 120, 200)
+        card.BorderSizePixel = isCurrent and 2 or 1
+        card.Parent = targetListContainer
         
-        local rowCorner = Instance.new("UICorner")
-        rowCorner.CornerRadius = UDim.new(0, 4)
-        rowCorner.Parent = row
+        -- Gradient untuk card
+        local cardGradient = Instance.new("UIGradient")
+        cardGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, isCurrent and Color3.fromRGB(0, 60, 110) or Color3.fromRGB(10, 20, 35)),
+            ColorSequenceKeypoint.new(1, isCurrent and Color3.fromRGB(0, 40, 70) or Color3.fromRGB(5, 12, 22))
+        })
+        cardGradient.Rotation = 90
+        cardGradient.Parent = card
         
-        -- Nama (kiri atas)
+        local cardCorner = Instance.new("UICorner")
+        cardCorner.CornerRadius = UDim.new(0, 8)
+        cardCorner.Parent = card
+        
+        -- Avatar bulat (huruf pertama nama)
+        local avatar = Instance.new("TextLabel")
+        avatar.Size = UDim2.new(0, 24, 0, 24)
+        avatar.Position = UDim2.new(0, 6, 0.5, -12)
+        avatar.BackgroundColor3 = target.hasCharacter and Color3.fromRGB(0, 70, 130) or Color3.fromRGB(40, 40, 40)
+        avatar.BorderColor3 = target.hasCharacter and Color3.fromRGB(0, 200, 255) or Color3.fromRGB(100, 100, 100)
+        avatar.BorderSizePixel = 1
+        avatar.Text = string.sub(target.name, 1, 1):upper()
+        avatar.TextColor3 = target.hasCharacter and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 150, 150)
+        avatar.TextSize = 12
+        avatar.Font = Enum.Font.GothamBold
+        avatar.Parent = card
+        
+        local avatarCorner = Instance.new("UICorner")
+        avatarCorner.CornerRadius = UDim.new(0, 12)
+        avatarCorner.Parent = avatar
+        
+        -- Nama player
         local nameLabel = Instance.new("TextLabel")
-        nameLabel.Size = UDim2.new(0.5, 0, 0.4, 0)
-        nameLabel.Position = UDim2.new(0, 4, 0, 2)
+        nameLabel.Size = UDim2.new(0.4, 0, 0.3, 0)
+        nameLabel.Position = UDim2.new(0, 35, 0, 6)
         nameLabel.BackgroundTransparency = 1
-        nameLabel.Text = (target.displayName or target.name):sub(1, 10)
-        nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        nameLabel.TextSize = 9
+        nameLabel.Text = (target.displayName or target.name):sub(1, 12)
+        nameLabel.TextColor3 = target.hasCharacter and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 150, 150)
+        nameLabel.TextSize = 10
         nameLabel.Font = Enum.Font.GothamBold
         nameLabel.TextXAlignment = Enum.TextXAlignment.Left
-        nameLabel.Parent = row
+        nameLabel.Parent = card
         
-        -- Jarak (kanan atas)
+        -- Distance
         local distLabel = Instance.new("TextLabel")
-        distLabel.Size = UDim2.new(0.3, 0, 0.4, 0)
-        distLabel.Position = UDim2.new(0.7, 0, 0, 2)
+        distLabel.Size = UDim2.new(0.2, 0, 0.25, 0)
+        distLabel.Position = UDim2.new(0.8, -30, 0, 6)
         distLabel.BackgroundTransparency = 1
-        distLabel.Text = target.distance .. "m"
+        distLabel.Text = target.hasCharacter and (target.distance .. "m") or "OFF"
         distLabel.TextColor3 = target.hasCharacter and Color3.fromRGB(100, 255, 100) or Color3.fromRGB(150, 150, 150)
         distLabel.TextSize = 8
         distLabel.Font = Enum.Font.GothamBold
         distLabel.TextXAlignment = Enum.TextXAlignment.Right
-        distLabel.Parent = row
+        distLabel.Parent = card
         
-        -- Koordinat (tengah)
+        -- Health bar (kalau ada character)
+        if target.hasCharacter then
+            local healthBg = Instance.new("Frame")
+            healthBg.Size = UDim2.new(0.3, 0, 0, 3)
+            healthBg.Position = UDim2.new(0, 35, 0, 22)
+            healthBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            healthBg.BorderSizePixel = 0
+            healthBg.Parent = card
+            
+            local healthFill = Instance.new("Frame")
+            healthFill.Size = UDim2.new(target.health / target.maxHealth, 0, 1, 0)
+            healthFill.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+            healthFill.BorderSizePixel = 0
+            healthFill.Parent = healthBg
+        end
+        
+        -- Koordinat
         local coordLabel = Instance.new("TextLabel")
-        coordLabel.Size = UDim2.new(1, -4, 0.3, 0)
-        coordLabel.Position = UDim2.new(0, 4, 0, 14)
+        coordLabel.Size = UDim2.new(0.5, 0, 0.2, 0)
+        coordLabel.Position = UDim2.new(0, 35, 0, 26)
         coordLabel.BackgroundTransparency = 1
         
         if target.hasCharacter and target.position then
-            coordLabel.Text = string.format("%d %d %d",
+            coordLabel.Text = string.format("📍 %d %d %d",
                 math.floor(target.position.X),
                 math.floor(target.position.Y),
                 math.floor(target.position.Z)
             )
         else
-            coordLabel.Text = "---"
+            coordLabel.Text = "📍 ---"
         end
         
-        coordLabel.TextColor3 = Color3.fromRGB(120, 160, 255)
+        coordLabel.TextColor3 = Color3.fromRGB(120, 180, 255)
         coordLabel.TextSize = 7
         coordLabel.Font = Enum.Font.Gotham
         coordLabel.TextXAlignment = Enum.TextXAlignment.Left
-        coordLabel.Parent = row
+        coordLabel.Parent = card
         
-        -- Button frame (2 button je)
-        local btnFrame = Instance.new("Frame")
-        btnFrame.Size = UDim2.new(0.6, -6, 0, 14)
-        btnFrame.Position = UDim2.new(0.4, 0, 0, 20)
-        btnFrame.BackgroundTransparency = 1
-        btnFrame.Parent = row
+        -- Button container (2 button)
+        local btnContainer = Instance.new("Frame")
+        btnContainer.Size = UDim2.new(0.45, 0, 0, 22)
+        btnContainer.Position = UDim2.new(0.55, 0, 0.5, -11)
+        btnContainer.BackgroundTransparency = 1
+        btnContainer.Parent = card
         
-        -- VIEW button (V)
+        -- VIEW button (dengan icon)
         local viewBtn = Instance.new("TextButton")
-        viewBtn.Size = UDim2.new(0.45, -1, 1, 0)
+        viewBtn.Size = UDim2.new(0.45, -2, 1, 0)
         viewBtn.Position = UDim2.new(0, 0, 0, 0)
-        viewBtn.BackgroundColor3 = target.hasCharacter and Color3.fromRGB(0, 80, 160) or Color3.fromRGB(50, 50, 50)
+        viewBtn.BackgroundColor3 = target.hasCharacter and Color3.fromRGB(0, 100, 200) or Color3.fromRGB(50, 50, 50)
+        viewBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
+        viewBtn.BorderSizePixel = target.hasCharacter and 1 or 0
         viewBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        viewBtn.Text = "V"
+        viewBtn.Text = "👁️ V"
         viewBtn.Font = Enum.Font.GothamBold
-        viewBtn.TextSize = 7
+        viewBtn.TextSize = 8
         viewBtn.Active = target.hasCharacter
-        viewBtn.Parent = btnFrame
+        viewBtn.Parent = btnContainer
         
         local viewCorner = Instance.new("UICorner")
-        viewCorner.CornerRadius = UDim.new(0, 2)
+        viewCorner.CornerRadius = UDim.new(0, 4)
         viewCorner.Parent = viewBtn
         
-        -- TP button (T)
+        -- TP button (dengan icon)
         local tpBtn = Instance.new("TextButton")
-        tpBtn.Size = UDim2.new(0.45, -1, 1, 0)
-        tpBtn.Position = UDim2.new(0.55, 1, 0, 0)
-        tpBtn.BackgroundColor3 = target.hasCharacter and Color3.fromRGB(140, 30, 50) or Color3.fromRGB(50, 50, 50)
+        tpBtn.Size = UDim2.new(0.45, -2, 1, 0)
+        tpBtn.Position = UDim2.new(0.55, 2, 0, 0)
+        tpBtn.BackgroundColor3 = target.hasCharacter and Color3.fromRGB(180, 40, 60) or Color3.fromRGB(50, 50, 50)
+        tpBtn.BorderColor3 = Color3.fromRGB(255, 100, 100)
+        tpBtn.BorderSizePixel = target.hasCharacter and 1 or 0
         tpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        tpBtn.Text = "T"
+        tpBtn.Text = "🚀 T"
         tpBtn.Font = Enum.Font.GothamBold
-        tpBtn.TextSize = 7
+        tpBtn.TextSize = 8
         tpBtn.Active = target.hasCharacter
-        tpBtn.Parent = btnFrame
+        tpBtn.Parent = btnContainer
         
         local tpCorner = Instance.new("UICorner")
-        tpCorner.CornerRadius = UDim.new(0, 2)
+        tpCorner.CornerRadius = UDim.new(0, 4)
         tpCorner.Parent = tpBtn
         
         -- Button functions
@@ -326,7 +395,7 @@ local function refreshDisplay()
             if target.hasCharacter then
                 spectateTarget(target)
             else
-                notify("❌ No char")
+                notify("❌ No character")
             end
         end)
         
@@ -334,297 +403,435 @@ local function refreshDisplay()
             if target.hasCharacter then
                 teleportToTarget(target)
             else
-                notify("❌ No char")
+                notify("❌ No character")
             end
         end)
         
-        yPos = yPos + 39
+        yPos = yPos + 52
     end
     
     -- Update canvas
     if targetListContainer.Parent then
-        local totalHeight = #playerList * 39
+        local totalHeight = #playerList * 52
         targetListContainer.Size = UDim2.new(1, 0, 0, totalHeight)
         targetListContainer.Parent.CanvasSize = UDim2.new(0, 0, 0, totalHeight)
     end
 end
 
 -- ==============================================
--- CREATE MAIN GUI (260x380)
+-- CREATE MODERN UI (GLASSMORPHISM + NEON BLUE)
 -- ==============================================
 local gui = Instance.new("ScreenGui")
 gui.Name = "FIQQZR7_Spectator"
-gui.Parent = player.PlayerGui
 gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.Parent = player.PlayerGui
 
+-- Main Container
+local Container = Instance.new("Frame")
+Container.Size = UDim2.new(0, 280, 0, 420)
+Container.Position = UDim2.new(0.5, -140, 0.5, -210)
+Container.BackgroundTransparency = 1
+Container.Active = true
+Container.Draggable = true
+Container.Parent = gui
+
+-- Main Frame (Glass Effect)
 main = Instance.new("Frame")
-main.Size = UDim2.new(0, 260, 0, 380)
-main.Position = UDim2.new(0.5, -130, 0.5, -190)
-main.BackgroundColor3 = Color3.fromRGB(4, 10, 22)
-main.BorderColor3 = Color3.fromRGB(0, 130, 240)
+main.Size = UDim2.new(1, 0, 1, 0)
+main.Position = UDim2.new(0, 0, 0, 0)
+main.BackgroundColor3 = Color3.fromRGB(8, 12, 20)
+main.BackgroundTransparency = 0.1
+main.BorderColor3 = Color3.fromRGB(0, 150, 255)
 main.BorderSizePixel = 2
-main.Active = true
-main.Draggable = true
 main.ClipsDescendants = true
-main.Parent = gui
+main.Parent = Container
 
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 8)
-corner.Parent = main
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 16)
+MainCorner.Parent = main
+
+-- Glass Blur Effect
+local Blur = Instance.new("Frame")
+Blur.Size = UDim2.new(1, 0, 1, 0)
+Blur.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
+Blur.BackgroundTransparency = 0.6
+Blur.BorderSizePixel = 0
+Blur.ZIndex = 0
+Blur.Parent = main
+
+local BlurCorner = Instance.new("UICorner")
+BlurCorner.CornerRadius = UDim.new(0, 16)
+BlurCorner.Parent = Blur
+
+-- Neon Glow Border
+local Glow = Instance.new("Frame")
+Glow.Size = UDim2.new(1, 8, 1, 8)
+Glow.Position = UDim2.new(0, -4, 0, -4)
+Glow.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+Glow.BackgroundTransparency = 0.8
+Glow.BorderSizePixel = 0
+Glow.ZIndex = 0
+Glow.Parent = Container
+
+local GlowCorner = Instance.new("UICorner")
+GlowCorner.CornerRadius = UDim.new(0, 18)
+GlowCorner.Parent = Glow
+
+-- Inner Glow
+local InnerGlow = Instance.new("Frame")
+InnerGlow.Size = UDim2.new(1, 4, 1, 4)
+InnerGlow.Position = UDim2.new(0, -2, 0, -2)
+InnerGlow.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+InnerGlow.BackgroundTransparency = 0.7
+InnerGlow.BorderSizePixel = 0
+InnerGlow.ZIndex = 0
+InnerGlow.Parent = Container
+
+local InnerGlowCorner = Instance.new("UICorner")
+InnerGlowCorner.CornerRadius = UDim.new(0, 17)
+InnerGlowCorner.Parent = InnerGlow
+
+-- Gradient Background
+local Gradient = Instance.new("UIGradient")
+Gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 20, 40)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(5, 15, 35)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 10, 30))
+})
+Gradient.Rotation = 45
+Gradient.Parent = main
 
 -- ==============================================
--- TITLE BAR (26px)
+-- TITLE BAR MODERN
 -- ==============================================
-local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 26)
-titleBar.BackgroundColor3 = Color3.fromRGB(0, 50, 100)
-titleBar.BorderSizePixel = 0
-titleBar.Parent = main
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, -16, 0, 45)
+TitleBar.Position = UDim2.new(0, 8, 0, 8)
+TitleBar.BackgroundColor3 = Color3.fromRGB(10, 15, 30)
+TitleBar.BackgroundTransparency = 0.3
+TitleBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
+TitleBar.BorderSizePixel = 1
+TitleBar.Parent = main
 
-local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0, 8)
-titleCorner.Parent = titleBar
+local TitleBarCorner = Instance.new("UICorner")
+TitleBarCorner.CornerRadius = UDim.new(0, 12)
+TitleBarCorner.Parent = TitleBar
+
+-- Icon
+local Icon = Instance.new("TextLabel")
+Icon.Size = UDim2.new(0, 35, 1, 0)
+Icon.Position = UDim2.new(0, 8, 0, 0)
+Icon.BackgroundTransparency = 1
+Icon.Text = "👁️"
+Icon.TextColor3 = Color3.fromRGB(0, 200, 255)
+Icon.TextSize = 18
+Icon.Font = Enum.Font.GothamBold
+Icon.Parent = TitleBar
 
 -- Title
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(0.6, 0, 1, 0)
-title.Position = UDim2.new(0, 6, 0, 0)
-title.BackgroundTransparency = 1
-title.Text = "⚡ FIQQZR7 TP"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 11
-title.Font = Enum.Font.GothamBold
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = titleBar
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(0.6, 0, 1, 0)
+Title.Position = UDim2.new(0, 45, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "SPECTATOR AND TP"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 14
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = TitleBar
 
 -- Hide Button
-local hideBtn = Instance.new("TextButton")
-hideBtn.Size = UDim2.new(0, 18, 0, 18)
-hideBtn.Position = UDim2.new(1, -42, 0.5, -9)
-hideBtn.BackgroundColor3 = Color3.fromRGB(25, 70, 130)
-hideBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-hideBtn.Text = "−"
-hideBtn.Font = Enum.Font.GothamBold
-hideBtn.TextSize = 12
-hideBtn.Parent = titleBar
+local HideBtn = Instance.new("TextButton")
+HideBtn.Size = UDim2.new(0, 26, 0, 26)
+HideBtn.Position = UDim2.new(1, -60, 0.5, -13)
+HideBtn.BackgroundColor3 = Color3.fromRGB(10, 25, 45)
+HideBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+HideBtn.BorderSizePixel = 1
+HideBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
+HideBtn.Text = "−"
+HideBtn.Font = Enum.Font.GothamBold
+HideBtn.TextSize = 16
+HideBtn.Parent = TitleBar
 
-local hideCorner = Instance.new("UICorner")
-hideCorner.CornerRadius = UDim.new(0, 3)
-hideCorner.Parent = hideBtn
+local HideCorner = Instance.new("UICorner")
+HideCorner.CornerRadius = UDim.new(0, 8)
+HideCorner.Parent = HideBtn
 
 -- Close Button
-local close = Instance.new("TextButton")
-close.Size = UDim2.new(0, 18, 0, 18)
-close.Position = UDim2.new(1, -22, 0.5, -9)
-close.BackgroundColor3 = Color3.fromRGB(25, 70, 130)
-close.TextColor3 = Color3.fromRGB(255, 255, 255)
-close.Text = "✕"
-close.Font = Enum.Font.GothamBold
-close.TextSize = 10
-close.Parent = titleBar
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 26, 0, 26)
+CloseBtn.Position = UDim2.new(1, -30, 0.5, -13)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 20, 45)
+CloseBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+CloseBtn.BorderSizePixel = 1
+CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+CloseBtn.Text = "✕"
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 12
+CloseBtn.Parent = TitleBar
 
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 3)
-closeCorner.Parent = close
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseBtn
 
--- Content Container
+-- ==============================================
+-- CONTENT CONTAINER
+-- ==============================================
 contentContainer = Instance.new("Frame")
-contentContainer.Size = UDim2.new(1, -10, 1, -32)
-contentContainer.Position = UDim2.new(0, 5, 0, 28)
+contentContainer.Size = UDim2.new(1, -16, 1, -65)
+contentContainer.Position = UDim2.new(0, 8, 0, 58)
 contentContainer.BackgroundTransparency = 1
 contentContainer.Parent = main
 
--- Hide Function
-hideBtn.MouseButton1Click:Connect(function()
-    uiVisible = not uiVisible
-    
-    if uiVisible then
-        TweenService:Create(main, TweenInfo.new(0.3), {Size = UDim2.new(0, 260, 0, 380)}):Play()
-        task.wait(0.1)
-        contentContainer.Visible = true
-        hideBtn.Text = "−"
-    else
-        contentContainer.Visible = false
-        TweenService:Create(main, TweenInfo.new(0.3), {Size = UDim2.new(0, 260, 0, 26)}):Play()
-        hideBtn.Text = "+"
+-- ==============================================
+-- SCROLLING FRAME UNTUK CONTENT
+-- ==============================================
+local ScrollingFrame = Instance.new("ScrollingFrame")
+ScrollingFrame.Size = UDim2.new(1, 0, 1, 0)
+ScrollingFrame.BackgroundTransparency = 1
+ScrollingFrame.BorderSizePixel = 0
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 480)
+ScrollingFrame.ScrollBarThickness = 4
+ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
+ScrollingFrame.Parent = contentContainer
+
+-- ==============================================
+-- MODERN CARD FUNCTION
+-- ==============================================
+local function createCard(y, title, subtitle)
+    local Card = Instance.new("Frame")
+    Card.Size = UDim2.new(0.95, 0, 0, 40)
+    Card.Position = UDim2.new(0.025, 0, 0, y)
+    Card.BackgroundColor3 = Color3.fromRGB(10, 15, 30)
+    Card.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    Card.BorderSizePixel = 1
+    Card.Parent = ScrollingFrame
+
+    local CardCorner = Instance.new("UICorner")
+    CardCorner.CornerRadius = UDim.new(0, 12)
+    CardCorner.Parent = Card
+
+    -- Inner gradient
+    local CardGradient = Instance.new("UIGradient")
+    CardGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 20, 35)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 12, 25))
+    })
+    CardGradient.Rotation = 90
+    CardGradient.Parent = Card
+
+    local CardTitle = Instance.new("TextLabel")
+    CardTitle.Size = UDim2.new(0.7, 0, 0.5, 0)
+    CardTitle.Position = UDim2.new(0, 12, 0, 6)
+    CardTitle.BackgroundTransparency = 1
+    CardTitle.Text = title
+    CardTitle.TextColor3 = Color3.fromRGB(0, 200, 255)
+    CardTitle.TextSize = 13
+    CardTitle.Font = Enum.Font.GothamBold
+    CardTitle.TextXAlignment = Enum.TextXAlignment.Left
+    CardTitle.Parent = Card
+
+    if subtitle then
+        local CardSubtitle = Instance.new("TextLabel")
+        CardSubtitle.Size = UDim2.new(0.7, 0, 0.4, 0)
+        CardSubtitle.Position = UDim2.new(0, 12, 0, 22)
+        CardSubtitle.BackgroundTransparency = 1
+        CardSubtitle.Text = subtitle
+        CardSubtitle.TextColor3 = Color3.fromRGB(140, 180, 255)
+        CardSubtitle.TextSize = 9
+        CardSubtitle.Font = Enum.Font.Gotham
+        CardSubtitle.TextXAlignment = Enum.TextXAlignment.Left
+        CardSubtitle.Parent = Card
     end
-end)
 
-close.MouseButton1Click:Connect(function()
-    if isSpectating then stopSpectating() end
-    gui:Destroy()
-end)
+    return Card
+end
 
 -- ==============================================
--- CONTENT
+-- STATUS CARD (MODERN)
 -- ==============================================
-local content = contentContainer
+local StatusCard = createCard(5, "STATUS", "Current spectator mode")
 
--- ==============================================
--- STATUS CARD (35px)
--- ==============================================
-local statusCard = Instance.new("Frame")
-statusCard.Size = UDim2.new(1, 0, 0, 35)
-statusCard.Position = UDim2.new(0, 0, 0, 0)
-statusCard.BackgroundColor3 = Color3.fromRGB(6, 14, 28)
-statusCard.BorderColor3 = Color3.fromRGB(0, 130, 240)
-statusCard.BorderSizePixel = 1
-statusCard.Parent = content
-
-local statusCorner = Instance.new("UICorner")
-statusCorner.CornerRadius = UDim.new(0, 5)
-statusCorner.Parent = statusCard
-
--- Status label
+-- Status label dalam card
 statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(0.3, 0, 0.5, 0)
-statusLabel.Position = UDim2.new(0, 4, 0, 2)
+statusLabel.Size = UDim2.new(0.3, 0, 0.4, 0)
+statusLabel.Position = UDim2.new(0.65, -20, 0, 6)
 statusLabel.BackgroundTransparency = 1
 statusLabel.Text = "STANDBY"
 statusLabel.TextColor3 = Color3.fromRGB(255, 255, 100)
-statusLabel.TextSize = 9
+statusLabel.TextSize = 10
 statusLabel.Font = Enum.Font.GothamBold
-statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-statusLabel.Parent = statusCard
+statusLabel.TextXAlignment = Enum.TextXAlignment.Right
+statusLabel.Parent = StatusCard
 
--- Status count
+-- Player count
 statusCount = Instance.new("TextLabel")
-statusCount.Size = UDim2.new(0.3, 0, 0.5, 0)
-statusCount.Position = UDim2.new(0.7, 0, 0, 2)
+statusCount.Size = UDim2.new(0.2, 0, 0.3, 0)
+statusCount.Position = UDim2.new(0.75, 0, 0, 20)
 statusCount.BackgroundTransparency = 1
 statusCount.Text = "0/0"
-statusCount.TextColor3 = Color3.fromRGB(120, 160, 255)
-statusCount.TextSize = 9
+statusCount.TextColor3 = Color3.fromRGB(120, 200, 255)
+statusCount.TextSize = 8
 statusCount.Font = Enum.Font.GothamBold
 statusCount.TextXAlignment = Enum.TextXAlignment.Right
-statusCount.Parent = statusCard
+statusCount.Parent = StatusCard
 
--- Target info (satu baris)
+-- Target info
 currentTargetLabel = Instance.new("TextLabel")
-currentTargetLabel.Size = UDim2.new(1, -8, 0.4, 0)
-currentTargetLabel.Position = UDim2.new(0, 4, 0, 18)
+currentTargetLabel.Size = UDim2.new(1, -12, 0.3, 0)
+currentTargetLabel.Position = UDim2.new(0, 12, 0, 24)
 currentTargetLabel.BackgroundTransparency = 1
-currentTargetLabel.Text = "No target"
+currentTargetLabel.Text = "No target selected"
 currentTargetLabel.TextColor3 = Color3.fromRGB(160, 160, 255)
-currentTargetLabel.TextSize = 7
+currentTargetLabel.TextSize = 8
 currentTargetLabel.Font = Enum.Font.Gotham
 currentTargetLabel.TextXAlignment = Enum.TextXAlignment.Left
-currentTargetLabel.Parent = statusCard
+currentTargetLabel.Parent = StatusCard
 
 -- ==============================================
 -- PLAYER LIST HEADER
 -- ==============================================
-local header = Instance.new("TextLabel")
-header.Size = UDim2.new(1, 0, 0, 14)
-header.Position = UDim2.new(0, 0, 0, 38)
-header.BackgroundTransparency = 1
-header.Text = "PLAYERS"
-header.TextColor3 = Color3.fromRGB(70, 140, 240)
-header.TextSize = 8
-header.Font = Enum.Font.GothamBold
-header.TextXAlignment = Enum.TextXAlignment.Left
-header.Parent = content
+local PlayerHeader = createCard(50, "👥 PLAYER LIST", "View (V) | Teleport (T)")
 
 -- ==============================================
--- PLAYER LIST (235px height)
+-- PLAYER LIST CONTAINER
 -- ==============================================
-local listBg = Instance.new("Frame")
-listBg.Size = UDim2.new(1, 0, 0, 235)
-listBg.Position = UDim2.new(0, 0, 0, 53)
-listBg.BackgroundColor3 = Color3.fromRGB(2, 8, 18)
-listBg.BorderColor3 = Color3.fromRGB(0, 130, 240)
-listBg.BorderSizePixel = 1
-listBg.Parent = content
+local ListContainer = Instance.new("Frame")
+ListContainer.Size = UDim2.new(0.95, 0, 0, 250)
+ListContainer.Position = UDim2.new(0.025, 0, 0, 95)
+ListContainer.BackgroundColor3 = Color3.fromRGB(8, 12, 20)
+ListContainer.BorderColor3 = Color3.fromRGB(0, 150, 255)
+ListContainer.BorderSizePixel = 1
+ListContainer.Parent = ScrollingFrame
 
-local listBgCorner = Instance.new("UICorner")
-listBgCorner.CornerRadius = UDim.new(0, 5)
-listBgCorner.Parent = listBg
+local ListCorner = Instance.new("UICorner")
+ListCorner.CornerRadius = UDim.new(0, 12)
+ListCorner.Parent = ListContainer
 
-local scrollingFrame = Instance.new("ScrollingFrame")
-scrollingFrame.Size = UDim2.new(1, -6, 1, -6)
-scrollingFrame.Position = UDim2.new(0, 3, 0, 3)
-scrollingFrame.BackgroundTransparency = 1
-scrollingFrame.BorderSizePixel = 0
-scrollingFrame.ScrollBarThickness = 3
-scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 130, 240)
-scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-scrollingFrame.Parent = listBg
+local ListScroller = Instance.new("ScrollingFrame")
+ListScroller.Size = UDim2.new(1, -8, 1, -8)
+ListScroller.Position = UDim2.new(0, 4, 0, 4)
+ListScroller.BackgroundTransparency = 1
+ListScroller.BorderSizePixel = 0
+ListScroller.CanvasSize = UDim2.new(0, 0, 0, 0)
+ListScroller.ScrollBarThickness = 4
+ListScroller.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
+ListScroller.Parent = ListContainer
 
 targetListContainer = Instance.new("Frame")
 targetListContainer.Size = UDim2.new(1, 0, 0, 0)
 targetListContainer.BackgroundTransparency = 1
-targetListContainer.Parent = scrollingFrame
+targetListContainer.Parent = ListScroller
 
 -- ==============================================
--- SCROLL BUTTONS
+-- SCROLL BUTTONS (MODERN)
 -- ==============================================
-local scrollFrame = Instance.new("Frame")
-scrollFrame.Size = UDim2.new(1, 0, 0, 16)
-scrollFrame.Position = UDim2.new(0, 0, 0, 292)
-scrollFrame.BackgroundTransparency = 1
-scrollFrame.Parent = content
+local ScrollCard = createCard(350, "🔽 SCROLL", "Navigate player list")
 
-local scrollUp = Instance.new("TextButton")
-scrollUp.Size = UDim2.new(0.5, -1, 0, 14)
-scrollUp.Position = UDim2.new(0, 0, 0, 0)
-scrollUp.BackgroundColor3 = Color3.fromRGB(0, 45, 80)
-scrollUp.TextColor3 = Color3.fromRGB(255, 255, 255)
-scrollUp.Text = "▲"
-scrollUp.Font = Enum.Font.GothamBold
-scrollUp.TextSize = 8
-scrollUp.Parent = scrollFrame
+local ScrollUp = Instance.new("TextButton")
+ScrollUp.Size = UDim2.new(0.4, 0, 0, 30)
+ScrollUp.Position = UDim2.new(0.05, 0, 0.5, -15)
+ScrollUp.BackgroundColor3 = Color3.fromRGB(0, 60, 120)
+ScrollUp.BorderColor3 = Color3.fromRGB(0, 150, 255)
+ScrollUp.BorderSizePixel = 1
+ScrollUp.TextColor3 = Color3.fromRGB(255, 255, 255)
+ScrollUp.Text = "▲ ATAS"
+ScrollUp.Font = Enum.Font.GothamBold
+ScrollUp.TextSize = 10
+ScrollUp.Parent = ScrollCard
 
-local scrollDown = Instance.new("TextButton")
-scrollDown.Size = UDim2.new(0.5, -1, 0, 14)
-scrollDown.Position = UDim2.new(0.5, 1, 0, 0)
-scrollDown.BackgroundColor3 = Color3.fromRGB(0, 45, 80)
-scrollDown.TextColor3 = Color3.fromRGB(255, 255, 255)
-scrollDown.Text = "▼"
-scrollDown.Font = Enum.Font.GothamBold
-scrollDown.TextSize = 8
-scrollDown.Parent = scrollFrame
+local ScrollUpCorner = Instance.new("UICorner")
+ScrollUpCorner.CornerRadius = UDim.new(0, 8)
+ScrollUpCorner.Parent = ScrollUp
 
-scrollUp.MouseButton1Click:Connect(function()
+local ScrollDown = Instance.new("TextButton")
+ScrollDown.Size = UDim2.new(0.4, 0, 0, 30)
+ScrollDown.Position = UDim2.new(0.55, 0, 0.5, -15)
+ScrollDown.BackgroundColor3 = Color3.fromRGB(0, 60, 120)
+ScrollDown.BorderColor3 = Color3.fromRGB(0, 150, 255)
+ScrollDown.BorderSizePixel = 1
+ScrollDown.TextColor3 = Color3.fromRGB(255, 255, 255)
+ScrollDown.Text = "▼ BAWAH"
+ScrollDown.Font = Enum.Font.GothamBold
+ScrollDown.TextSize = 10
+ScrollDown.Parent = ScrollCard
+
+local ScrollDownCorner = Instance.new("UICorner")
+ScrollDownCorner.CornerRadius = UDim.new(0, 8)
+ScrollDownCorner.Parent = ScrollDown
+
+ScrollUp.MouseButton1Click:Connect(function()
     scrollOffset = math.max(0, scrollOffset - 1)
     refreshDisplay()
 end)
 
-scrollDown.MouseButton1Click:Connect(function()
+ScrollDown.MouseButton1Click:Connect(function()
     scrollOffset = math.min(#playerList - maxVisible, scrollOffset + 1)
     refreshDisplay()
 end)
 
 -- ==============================================
--- STOP BUTTON
+-- STOP BUTTON (MODERN)
 -- ==============================================
-local stopBtn = Instance.new("TextButton")
-stopBtn.Size = UDim2.new(1, 0, 0, 22)
-stopBtn.Position = UDim2.new(0, 0, 1, -22)
-stopBtn.BackgroundColor3 = Color3.fromRGB(140, 25, 25)
-stopBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-stopBtn.Text = "⏹️ STOP VIEW"
-stopBtn.Font = Enum.Font.GothamBold
-stopBtn.TextSize = 9
-stopBtn.Parent = content
+local StopCard = createCard(395, "⏹️ CONTROL", "Stop current spectator mode")
 
-local stopCorner = Instance.new("UICorner")
-stopCorner.CornerRadius = UDim.new(0, 3)
-stopCorner.Parent = stopBtn
+spectateBtn = Instance.new("TextButton")
+spectateBtn.Size = UDim2.new(0.6, 0, 0, 36)
+spectateBtn.Position = UDim2.new(0.2, 0, 0.5, -18)
+spectateBtn.BackgroundColor3 = Color3.fromRGB(0, 80, 150)
+spectateBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
+spectateBtn.BorderSizePixel = 2
+spectateBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+spectateBtn.Text = "👁️ VIEW MODE"
+spectateBtn.Font = Enum.Font.GothamBold
+spectateBtn.TextSize = 11
+spectateBtn.Parent = StopCard
 
-stopBtn.MouseButton1Click:Connect(function()
+local StopCorner = Instance.new("UICorner")
+StopCorner.CornerRadius = UDim.new(0, 10)
+StopCorner.Parent = spectateBtn
+
+spectateBtn.MouseButton1Click:Connect(function()
     if isSpectating then
         stopSpectating()
     else
-        notify("Not spectating")
+        notify("Pilih player dulu dengan V")
     end
 end)
 
 -- ==============================================
--- INIT
+-- HIDE FUNCTION
+-- ==============================================
+HideBtn.MouseButton1Click:Connect(function()
+    uiVisible = not uiVisible
+    
+    if uiVisible then
+        TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 420)}):Play()
+        task.wait(0.1)
+        contentContainer.Visible = true
+        HideBtn.Text = "−"
+        HideBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
+    else
+        contentContainer.Visible = false
+        TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 45)}):Play()
+        HideBtn.Text = "+"
+        HideBtn.TextColor3 = Color3.fromRGB(255, 200, 0)
+    end
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    if isSpectating then stopSpectating() end
+    gui:Destroy()
+end)
+
+-- ==============================================
+-- INITIAL UPDATE
 -- ==============================================
 task.wait(1)
 refreshDisplay()
 
+-- Auto-refresh setiap 2 saat
 task.spawn(function()
     while true do
         task.wait(2)
@@ -632,5 +839,5 @@ task.spawn(function()
     end
 end)
 
-print("✅ FIQQZR7 SPECTATOR - TANPA BUTTON PILIH")
-print("🎯 VIEW (V) | TELEPORT (T)")
+print("✅ FIQQZR7 SPECTATOR - MODERN UI (BLUE EDITION)")
+print("🎯 View dengan V | Teleport dengan T | Ukuran: 280x420")
