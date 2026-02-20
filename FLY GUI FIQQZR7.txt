@@ -1,5 +1,5 @@
--- FIQQZR7 FLY GUI - MOBILE BUTTON + NOCLIP (TEMA BIRU!)
--- Version: Button kecik, muncul masa fly, plus noclip auto!
+-- FIQQZR7 FLY GUI - MODERN UI (SUSUNAN KEMAS)
+-- Mobile button + Noclip auto dengan glassmorphism!
 
 local player = game.Players.LocalPlayer
 repeat task.wait() until player and player:FindFirstChild("PlayerGui")
@@ -28,17 +28,16 @@ local keys = {
     space = false, ctrl = false
 }
 
--- References untuk button control (supaya boleh hide/show)
+-- References untuk button control
 local controlFrame = nil
 local upDownFrame = nil
 local moveLabel = nil
 local upDownLabel = nil
 
 -- ==============================================
--- FUNGSI NOCLIP (TEMBUS DINDING)
+-- FUNGSI NOCLIP
 -- ==============================================
 local function noclipOn()
-    -- Matikan collision untuk semua bahagian character
     if noclipConnection then
         noclipConnection:Disconnect()
     end
@@ -46,7 +45,6 @@ local function noclipOn()
     noclipConnection = RunService.Stepped:Connect(function()
         if not flying or not player.Character then return end
         
-        -- Loop semua bahagian badan dan matikan collision
         for _, part in pairs(player.Character:GetDescendants()) do
             if part:IsA("BasePart") and part.CanCollide then
                 part.CanCollide = false
@@ -56,13 +54,11 @@ local function noclipOn()
 end
 
 local function noclipOff()
-    -- Hidupkan balik collision
     if noclipConnection then
         noclipConnection:Disconnect()
         noclipConnection = nil
     end
     
-    -- Set semula collision untuk semua bahagian
     if player.Character then
         for _, part in pairs(player.Character:GetDescendants()) do
             if part:IsA("BasePart") then
@@ -111,11 +107,8 @@ local function startFly()
     bodyVelocity.Parent = hrp
     
     flying = true
-    
-    -- Aktifkan NOCLIP
     noclipOn()
     
-    -- Tunjukkan button control
     if isMobile then
         if controlFrame then controlFrame.Visible = true end
         if upDownFrame then upDownFrame.Visible = true end
@@ -131,7 +124,6 @@ local function startFly()
         
         if camera then
             if isMobile then
-                -- MOBILE: Kawal guna BUTTON ARAH
                 if keys.w then
                     moveDirection = moveDirection + (camera.CFrame.LookVector * flySpeed)
                 end
@@ -151,7 +143,6 @@ local function startFly()
                     moveDirection = moveDirection - Vector3.new(0, flySpeed, 0)
                 end
             else
-                -- PC: Kawal guna keyboard
                 if keys.w then
                     moveDirection = moveDirection + (camera.CFrame.LookVector * flySpeed)
                 end
@@ -183,11 +174,8 @@ end
 
 local function stopFly()
     flying = false
-    
-    -- Matikan NOCLIP
     noclipOff()
     
-    -- Sembunyikan button control
     if isMobile then
         if controlFrame then controlFrame.Visible = false end
         if upDownFrame then upDownFrame.Visible = false end
@@ -204,7 +192,7 @@ local function stopFly()
 end
 
 -- ==============================================
--- PENGESAN KEYBOARD (UNTUK PC)
+-- KEYBOARD UNTUK PC
 -- ==============================================
 if not isMobile then
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -228,7 +216,7 @@ if not isMobile then
 end
 
 -- ==============================================
--- CREATE MAIN UI (DI TENGAH, UNTUK SETTING) - TEMA BIRU
+-- MODERN UI KEMAS (280x340)
 -- ==============================================
 local gui = Instance.new("ScreenGui")
 gui.Name = "FIQQZR7_FlyGUI"
@@ -237,355 +225,523 @@ gui.ResetOnSpawn = false
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.IgnoreGuiInset = true
 
--- Main UI (untuk setting speed, on/off, status)
-local uiWidth = 250
-local uiHeight = 280
+local Container = Instance.new("Frame")
+Container.Size = UDim2.new(0, 280, 0, 340)
+Container.Position = UDim2.new(0.5, -140, 0.5, -170)
+Container.BackgroundTransparency = 1
+Container.Active = true
+Container.Draggable = true
+Container.Parent = gui
 
-local main = Instance.new("Frame")
-main.Size = UDim2.new(0, uiWidth, 0, uiHeight)
-main.Position = UDim2.new(0.5, -uiWidth/2, 0.5, -uiHeight/2)
-main.BackgroundColor3 = Color3.fromRGB(5, 15, 30)  -- Biru gelap
-main.BorderColor3 = Color3.fromRGB(0, 150, 255)    -- Biru terang
-main.BorderSizePixel = 2
-main.Active = true
-main.Draggable = true
-main.ClipsDescendants = true
-main.Parent = gui
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(1, 0, 1, 0)
+Main.Position = UDim2.new(0, 0, 0, 0)
+Main.BackgroundColor3 = Color3.fromRGB(8, 12, 20)
+Main.BackgroundTransparency = 0.1
+Main.BorderColor3 = Color3.fromRGB(0, 150, 255)
+Main.BorderSizePixel = 2
+Main.ClipsDescendants = true
+Main.Parent = Container
 
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 16)
-corner.Parent = main
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 20)
+MainCorner.Parent = Main
 
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 20, 40)),    -- Biru gelap
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 50, 100)), -- Biru sederhana
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 30, 60))     -- Biru gelap
+local Blur = Instance.new("Frame")
+Blur.Size = UDim2.new(1, 0, 1, 0)
+Blur.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
+Blur.BackgroundTransparency = 0.6
+Blur.BorderSizePixel = 0
+Blur.ZIndex = 0
+Blur.Parent = Main
+
+local BlurCorner = Instance.new("UICorner")
+BlurCorner.CornerRadius = UDim.new(0, 20)
+BlurCorner.Parent = Blur
+
+local Glow = Instance.new("Frame")
+Glow.Size = UDim2.new(1, 8, 1, 8)
+Glow.Position = UDim2.new(0, -4, 0, -4)
+Glow.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+Glow.BackgroundTransparency = 0.8
+Glow.BorderSizePixel = 0
+Glow.ZIndex = 0
+Glow.Parent = Container
+
+local GlowCorner = Instance.new("UICorner")
+GlowCorner.CornerRadius = UDim.new(0, 22)
+GlowCorner.Parent = Glow
+
+local InnerGlow = Instance.new("Frame")
+InnerGlow.Size = UDim2.new(1, 4, 1, 4)
+InnerGlow.Position = UDim2.new(0, -2, 0, -2)
+InnerGlow.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+InnerGlow.BackgroundTransparency = 0.7
+InnerGlow.BorderSizePixel = 0
+InnerGlow.ZIndex = 0
+InnerGlow.Parent = Container
+
+local InnerGlowCorner = Instance.new("UICorner")
+InnerGlowCorner.CornerRadius = UDim.new(0, 21)
+InnerGlowCorner.Parent = InnerGlow
+
+local Gradient = Instance.new("UIGradient")
+Gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 20, 40)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(5, 15, 35)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 10, 30))
 })
-gradient.Rotation = 45
-gradient.Parent = main
-
--- Title Bar - Biru
-local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 35)
-titleBar.BackgroundColor3 = Color3.fromRGB(0, 80, 150)  -- Biru
-titleBar.BorderSizePixel = 0
-titleBar.Parent = main
-
-local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0, 16)
-titleCorner.Parent = titleBar
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(0.6, 0, 1, 0)
-title.Position = UDim2.new(0, 12, 0, 0)
-title.BackgroundTransparency = 1
-title.Text = "FIQQZR7 FLY"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 15
-title.Font = Enum.Font.GothamBold
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = titleBar
-
-local hideBtn = Instance.new("TextButton")
-hideBtn.Size = UDim2.new(0, 22, 0, 22)
-hideBtn.Position = UDim2.new(1, -52, 0.5, -11)
-hideBtn.BackgroundColor3 = Color3.fromRGB(30, 100, 180)  -- Biru cerah
-hideBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-hideBtn.Text = "−"
-hideBtn.Font = Enum.Font.GothamBold
-hideBtn.TextSize = 16
-hideBtn.Parent = titleBar
-
-local close = Instance.new("TextButton")
-close.Size = UDim2.new(0, 22, 0, 22)
-close.Position = UDim2.new(1, -27, 0.5, -11)
-close.BackgroundColor3 = Color3.fromRGB(30, 100, 180)  -- Biru cerah
-close.TextColor3 = Color3.fromRGB(200, 200, 255)
-close.Text = "✕"
-close.Font = Enum.Font.GothamBold
-close.TextSize = 14
-close.Parent = titleBar
-
--- Content Container
-local contentContainer = Instance.new("Frame")
-contentContainer.Size = UDim2.new(1, -20, 1, -50)
-contentContainer.Position = UDim2.new(0, 10, 0, 40)
-contentContainer.BackgroundTransparency = 1
-contentContainer.Parent = main
-
--- Hide Function
-hideBtn.MouseButton1Click:Connect(function()
-    uiVisible = not uiVisible
-    if uiVisible then
-        TweenService:Create(main, TweenInfo.new(0.3), {Size = UDim2.new(0, uiWidth, 0, uiHeight)}):Play()
-        task.wait(0.1)
-        contentContainer.Visible = true
-        hideBtn.Text = "−"
-    else
-        contentContainer.Visible = false
-        TweenService:Create(main, TweenInfo.new(0.3), {Size = UDim2.new(0, uiWidth, 0, 35)}):Play()
-        hideBtn.Text = "+"
-    end
-end)
-
-close.MouseButton1Click:Connect(function()
-    if flying then stopFly() end
-    gui:Destroy()
-end)
-
--- Status Card
-local statusCard = Instance.new("Frame")
-statusCard.Size = UDim2.new(1, 0, 0, 45)
-statusCard.Position = UDim2.new(0, 0, 0, 0)
-statusCard.BackgroundColor3 = Color3.fromRGB(10, 25, 45)  -- Biru gelap
-statusCard.BorderColor3 = Color3.fromRGB(0, 150, 255)    -- Biru terang
-statusCard.BorderSizePixel = 1
-statusCard.Parent = contentContainer
-
-local statusIcon = Instance.new("TextLabel")
-statusIcon.Size = UDim2.new(0, 25, 1, 0)
-statusIcon.Position = UDim2.new(0, 10, 0, 0)
-statusIcon.BackgroundTransparency = 1
-statusIcon.Text = "●"
-statusIcon.TextColor3 = Color3.fromRGB(255, 0, 0)
-statusIcon.TextSize = 22
-statusIcon.Font = Enum.Font.GothamBold
-statusIcon.Parent = statusCard
-
-local statusText = Instance.new("TextLabel")
-statusText.Size = UDim2.new(0.5, 0, 1, 0)
-statusText.Position = UDim2.new(0.2, 0, 0, 0)
-statusText.BackgroundTransparency = 1
-statusText.Text = "TERBANG: OFF"
-statusText.TextColor3 = Color3.fromRGB(220, 220, 255)
-statusText.TextSize = 14
-statusText.Font = Enum.Font.GothamBold
-statusText.TextXAlignment = Enum.TextXAlignment.Left
-statusText.Parent = statusCard
-
--- NOCLIP Status
-local noclipStatus = Instance.new("TextLabel")
-noclipStatus.Size = UDim2.new(0.3, 0, 1, 0)
-noclipStatus.Position = UDim2.new(0.7, 0, 0, 0)
-noclipStatus.BackgroundTransparency = 1
-noclipStatus.Text = "NOCLIP"
-noclipStatus.TextColor3 = Color3.fromRGB(100, 100, 100)
-noclipStatus.TextSize = 10
-noclipStatus.Font = Enum.Font.GothamBold
-noclipStatus.TextXAlignment = Enum.TextXAlignment.Right
-noclipStatus.Parent = statusCard
-
--- Speed Control
-local speedLabel = Instance.new("TextLabel")
-speedLabel.Size = UDim2.new(1, 0, 0, 20)
-speedLabel.Position = UDim2.new(0, 0, 0, 55)
-speedLabel.BackgroundTransparency = 1
-speedLabel.Text = "⚡ LAJU TERBANG"
-speedLabel.TextColor3 = Color3.fromRGB(100, 180, 255)  -- Biru cerah
-speedLabel.TextSize = 12
-speedLabel.Font = Enum.Font.GothamBold
-speedLabel.TextXAlignment = Enum.TextXAlignment.Left
-speedLabel.Parent = contentContainer
-
-local speedFrame = Instance.new("Frame")
-speedFrame.Size = UDim2.new(1, 0, 0, 35)
-speedFrame.Position = UDim2.new(0, 0, 0, 75)
-speedFrame.BackgroundColor3 = Color3.fromRGB(10, 25, 45)  -- Biru gelap
-speedFrame.BorderColor3 = Color3.fromRGB(0, 150, 255)    -- Biru terang
-speedFrame.BorderSizePixel = 1
-speedFrame.Parent = contentContainer
-
-local speedValue = Instance.new("TextLabel")
-speedValue.Size = UDim2.new(0.3, 0, 1, 0)
-speedValue.Position = UDim2.new(0.35, 0, 0, 0)
-speedValue.BackgroundTransparency = 1
-speedValue.Text = "50"
-speedValue.TextColor3 = Color3.fromRGB(100, 200, 255)  -- Biru cerah
-speedValue.TextSize = 16
-speedValue.Font = Enum.Font.GothamBold
-speedValue.Parent = speedFrame
-
-local speedDown = Instance.new("TextButton")
-speedDown.Size = UDim2.new(0.2, 0, 0, 25)
-speedDown.Position = UDim2.new(0.1, 0, 0.5, -12)
-speedDown.BackgroundColor3 = Color3.fromRGB(0, 70, 150)  -- Biru
-speedDown.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedDown.Text = "-"
-speedDown.Font = Enum.Font.GothamBold
-speedDown.TextSize = 18
-speedDown.Parent = speedFrame
-speedDown.MouseButton1Click:Connect(function() flySpeed = math.max(10, flySpeed - 5) speedValue.Text = tostring(flySpeed) end)
-
-local speedUp = Instance.new("TextButton")
-speedUp.Size = UDim2.new(0.2, 0, 0, 25)
-speedUp.Position = UDim2.new(0.7, 0, 0.5, -12)
-speedUp.BackgroundColor3 = Color3.fromRGB(0, 70, 150)  -- Biru
-speedUp.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedUp.Text = "+"
-speedUp.Font = Enum.Font.GothamBold
-speedUp.TextSize = 18
-speedUp.Parent = speedFrame
-speedUp.MouseButton1Click:Connect(function() flySpeed = math.min(200, flySpeed + 5) speedValue.Text = tostring(flySpeed) end)
-
--- Main Fly Button
-local flyBtn = Instance.new("TextButton")
-flyBtn.Size = UDim2.new(1, 0, 0, 45)
-flyBtn.Position = UDim2.new(0, 0, 0, 125)
-flyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)  -- Biru
-flyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-flyBtn.Text = "MULA TERBANG"
-flyBtn.Font = Enum.Font.GothamBold
-flyBtn.TextSize = 16
-flyBtn.Parent = contentContainer
-
-flyBtn.MouseButton1Click:Connect(function()
-    if flying then
-        stopFly()
-        flyBtn.Text = "MULA TERBANG"
-        flyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)  -- Biru
-        statusIcon.TextColor3 = Color3.fromRGB(255, 0, 0)
-        statusText.Text = "TERBANG: OFF"
-        noclipStatus.TextColor3 = Color3.fromRGB(100, 100, 100)
-    else
-        startFly()
-        flyBtn.Text = "HENTI TERBANG"
-        flyBtn.BackgroundColor3 = Color3.fromRGB(200, 30, 30)  -- Merah untuk STOP (kekal)
-        statusIcon.TextColor3 = Color3.fromRGB(0, 255, 0)
-        statusText.Text = "TERBANG: ON"
-        noclipStatus.TextColor3 = Color3.fromRGB(100, 255, 255)  -- Biru cerah untuk noclip
-    end
-end)
-
--- Info untuk PC
-if not isMobile then
-    local infoLabel = Instance.new("TextLabel")
-    infoLabel.Size = UDim2.new(1, 0, 0, 30)
-    infoLabel.Position = UDim2.new(0, 0, 0, 180)
-    infoLabel.BackgroundTransparency = 1
-    infoLabel.Text = "WASD: Gerak | Space: Naik | Ctrl: Turun"
-    infoLabel.TextColor3 = Color3.fromRGB(150, 200, 255)  -- Biru cerah
-    infoLabel.TextSize = 10
-    infoLabel.Font = Enum.Font.Gotham
-    infoLabel.Parent = contentContainer
-end
+Gradient.Rotation = 45
+Gradient.Parent = Main
 
 -- ==============================================
--- BUTTON ARAH UNTUK MOBILE (KIRI BAWAH) - Saiz 50px - TEMA BIRU
+-- TITLE BAR (45px)
+-- ==============================================
+local TitleBar = Instance.new("Frame")
+TitleBar.Size = UDim2.new(1, -16, 0, 45)
+TitleBar.Position = UDim2.new(0, 8, 0, 8)
+TitleBar.BackgroundColor3 = Color3.fromRGB(10, 15, 30)
+TitleBar.BackgroundTransparency = 0.3
+TitleBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
+TitleBar.BorderSizePixel = 1
+TitleBar.Parent = Main
+
+local TitleBarCorner = Instance.new("UICorner")
+TitleBarCorner.CornerRadius = UDim.new(0, 12)
+TitleBarCorner.Parent = TitleBar
+
+local Icon = Instance.new("TextLabel")
+Icon.Size = UDim2.new(0, 35, 1, 0)
+Icon.Position = UDim2.new(0, 8, 0, 0)
+Icon.BackgroundTransparency = 1
+Icon.Text = "🕊️"
+Icon.TextColor3 = Color3.fromRGB(0, 200, 255)
+Icon.TextSize = 18
+Icon.Font = Enum.Font.GothamBold
+Icon.Parent = TitleBar
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(0.6, 0, 1, 0)
+Title.Position = UDim2.new(0, 45, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "FLY NOCLIP"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 14
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = TitleBar
+
+local HideBtn = Instance.new("TextButton")
+HideBtn.Size = UDim2.new(0, 26, 0, 26)
+HideBtn.Position = UDim2.new(1, -60, 0.5, -13)
+HideBtn.BackgroundColor3 = Color3.fromRGB(10, 25, 45)
+HideBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+HideBtn.BorderSizePixel = 1
+HideBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
+HideBtn.Text = "−"
+HideBtn.Font = Enum.Font.GothamBold
+HideBtn.TextSize = 16
+HideBtn.Parent = TitleBar
+
+local HideCorner = Instance.new("UICorner")
+HideCorner.CornerRadius = UDim.new(0, 8)
+HideCorner.Parent = HideBtn
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 26, 0, 26)
+CloseBtn.Position = UDim2.new(1, -30, 0.5, -13)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 20, 45)
+CloseBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+CloseBtn.BorderSizePixel = 1
+CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+CloseBtn.Text = "✕"
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 12
+CloseBtn.Parent = TitleBar
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseBtn
+
+-- ==============================================
+-- CONTENT CONTAINER (sisa ruang)
+-- ==============================================
+local ContentContainer = Instance.new("Frame")
+ContentContainer.Size = UDim2.new(1, -16, 1, -65)
+ContentContainer.Position = UDim2.new(0, 8, 0, 58)
+ContentContainer.BackgroundTransparency = 1
+ContentContainer.Parent = Main
+
+-- ==============================================
+-- SUSUNAN KEMAS - TIADA SCROLLING FRAME
+-- ==============================================
+local Content = ContentContainer
+
+-- ==============================================
+-- 1. STATUS BAR (FLY & NOCLIP) - 50px
+-- ==============================================
+local StatusBar = Instance.new("Frame")
+StatusBar.Size = UDim2.new(1, 0, 0, 50)
+StatusBar.Position = UDim2.new(0, 0, 0, 0)
+StatusBar.BackgroundColor3 = Color3.fromRGB(10, 18, 30)
+StatusBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
+StatusBar.BorderSizePixel = 1
+StatusBar.Parent = Content
+
+local StatusCorner = Instance.new("UICorner")
+StatusCorner.CornerRadius = UDim.new(0, 8)
+StatusCorner.Parent = StatusBar
+
+-- FLY STATUS (kiri)
+local FlyStatusFrame = Instance.new("Frame")
+FlyStatusFrame.Size = UDim2.new(0.45, 0, 1, 0)
+FlyStatusFrame.Position = UDim2.new(0, 0, 0, 0)
+FlyStatusFrame.BackgroundTransparency = 1
+FlyStatusFrame.Parent = StatusBar
+
+local FlyIcon = Instance.new("TextLabel")
+FlyIcon.Size = UDim2.new(0, 30, 0, 30)
+FlyIcon.Position = UDim2.new(0, 8, 0.5, -15)
+FlyIcon.BackgroundTransparency = 1
+FlyIcon.Text = "🕊️"
+FlyIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+FlyIcon.TextSize = 20
+FlyIcon.Font = Enum.Font.GothamBold
+FlyIcon.Parent = FlyStatusFrame
+
+local FlyLabel = Instance.new("TextLabel")
+FlyLabel.Size = UDim2.new(0, 0, 0.4, 0)
+FlyLabel.Position = UDim2.new(0, 40, 0, 10)
+FlyLabel.BackgroundTransparency = 1
+FlyLabel.Text = "FLY"
+FlyLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+FlyLabel.TextSize = 10
+FlyLabel.Font = Enum.Font.Gotham
+FlyLabel.TextXAlignment = Enum.TextXAlignment.Left
+FlyLabel.Parent = FlyStatusFrame
+
+local FlyStatus = Instance.new("TextLabel")
+FlyStatus.Size = UDim2.new(0, 0, 0.5, 0)
+FlyStatus.Position = UDim2.new(0, 40, 0, 20)
+FlyStatus.BackgroundTransparency = 1
+FlyStatus.Text = "OFF"
+FlyStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+FlyStatus.TextSize = 14
+FlyStatus.Font = Enum.Font.GothamBold
+FlyStatus.TextXAlignment = Enum.TextXAlignment.Left
+FlyStatus.Parent = FlyStatusFrame
+
+-- NOCLIP STATUS (kanan)
+local NoclipStatusFrame = Instance.new("Frame")
+NoclipStatusFrame.Size = UDim2.new(0.45, 0, 1, 0)
+NoclipStatusFrame.Position = UDim2.new(0.55, 0, 0, 0)
+NoclipStatusFrame.BackgroundTransparency = 1
+NoclipStatusFrame.Parent = StatusBar
+
+local NoclipIcon = Instance.new("TextLabel")
+NoclipIcon.Size = UDim2.new(0, 30, 0, 30)
+NoclipIcon.Position = UDim2.new(0, 8, 0.5, -15)
+NoclipIcon.BackgroundTransparency = 1
+NoclipIcon.Text = "🛡️"
+NoclipIcon.TextColor3 = Color3.fromRGB(100, 100, 100)
+NoclipIcon.TextSize = 18
+NoclipIcon.Font = Enum.Font.GothamBold
+NoclipIcon.Parent = NoclipStatusFrame
+
+local NoclipLabel = Instance.new("TextLabel")
+NoclipLabel.Size = UDim2.new(0, 0, 0.4, 0)
+NoclipLabel.Position = UDim2.new(0, 40, 0, 10)
+NoclipLabel.BackgroundTransparency = 1
+NoclipLabel.Text = "NOCLIP:"
+NoclipLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+NoclipLabel.TextSize = 10
+NoclipLabel.Font = Enum.Font.Gotham
+NoclipLabel.TextXAlignment = Enum.TextXAlignment.Left
+NoclipLabel.Parent = NoclipStatusFrame
+
+local NoclipStatus = Instance.new("TextLabel")
+NoclipStatus.Size = UDim2.new(0, 0, 0.5, 0)
+NoclipStatus.Position = UDim2.new(0, 40, 0, 20)
+NoclipStatus.BackgroundTransparency = 1
+NoclipStatus.Text = "OFF"
+NoclipStatus.TextColor3 = Color3.fromRGB(100, 100, 100)
+NoclipStatus.TextSize = 14
+NoclipStatus.Font = Enum.Font.GothamBold
+NoclipStatus.TextXAlignment = Enum.TextXAlignment.Left
+NoclipStatus.Parent = NoclipStatusFrame
+
+-- ==============================================
+-- 2. SPEED CONTROL - 70px
+-- ==============================================
+local SpeedBar = Instance.new("Frame")
+SpeedBar.Size = UDim2.new(1, 0, 0, 70)
+SpeedBar.Position = UDim2.new(0, 0, 0, 55)
+SpeedBar.BackgroundColor3 = Color3.fromRGB(8, 15, 28)
+SpeedBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
+SpeedBar.BorderSizePixel = 1
+SpeedBar.Parent = Content
+
+local SpeedCorner = Instance.new("UICorner")
+SpeedCorner.CornerRadius = UDim.new(0, 8)
+SpeedCorner.Parent = SpeedBar
+
+-- Label "FLIGHT SPEED" (atas)
+local SpeedTitle = Instance.new("TextLabel")
+SpeedTitle.Size = UDim2.new(1, 0, 0, 18)
+SpeedTitle.Position = UDim2.new(0, 10, 0, 4)
+SpeedTitle.BackgroundTransparency = 1
+SpeedTitle.Text = "⚡ FLYSPEED"
+SpeedTitle.TextColor3 = Color3.fromRGB(100, 200, 255)
+SpeedTitle.TextSize = 10
+SpeedTitle.Font = Enum.Font.GothamBold
+SpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
+SpeedTitle.Parent = SpeedBar
+
+-- Speed circle (tengah)
+local SpeedCircle = Instance.new("Frame")
+SpeedCircle.Size = UDim2.new(0, 40, 0, 40)
+SpeedCircle.Position = UDim2.new(0.5, -20, 0, 20)
+SpeedCircle.BackgroundColor3 = Color3.fromRGB(0, 50, 90)
+SpeedCircle.BorderColor3 = Color3.fromRGB(0, 200, 255)
+SpeedCircle.BorderSizePixel = 2
+SpeedCircle.Parent = SpeedBar
+
+local SpeedCircleCorner = Instance.new("UICorner")
+SpeedCircleCorner.CornerRadius = UDim.new(0, 20)
+SpeedCircleCorner.Parent = SpeedCircle
+
+local SpeedValue = Instance.new("TextLabel")
+SpeedValue.Size = UDim2.new(1, 0, 1, 0)
+SpeedValue.BackgroundTransparency = 1
+SpeedValue.Text = "50"
+SpeedValue.TextColor3 = Color3.fromRGB(0, 255, 200)
+SpeedValue.TextSize = 16
+SpeedValue.Font = Enum.Font.GothamBold
+SpeedValue.Parent = SpeedCircle
+
+-- Speed buttons (kiri & kanan)
+local SpeedDown = Instance.new("TextButton")
+SpeedDown.Size = UDim2.new(0, 30, 0, 30)
+SpeedDown.Position = UDim2.new(0.2, -15, 0, 25)
+SpeedDown.BackgroundColor3 = Color3.fromRGB(0, 70, 130)
+SpeedDown.BorderColor3 = Color3.fromRGB(0, 150, 255)
+SpeedDown.BorderSizePixel = 1
+SpeedDown.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedDown.Text = "-"
+SpeedDown.Font = Enum.Font.GothamBold
+SpeedDown.TextSize = 18
+SpeedDown.Parent = SpeedBar
+
+local SpeedDownCorner = Instance.new("UICorner")
+SpeedDownCorner.CornerRadius = UDim.new(0, 8)
+SpeedDownCorner.Parent = SpeedDown
+
+local SpeedUp = Instance.new("TextButton")
+SpeedUp.Size = UDim2.new(0, 30, 0, 30)
+SpeedUp.Position = UDim2.new(0.8, -15, 0, 25)
+SpeedUp.BackgroundColor3 = Color3.fromRGB(0, 70, 130)
+SpeedUp.BorderColor3 = Color3.fromRGB(0, 150, 255)
+SpeedUp.BorderSizePixel = 1
+SpeedUp.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedUp.Text = "+"
+SpeedUp.Font = Enum.Font.GothamBold
+SpeedUp.TextSize = 18
+SpeedUp.Parent = SpeedBar
+
+local SpeedUpCorner = Instance.new("UICorner")
+SpeedUpCorner.CornerRadius = UDim.new(0, 8)
+SpeedUpCorner.Parent = SpeedUp
+
+SpeedDown.MouseButton1Click:Connect(function() 
+    flySpeed = math.max(10, flySpeed - 5) 
+    SpeedValue.Text = tostring(flySpeed)
+end)
+
+SpeedUp.MouseButton1Click:Connect(function() 
+    flySpeed = math.min(200, flySpeed + 5) 
+    SpeedValue.Text = tostring(flySpeed)
+end)
+
+-- ==============================================
+-- 3. MAIN FLY BUTTON - 55px
+-- ==============================================
+local FlyBtn = Instance.new("TextButton")
+FlyBtn.Size = UDim2.new(1, 0, 0, 55)
+FlyBtn.Position = UDim2.new(0, 0, 0, 130)
+FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+FlyBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
+FlyBtn.BorderSizePixel = 2
+FlyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FlyBtn.Text = "🚀 MULA TERBANG"
+FlyBtn.Font = Enum.Font.GothamBold
+FlyBtn.TextSize = 16
+FlyBtn.Parent = Content
+
+local FlyBtnCorner = Instance.new("UICorner")
+FlyBtnCorner.CornerRadius = UDim.new(0, 12)
+FlyBtnCorner.Parent = FlyBtn
+
+-- ==============================================
+-- 4. WATERMARK / INFO - 25px
+-- ==============================================
+local Watermark = Instance.new("TextLabel")
+Watermark.Size = UDim2.new(1, 0, 0, 25)
+Watermark.Position = UDim2.new(0, 0, 0, 190)
+Watermark.BackgroundTransparency = 1
+Watermark.Text = "⚡ FIQQZR7  |  FLY V2"
+Watermark.TextColor3 = Color3.fromRGB(100, 180, 255)
+Watermark.TextSize = 10
+Watermark.Font = Enum.Font.GothamBold
+Watermark.Parent = Content
+
+-- ==============================================
+-- 5. MOBILE BUTTONS (AKAN DILETAKKAN LUAR)
 -- ==============================================
 if isMobile then
-    -- Frame untuk button arah (Floating, dekat kiri bawah)
+    -- Control frame untuk arrow buttons (kiri bawah)
     controlFrame = Instance.new("Frame")
-    controlFrame.Size = UDim2.new(0, 150, 0, 150)
-    controlFrame.Position = UDim2.new(0, 15, 1, -165)
+    controlFrame.Size = UDim2.new(0, 160, 0, 160)
+    controlFrame.Position = UDim2.new(0, 15, 1, -180)
     controlFrame.BackgroundTransparency = 1
     controlFrame.Visible = false
     controlFrame.Parent = gui
     
-    -- BUTTON DEPAN (W) - Biru
+    -- BUTTON DEPAN (W)
     local forwardBtn = Instance.new("TextButton")
-    forwardBtn.Size = UDim2.new(0, 50, 0, 50)
-    forwardBtn.Position = UDim2.new(0.5, -25, 0, 0)
-    forwardBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 210)  -- Biru
+    forwardBtn.Size = UDim2.new(0, 60, 0, 60)
+    forwardBtn.Position = UDim2.new(0.5, -30, 0, 0)
+    forwardBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 210)
+    forwardBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
+    forwardBtn.BorderSizePixel = 2
     forwardBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     forwardBtn.Text = "⬆️"
     forwardBtn.Font = Enum.Font.GothamBold
     forwardBtn.TextSize = 30
     forwardBtn.Parent = controlFrame
     
-    -- BUTTON KIRI (A) - Biru lebih gelap sikit
+    local forwardCorner = Instance.new("UICorner")
+    forwardCorner.CornerRadius = UDim.new(0, 30)
+    forwardCorner.Parent = forwardBtn
+    
+    -- BUTTON KIRI (A)
     local leftBtn = Instance.new("TextButton")
-    leftBtn.Size = UDim2.new(0, 50, 0, 50)
-    leftBtn.Position = UDim2.new(0, 0, 0, 55)
-    leftBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 180)  -- Biru gelap
+    leftBtn.Size = UDim2.new(0, 60, 0, 60)
+    leftBtn.Position = UDim2.new(0, 0, 0, 60)
+    leftBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 180)
+    leftBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
+    leftBtn.BorderSizePixel = 2
     leftBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     leftBtn.Text = "⬅️"
     leftBtn.Font = Enum.Font.GothamBold
     leftBtn.TextSize = 30
     leftBtn.Parent = controlFrame
     
-    -- BUTTON BELAKANG (S) - Biru lebih cerah
+    local leftCorner = Instance.new("UICorner")
+    leftCorner.CornerRadius = UDim.new(0, 30)
+    leftCorner.Parent = leftBtn
+    
+    -- BUTTON BELAKANG (S)
     local backwardBtn = Instance.new("TextButton")
-    backwardBtn.Size = UDim2.new(0, 50, 0, 50)
-    backwardBtn.Position = UDim2.new(0.5, -25, 0, 55)
-    backwardBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 230)  -- Biru cerah
+    backwardBtn.Size = UDim2.new(0, 60, 0, 60)
+    backwardBtn.Position = UDim2.new(0.5, -30, 0, 60)
+    backwardBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 230)
+    backwardBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
+    backwardBtn.BorderSizePixel = 2
     backwardBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     backwardBtn.Text = "⬇️"
     backwardBtn.Font = Enum.Font.GothamBold
     backwardBtn.TextSize = 30
     backwardBtn.Parent = controlFrame
     
-    -- BUTTON KANAN (D) - Biru sederhana
+    local backwardCorner = Instance.new("UICorner")
+    backwardCorner.CornerRadius = UDim.new(0, 30)
+    backwardCorner.Parent = backwardBtn
+    
+    -- BUTTON KANAN (D)
     local rightBtn = Instance.new("TextButton")
-    rightBtn.Size = UDim2.new(0, 50, 0, 50)
-    rightBtn.Position = UDim2.new(1, -50, 0, 55)
-    rightBtn.BackgroundColor3 = Color3.fromRGB(30, 120, 210)  -- Biru
+    rightBtn.Size = UDim2.new(0, 60, 0, 60)
+    rightBtn.Position = UDim2.new(1, -60, 0, 60)
+    rightBtn.BackgroundColor3 = Color3.fromRGB(30, 120, 210)
+    rightBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
+    rightBtn.BorderSizePixel = 2
     rightBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     rightBtn.Text = "➡️"
     rightBtn.Font = Enum.Font.GothamBold
     rightBtn.TextSize = 30
     rightBtn.Parent = controlFrame
     
-    -- Event untuk button (Tekan & Tahan)
+    local rightCorner = Instance.new("UICorner")
+    rightCorner.CornerRadius = UDim.new(0, 30)
+    rightCorner.Parent = rightBtn
+    
+    -- Event untuk button
     forwardBtn.MouseButton1Down:Connect(function() keys.w = true end)
     forwardBtn.MouseButton1Up:Connect(function() keys.w = false end)
-    forwardBtn.TouchLongPress:Connect(function() end)
     
     leftBtn.MouseButton1Down:Connect(function() keys.a = true end)
     leftBtn.MouseButton1Up:Connect(function() keys.a = false end)
-    leftBtn.TouchLongPress:Connect(function() end)
     
     backwardBtn.MouseButton1Down:Connect(function() keys.s = true end)
     backwardBtn.MouseButton1Up:Connect(function() keys.s = false end)
-    backwardBtn.TouchLongPress:Connect(function() end)
     
     rightBtn.MouseButton1Down:Connect(function() keys.d = true end)
     rightBtn.MouseButton1Up:Connect(function() keys.d = false end)
-    rightBtn.TouchLongPress:Connect(function() end)
     
-    -- Label "FIQZR7ONTHETOP" - Biru
+    -- Label "FIQQZR7ONTHETOP" (seperti dalam gambar)
     moveLabel = Instance.new("TextLabel")
-    moveLabel.Size = UDim2.new(0, 150, 0, 15)
-    moveLabel.Position = UDim2.new(0, 15, 1, -20)
+    moveLabel.Size = UDim2.new(0, 150, 0, 20)
+    moveLabel.Position = UDim2.new(0, 15, 1, -25)
     moveLabel.BackgroundTransparency = 1
     moveLabel.Text = "FIQQZR7ONTHETOP"
-    moveLabel.TextColor3 = Color3.fromRGB(100, 200, 255)  -- Biru cerah
+    moveLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
     moveLabel.TextSize = 10
     moveLabel.Font = Enum.Font.GothamBold
     moveLabel.Visible = false
     moveLabel.Parent = gui
     
     -- ==============================================
-    -- BUTTON NAIK/TURUN (KANAN BAWAH) - Saiz kecik - TEMA BIRU
+    -- BUTTON NAIK/TURUN (kanan bawah)
     -- ==============================================
     upDownFrame = Instance.new("Frame")
-    upDownFrame.Size = UDim2.new(0, 80, 0, 70)
-    upDownFrame.Position = UDim2.new(1, -95, 1, -90)
+    upDownFrame.Size = UDim2.new(0, 90, 0, 80)
+    upDownFrame.Position = UDim2.new(1, -105, 1, -100)
     upDownFrame.BackgroundTransparency = 1
     upDownFrame.Visible = false
     upDownFrame.Parent = gui
     
-    -- BUTTON NAIK (Space) - Biru
+    -- BUTTON NAIK (↑ NAIK)
     local upBtn = Instance.new("TextButton")
-    upBtn.Size = UDim2.new(1, 0, 0, 30)
+    upBtn.Size = UDim2.new(1, 0, 0, 35)
     upBtn.Position = UDim2.new(0, 0, 0, 0)
-    upBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)  -- Biru
+    upBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 200)
+    upBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
+    upBtn.BorderSizePixel = 2
     upBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    upBtn.Text = "⬆️ NAIK"
+    upBtn.Text = "↑ NAIK"
     upBtn.Font = Enum.Font.GothamBold
     upBtn.TextSize = 12
     upBtn.Parent = upDownFrame
     
-    -- BUTTON TURUN (Ctrl) - Biru gelap
+    local upCorner = Instance.new("UICorner")
+    upCorner.CornerRadius = UDim.new(0, 12)
+    upCorner.Parent = upBtn
+    
+    -- BUTTON TURUN (↓ TURUN)
     local downBtn = Instance.new("TextButton")
-    downBtn.Size = UDim2.new(1, 0, 0, 30)
-    downBtn.Position = UDim2.new(0, 0, 0, 35)
-    downBtn.BackgroundColor3 = Color3.fromRGB(0, 70, 150)  -- Biru gelap
+    downBtn.Size = UDim2.new(1, 0, 0, 35)
+    downBtn.Position = UDim2.new(0, 0, 0, 40)
+    downBtn.BackgroundColor3 = Color3.fromRGB(0, 70, 150)
+    downBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
+    downBtn.BorderSizePixel = 2
     downBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    downBtn.Text = "⬇️ TURUN"
+    downBtn.Text = "↓ TURUN"
     downBtn.Font = Enum.Font.GothamBold
     downBtn.TextSize = 12
     downBtn.Parent = upDownFrame
+    
+    local downCorner = Instance.new("UICorner")
+    downCorner.CornerRadius = UDim.new(0, 12)
+    downCorner.Parent = downBtn
     
     -- Event untuk button naik/turun
     upBtn.MouseButton1Down:Connect(function() keys.space = true end)
@@ -594,18 +750,68 @@ if isMobile then
     downBtn.MouseButton1Down:Connect(function() keys.ctrl = true end)
     downBtn.MouseButton1Up:Connect(function() keys.ctrl = false end)
     
-    -- Label "NAIK/TURUN" - Biru
+    -- Label "NAIK / TURUN"
     upDownLabel = Instance.new("TextLabel")
-    upDownLabel.Size = UDim2.new(0, 80, 0, 15)
-    upDownLabel.Position = UDim2.new(1, -95, 1, -20)
+    upDownLabel.Size = UDim2.new(0, 90, 0, 15)
+    upDownLabel.Position = UDim2.new(1, -105, 1, -20)
     upDownLabel.BackgroundTransparency = 1
-    upDownLabel.Text = "NAIK/TURUN"
-    upDownLabel.TextColor3 = Color3.fromRGB(100, 200, 255)  -- Biru cerah
+    upDownLabel.Text = "NAIK / TURUN"
+    upDownLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
     upDownLabel.TextSize = 8
     upDownLabel.Font = Enum.Font.GothamBold
     upDownLabel.Visible = false
     upDownLabel.Parent = gui
 end
+
+-- ==============================================
+-- FLY BUTTON CONNECTION
+-- ==============================================
+FlyBtn.MouseButton1Click:Connect(function()
+    if flying then
+        stopFly()
+        FlyBtn.Text = "🚀 MULA TERBANG"
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+        FlyStatus.Text = "OFF"
+        FlyStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+        NoclipStatus.Text = "OFF"
+        NoclipStatus.TextColor3 = Color3.fromRGB(100, 100, 100)
+        NoclipIcon.TextColor3 = Color3.fromRGB(100, 100, 100)
+    else
+        startFly()
+        FlyBtn.Text = "⏹️ HENTI TERBANG"
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
+        FlyStatus.Text = "ON"
+        FlyStatus.TextColor3 = Color3.fromRGB(0, 255, 100)
+        NoclipStatus.Text = "ON"
+        NoclipStatus.TextColor3 = Color3.fromRGB(100, 255, 255)
+        NoclipIcon.TextColor3 = Color3.fromRGB(100, 255, 255)
+    end
+end)
+
+-- ==============================================
+-- HIDE FUNCTION
+-- ==============================================
+HideBtn.MouseButton1Click:Connect(function()
+    uiVisible = not uiVisible
+    
+    if uiVisible then
+        TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 340)}):Play()
+        task.wait(0.1)
+        ContentContainer.Visible = true
+        HideBtn.Text = "−"
+        HideBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
+    else
+        ContentContainer.Visible = false
+        TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 45)}):Play()
+        HideBtn.Text = "+"
+        HideBtn.TextColor3 = Color3.fromRGB(255, 200, 0)
+    end
+end)
+
+CloseBtn.MouseButton1Click:Connect(function()
+    if flying then stopFly() end
+    gui:Destroy()
+end)
 
 -- ==============================================
 -- HANDLE CHARACTER RESPAWN
@@ -614,14 +820,15 @@ player.CharacterAdded:Connect(function()
     task.wait(1)
     if flying then
         stopFly()
-        flyBtn.Text = "🚀 MULA TERBANG"
-        flyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-        statusIcon.TextColor3 = Color3.fromRGB(255, 0, 0)
-        statusText.Text = "TERBANG: OFF"
+        FlyBtn.Text = "🚀 MULA TERBANG"
+        FlyBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+        FlyStatus.Text = "OFF"
+        FlyStatus.TextColor3 = Color3.fromRGB(255, 80, 80)
+        NoclipStatus.Text = "OFF"
+        NoclipStatus.TextColor3 = Color3.fromRGB(100, 100, 100)
+        NoclipIcon.TextColor3 = Color3.fromRGB(100, 100, 100)
     end
 end)
 
-print("✅ FIQQZR7 FLY V2 - TEMA BIRU POWER!")
-print("📱 MOBILE: Button biru (50px) - Muncul masa FLY ON, Hilang masa FLY OFF")
-print("💻 PC: Guna keyboard WASD + Space/Ctrl")
-print("🔄 NOCLIP: Aktif auto masa terbang! Boleh tembus dinding!")
+print("✅ FIQQZR7 FLY V2 - SUSUNAN KEMAS (BLUE EDITION)")
+print("📱 Mobile button: NAIK/TURUN & LOKAP POLIS")
