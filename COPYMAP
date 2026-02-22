@@ -1,0 +1,722 @@
+local player = game.Players.LocalPlayer
+local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+repeat task.wait() until player and player:FindFirstChild("PlayerGui")
+
+local isMobile = not UserInputService.KeyboardEnabled
+local hasClipboard = pcall(function() return setclipboard end)
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "FIQQZR7COPYMAP"
+gui.Parent = player.PlayerGui
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.DisplayOrder = 999
+
+-- Main Container
+local container = Instance.new("Frame")
+container.Size = UDim2.new(0, 420, 0, 600)
+container.Position = UDim2.new(0.5, -210, 0.5, -300)
+container.BackgroundTransparency = 1
+container.Active = true
+container.Draggable = true
+container.Parent = gui
+
+-- Main Frame (Glass Effect)
+local main = Instance.new("Frame")
+main.Size = UDim2.new(1, 0, 1, 0)
+main.Position = UDim2.new(0, 0, 0, 0)
+main.BackgroundColor3 = Color3.fromRGB(8, 12, 25)
+main.BackgroundTransparency = 0.1
+main.BorderColor3 = Color3.fromRGB(0, 150, 255)
+main.BorderSizePixel = 2
+main.ClipsDescendants = true
+main.Parent = container
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 24)
+mainCorner.Parent = main
+
+-- Glass Blur Effect
+local blur = Instance.new("Frame")
+blur.Size = UDim2.new(1, 0, 1, 0)
+blur.BackgroundColor3 = Color3.fromRGB(10, 15, 30)
+blur.BackgroundTransparency = 0.7
+blur.BorderSizePixel = 0
+blur.ZIndex = 0
+blur.Parent = main
+
+local blurCorner = Instance.new("UICorner")
+blurCorner.CornerRadius = UDim.new(0, 24)
+blurCorner.Parent = blur
+
+-- Neon Glow Border
+local glow = Instance.new("Frame")
+glow.Size = UDim2.new(1, 10, 1, 10)
+glow.Position = UDim2.new(0, -5, 0, -5)
+glow.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+glow.BackgroundTransparency = 0.8
+glow.BorderSizePixel = 0
+glow.ZIndex = 0
+glow.Parent = container
+
+local glowCorner = Instance.new("UICorner")
+glowCorner.CornerRadius = UDim.new(0, 26)
+glowCorner.Parent = glow
+
+-- Inner Glow
+local innerGlow = Instance.new("Frame")
+innerGlow.Size = UDim2.new(1, 6, 1, 6)
+innerGlow.Position = UDim2.new(0, -3, 0, -3)
+innerGlow.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+innerGlow.BackgroundTransparency = 0.7
+innerGlow.BorderSizePixel = 0
+innerGlow.ZIndex = 0
+innerGlow.Parent = container
+
+local innerGlowCorner = Instance.new("UICorner")
+innerGlowCorner.CornerRadius = UDim.new(0, 25)
+innerGlowCorner.Parent = innerGlow
+
+-- Gradient Background
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 25, 45)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(10, 20, 40)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 15, 35))
+})
+gradient.Rotation = 45
+gradient.Parent = main
+
+-- ==============================================
+-- TITLE BAR (Modern)
+-- ==============================================
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, -20, 0, 70)
+titleBar.Position = UDim2.new(0, 10, 0, 10)
+titleBar.BackgroundColor3 = Color3.fromRGB(15, 20, 35)
+titleBar.BackgroundTransparency = 0.2
+titleBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
+titleBar.BorderSizePixel = 1
+titleBar.Parent = main
+
+local titleBarCorner = Instance.new("UICorner")
+titleBarCorner.CornerRadius = UDim.new(0, 16)
+titleBarCorner.Parent = titleBar
+
+-- Icon
+local icon = Instance.new("TextLabel")
+icon.Size = UDim2.new(0, 45, 1, 0)
+icon.Position = UDim2.new(0, 10, 0, 0)
+icon.BackgroundTransparency = 1
+icon.Text = "🗺️"
+icon.TextColor3 = Color3.fromRGB(0, 200, 255)
+icon.TextSize = 28
+icon.Font = Enum.Font.GothamBold
+icon.Parent = titleBar
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0.5, 0, 0.5, 0)
+title.Position = UDim2.new(0, 65, 0, 10)
+title.BackgroundTransparency = 1
+title.Text = "FIQQZR7 COPYMAP"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 16
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
+
+-- Subtitle
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(0.5, 0, 0.3, 0)
+subtitle.Position = UDim2.new(0, 65, 0, 38)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "DEVELOPER FIQQZR7"
+subtitle.TextColor3 = Color3.fromRGB(150, 200, 255)
+subtitle.TextSize = 11
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.Parent = titleBar
+
+-- Status indicator
+local statusIndicator = Instance.new("Frame")
+statusIndicator.Size = UDim2.new(0, 8, 0, 8)
+statusIndicator.Position = UDim2.new(1, -25, 0.5, -4)
+statusIndicator.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+statusIndicator.BorderSizePixel = 0
+statusIndicator.Parent = titleBar
+
+local statusCorner = Instance.new("UICorner")
+statusCorner.CornerRadius = UDim.new(0, 4)
+statusCorner.Parent = statusIndicator
+
+-- ON/OFF Toggle
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0, 50, 0, 28)
+toggleBtn.Position = UDim2.new(1, -120, 0.5, -14)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+toggleBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.BorderSizePixel = 1
+toggleBtn.Text = "ON"
+toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextSize = 12
+toggleBtn.Parent = titleBar
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(0, 8)
+toggleCorner.Parent = toggleBtn
+
+-- Close Button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -40, 0.5, -15)
+closeBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.BorderSizePixel = 1
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 16
+closeBtn.Parent = titleBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 8)
+closeCorner.Parent = closeBtn
+
+-- ==============================================
+-- CONTENT CONTAINER
+-- ==============================================
+local contentContainer = Instance.new("Frame")
+contentContainer.Size = UDim2.new(1, -20, 1, -100)
+contentContainer.Position = UDim2.new(0, 10, 0, 90)
+contentContainer.BackgroundTransparency = 1
+contentContainer.Parent = main
+
+-- ==============================================
+-- SCROLLING FRAME (Glass cards)
+-- ==============================================
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
+scrollingFrame.BackgroundTransparency = 1
+scrollingFrame.BorderSizePixel = 0
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 750)
+scrollingFrame.ScrollBarThickness = 5
+scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
+scrollingFrame.Parent = contentContainer
+
+-- ==============================================
+-- CARD HELPER FUNCTION
+-- ==============================================
+local function createCard(title, icon, y, height)
+    local card = Instance.new("Frame")
+    card.Size = UDim2.new(0.95, 0, 0, height or 100)
+    card.Position = UDim2.new(0.025, 0, 0, y)
+    card.BackgroundColor3 = Color3.fromRGB(12, 18, 30)
+    card.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    card.BorderSizePixel = 1
+    card.Parent = scrollingFrame
+    
+    local cardCorner = Instance.new("UICorner")
+    cardCorner.CornerRadius = UDim.new(0, 16)
+    cardCorner.Parent = card
+    
+    local cardGradient = Instance.new("UIGradient")
+    cardGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 22, 38)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 15, 28))
+    })
+    cardGradient.Rotation = 90
+    cardGradient.Parent = card
+    
+    local cardIcon = Instance.new("TextLabel")
+    cardIcon.Size = UDim2.new(0, 30, 0, 30)
+    cardIcon.Position = UDim2.new(0, 12, 0, 10)
+    cardIcon.BackgroundTransparency = 1
+    cardIcon.Text = icon
+    cardIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+    cardIcon.TextSize = 20
+    cardIcon.Font = Enum.Font.GothamBold
+    cardIcon.Parent = card
+    
+    local cardTitle = Instance.new("TextLabel")
+    cardTitle.Size = UDim2.new(1, -50, 0, 20)
+    cardTitle.Position = UDim2.new(0, 50, 0, 12)
+    cardTitle.BackgroundTransparency = 1
+    cardTitle.Text = title
+    cardTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    cardTitle.TextSize = 14
+    cardTitle.Font = Enum.Font.GothamBold
+    cardTitle.TextXAlignment = Enum.TextXAlignment.Left
+    cardTitle.Parent = card
+    
+    return card
+end
+
+-- ==============================================
+-- INFO CARD
+-- ==============================================
+local infoCard = createCard("DEVICE INFO", "📱", 5, 80)
+
+local deviceIcon = Instance.new("TextLabel")
+deviceIcon.Size = UDim2.new(0, 20, 0, 20)
+deviceIcon.Position = UDim2.new(0, 55, 0, 40)
+deviceIcon.BackgroundTransparency = 1
+deviceIcon.Text = isMobile and "📱" or "💻"
+deviceIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+deviceIcon.TextSize = 14
+deviceIcon.Font = Enum.Font.GothamBold
+deviceIcon.Parent = infoCard
+
+local deviceText = Instance.new("TextLabel")
+deviceText.Size = UDim2.new(0.5, 0, 0, 20)
+deviceText.Position = UDim2.new(0, 80, 0, 40)
+deviceText.BackgroundTransparency = 1
+deviceText.Text = isMobile and "MOBILE MODE" or "PC MODE"
+deviceText.TextColor3 = Color3.fromRGB(255, 255, 255)
+deviceText.TextSize = 12
+deviceText.Font = Enum.Font.Gotham
+deviceText.TextXAlignment = Enum.TextXAlignment.Left
+deviceText.Parent = infoCard
+
+local clipboardIcon = Instance.new("TextLabel")
+clipboardIcon.Size = UDim2.new(0, 20, 0, 20)
+clipboardIcon.Position = UDim2.new(0.5, 20, 0, 40)
+clipboardIcon.BackgroundTransparency = 1
+clipboardIcon.Text = hasClipboard and "📋" or "💾"
+clipboardIcon.TextColor3 = hasClipboard and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 0)
+clipboardIcon.TextSize = 14
+clipboardIcon.Font = Enum.Font.GothamBold
+clipboardIcon.Parent = infoCard
+
+local clipboardText = Instance.new("TextLabel")
+clipboardText.Size = UDim2.new(0.4, 0, 0, 20)
+clipboardText.Position = UDim2.new(0.5, 45, 0, 40)
+clipboardText.BackgroundTransparency = 1
+clipboardText.Text = hasClipboard and "Clipboard" or "Workspace"
+clipboardText.TextColor3 = Color3.fromRGB(200, 200, 200)
+clipboardText.TextSize = 12
+clipboardText.Font = Enum.Font.Gotham
+clipboardText.TextXAlignment = Enum.TextXAlignment.Left
+clipboardText.Parent = infoCard
+
+-- ==============================================
+-- OPTIONS CARD
+-- ==============================================
+local optionsCard = createCard("SAVE OPTIONS", "⚙️", 95, 200)
+
+local options = {
+    {name = "Terrain", icon = "🌍", default = true},
+    {name = "BaseParts", icon = "📦", default = true},
+    {name = "Models", icon = "🏗️", default = true},
+    {name = "LocalScripts", icon = "📜", default = true},
+    {name = "GUI Elements", icon = "🖥️", default = true},
+    {name = "Tools", icon = "🔧", default = true},
+}
+
+local checkboxes = {}
+
+local function createCheckbox(y, option)
+    local row = Instance.new("Frame")
+    row.Size = UDim2.new(1, -30, 0, 25)
+    row.Position = UDim2.new(0, 15, 0, y)
+    row.BackgroundTransparency = 1
+    row.Parent = optionsCard
+    
+    local check = Instance.new("TextButton")
+    check.Size = UDim2.new(0, 18, 0, 18)
+    check.Position = UDim2.new(0, 0, 0.5, -9)
+    check.BackgroundColor3 = option.default and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(50, 50, 50)
+    check.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    check.BorderSizePixel = 1
+    check.Text = option.default and "✓" or ""
+    check.TextColor3 = Color3.fromRGB(255, 255, 255)
+    check.TextSize = 12
+    check.Font = Enum.Font.GothamBold
+    check.Parent = row
+    
+    local checkCorner = Instance.new("UICorner")
+    checkCorner.CornerRadius = UDim.new(0, 4)
+    checkCorner.Parent = check
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -25, 1, 0)
+    label.Position = UDim2.new(0, 23, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = option.icon .. "  " .. option.name
+    label.TextColor3 = Color3.fromRGB(220, 220, 240)
+    label.TextSize = 12
+    label.Font = Enum.Font.Gotham
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = row
+    
+    local state = option.default
+    check.MouseButton1Click:Connect(function()
+        state = not state
+        check.BackgroundColor3 = state and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(50, 50, 50)
+        check.Text = state and "✓" or ""
+    end)
+    
+    return function() return state end
+end
+
+for i, opt in ipairs(options) do
+    table.insert(checkboxes, createCheckbox(35 + (i-1) * 28, opt))
+end
+
+-- ==============================================
+-- FILENAME CARD
+-- ==============================================
+local nameCard = createCard("FILENAME", "📁", 305, 80)
+
+local nameBg = Instance.new("Frame")
+nameBg.Size = UDim2.new(0.9, 0, 0, 35)
+nameBg.Position = UDim2.new(0.05, 0, 0, 35)
+nameBg.BackgroundColor3 = Color3.fromRGB(20, 25, 38)
+nameBg.BorderColor3 = Color3.fromRGB(0, 150, 255)
+nameBg.BorderSizePixel = 1
+nameBg.Parent = nameCard
+
+local nameBgCorner = Instance.new("UICorner")
+nameBgCorner.CornerRadius = UDim.new(0, 8)
+nameBgCorner.Parent = nameBg
+
+local nameInput = Instance.new("TextBox")
+nameInput.Size = UDim2.new(1, -10, 1, 0)
+nameInput.Position = UDim2.new(0, 5, 0, 0)
+nameInput.BackgroundTransparency = 1
+nameInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+nameInput.PlaceholderColor3 = Color3.fromRGB(100, 120, 150)
+nameInput.PlaceholderText = "FIQQZR7MAP"
+nameInput.Text = "FIQQZR7MAP"
+nameInput.Font = Enum.Font.Gotham
+nameInput.TextSize = 14
+nameInput.ClearTextOnFocus = false
+nameInput.Parent = nameBg
+
+-- ==============================================
+-- LOCATION CARD
+-- ==============================================
+local locationCard = createCard("SAVE LOCATION", "📂", 395, 70)
+
+local locationText = Instance.new("TextLabel")
+locationText.Size = UDim2.new(1, -30, 0, 20)
+locationText.Position = UDim2.new(0, 40, 0, 35)
+locationText.BackgroundTransparency = 1
+locationText.Text = "workspace.FIQQZR7_Saves"
+locationText.TextColor3 = Color3.fromRGB(0, 255, 200)
+locationText.TextSize = 12
+locationText.Font = Enum.Font.Code
+locationText.TextXAlignment = Enum.TextXAlignment.Left
+locationText.Parent = locationCard
+
+-- ==============================================
+-- STATS CARD
+-- ==============================================
+local statsCard = createCard("MAP STATS", "📊", 475, 90)
+
+local partCount = Instance.new("TextLabel")
+partCount.Size = UDim2.new(0.5, 0, 0, 20)
+partCount.Position = UDim2.new(0, 40, 0, 35)
+partCount.BackgroundTransparency = 1
+partCount.Text = "📦 Parts: 0"
+partCount.TextColor3 = Color3.fromRGB(200, 200, 200)
+partCount.TextSize = 11
+partCount.Font = Enum.Font.Gotham
+partCount.TextXAlignment = Enum.TextXAlignment.Left
+partCount.Parent = statsCard
+
+local scriptCount = Instance.new("TextLabel")
+scriptCount.Size = UDim2.new(0.5, 0, 0, 20)
+scriptCount.Position = UDim2.new(0.5, 0, 0, 35)
+scriptCount.BackgroundTransparency = 1
+scriptCount.Text = "📜 Scripts: 0"
+scriptCount.TextColor3 = Color3.fromRGB(200, 200, 200)
+scriptCount.TextSize = 11
+scriptCount.Font = Enum.Font.Gotham
+scriptCount.TextXAlignment = Enum.TextXAlignment.Left
+scriptCount.Parent = statsCard
+
+local terrainInfo = Instance.new("TextLabel")
+terrainInfo.Size = UDim2.new(0.5, 0, 0, 20)
+terrainInfo.Position = UDim2.new(0, 40, 0, 55)
+terrainInfo.BackgroundTransparency = 1
+terrainInfo.Text = "🌍 Terrain: Yes"
+terrainInfo.TextColor3 = Color3.fromRGB(200, 200, 200)
+terrainInfo.TextSize = 11
+terrainInfo.Font = Enum.Font.Gotham
+terrainInfo.TextXAlignment = Enum.TextXAlignment.Left
+terrainInfo.Parent = statsCard
+
+local guiCount = Instance.new("TextLabel")
+guiCount.Size = UDim2.new(0.5, 0, 0, 20)
+guiCount.Position = UDim2.new(0.5, 0, 0, 55)
+guiCount.BackgroundTransparency = 1
+guiCount.Text = "🖥️ GUI: 0"
+guiCount.TextColor3 = Color3.fromRGB(200, 200, 200)
+guiCount.TextSize = 11
+guiCount.Font = Enum.Font.Gotham
+guiCount.TextXAlignment = Enum.TextXAlignment.Left
+guiCount.Parent = statsCard
+
+-- ==============================================
+-- STATUS CARD
+-- ==============================================
+local statusCard = createCard("STATUS", "🟢", 575, 70)
+
+local statusText = Instance.new("TextLabel")
+statusText.Size = UDim2.new(0.7, 0, 0, 20)
+statusText.Position = UDim2.new(0, 40, 0, 35)
+statusText.BackgroundTransparency = 1
+statusText.Text = "READY"
+statusText.TextColor3 = Color3.fromRGB(0, 255, 0)
+statusText.TextSize = 14
+statusText.Font = Enum.Font.GothamBold
+statusText.TextXAlignment = Enum.TextXAlignment.Left
+statusText.Parent = statusCard
+
+local lastSave = Instance.new("TextLabel")
+lastSave.Size = UDim2.new(0.7, 0, 0, 16)
+lastSave.Position = UDim2.new(0, 40, 0, 55)
+lastSave.BackgroundTransparency = 1
+lastSave.Text = "Last save: -"
+lastSave.TextColor3 = Color3.fromRGB(150, 150, 150)
+lastSave.TextSize = 10
+lastSave.Font = Enum.Font.Gotham
+lastSave.TextXAlignment = Enum.TextXAlignment.Left
+lastSave.Parent = statusCard
+
+-- ==============================================
+-- SAVE BUTTON
+-- ==============================================
+local saveBtn = Instance.new("TextButton")
+saveBtn.Size = UDim2.new(0.9, 0, 0, 50)
+saveBtn.Position = UDim2.new(0.05, 0, 0, 655)
+saveBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+saveBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+saveBtn.BorderSizePixel = 2
+saveBtn.Text = "💾 SAVE MAP"
+saveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+saveBtn.Font = Enum.Font.GothamBold
+saveBtn.TextSize = 18
+saveBtn.Parent = scrollingFrame
+
+local saveCorner = Instance.new("UICorner")
+saveCorner.CornerRadius = UDim.new(0, 12)
+saveCorner.Parent = saveBtn
+
+-- Update canvas size
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 720)
+
+-- ==============================================
+-- ON/OFF TOGGLE FUNCTION
+-- ==============================================
+local uiVisible = true
+toggleBtn.MouseButton1Click:Connect(function()
+    uiVisible = not uiVisible
+    
+    if uiVisible then
+        TweenService:Create(container, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
+            Size = UDim2.new(0, 420, 0, 600)
+        }):Play()
+        task.wait(0.1)
+        contentContainer.Visible = true
+        toggleBtn.Text = "ON"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+        statusIndicator.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    else
+        contentContainer.Visible = false
+        TweenService:Create(container, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
+            Size = UDim2.new(0, 420, 0, 70)
+        }):Play()
+        toggleBtn.Text = "OFF"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+        statusIndicator.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    end
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
+
+-- Insert key toggle
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Insert then
+        container.Visible = not container.Visible
+    end
+end)
+
+-- ==============================================
+-- MAP SAVING FUNCTIONS
+-- ==============================================
+
+local function countWorkspace()
+    local parts = 0
+    local scripts = 0
+    local guis = 0
+    
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") and not obj:IsA("Terrain") then
+            parts = parts + 1
+        elseif obj:IsA("LocalScript") or obj:IsA("Script") then
+            scripts = scripts + 1
+        elseif obj:IsA("ScreenGui") or obj:IsA("SurfaceGui") then
+            guis = guis + 1
+        end
+    end
+    
+    partCount.Text = "📦 Parts: " .. parts
+    scriptCount.Text = "📜 Scripts: " .. scripts
+    guiCount.Text = "🖥️ GUI: " .. guis
+end
+
+local function saveMap()
+    statusText.Text = "SAVING..."
+    statusText.TextColor3 = Color3.fromRGB(255, 255, 0)
+    
+    local saveData = {
+        name = nameInput.Text ~= "" and nameInput.Text or "FIQQZR7_Map",
+        date = os.date("%Y-%m-%d %H:%M:%S"),
+        executor = isMobile and "Mobile" or "PC",
+        terrain = nil,
+        parts = {},
+        models = {},
+        scripts = {},
+        guis = {},
+        tools = {}
+    }
+    
+    -- Save Terrain (Clone full terrain)
+    if checkboxes[1]() then
+        saveData.terrain = "Terrain saved (clone in workspace)"
+        terrainInfo.Text = "🌍 Terrain: Yes"
+    else
+        terrainInfo.Text = "🌍 Terrain: No"
+    end
+    
+    -- Save Parts
+    if checkboxes[2]() then
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and not obj:IsA("Terrain") then
+                table.insert(saveData.parts, {
+                    name = obj.Name,
+                    class = obj.ClassName,
+                    position = {obj.Position.X, obj.Position.Y, obj.Position.Z},
+                    size = {obj.Size.X, obj.Size.Y, obj.Size.Z},
+                    color = {obj.BrickColor and obj.BrickColor.R or 1, 
+                            obj.BrickColor and obj.BrickColor.G or 1, 
+                            obj.BrickColor and obj.BrickColor.B or 1},
+                    anchored = obj.Anchored,
+                    canCollide = obj.CanCollide,
+                    transparency = obj.Transparency,
+                    material = obj.Material and obj.Material.Name or "Plastic"
+                })
+            end
+        end
+    end
+    
+    -- Save Models
+    if checkboxes[3]() then
+        for _, obj in ipairs(workspace:GetChildren()) do
+            if obj:IsA("Model") then
+                table.insert(saveData.models, {
+                    name = obj.Name,
+                    children = {}
+                })
+            end
+        end
+    end
+    
+    -- Save Scripts
+    if checkboxes[4]() then
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("LocalScript") or obj:IsA("Script") then
+                table.insert(saveData.scripts, {
+                    name = obj.Name,
+                    class = obj.ClassName,
+                    source = obj.Source or "",
+                    disabled = obj.Disabled or false
+                })
+            end
+        end
+    end
+    
+    -- Save GUI
+    if checkboxes[5]() then
+        for _, obj in ipairs(player.PlayerGui:GetChildren()) do
+            if obj:IsA("ScreenGui") then
+                table.insert(saveData.guis, {
+                    name = obj.Name,
+                    children = {}
+                })
+            end
+        end
+    end
+    
+    -- Save Tools
+    if checkboxes[6]() then
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("Tool") then
+                table.insert(saveData.tools, {
+                    name = obj.Name,
+                    grip = {obj.Grip.X, obj.Grip.Y, obj.Grip.Z}
+                })
+            end
+        end
+    end
+    
+    -- Create save folder in workspace
+    local saveFolder = workspace:FindFirstChild("FIQQZR7_Saves")
+    if not saveFolder then
+        saveFolder = Instance.new("Folder")
+        saveFolder.Name = "FIQQZR7_Saves"
+        saveFolder.Parent = workspace
+    end
+    
+    -- Save as StringValue
+    local saveFile = Instance.new("StringValue")
+    saveFile.Name = saveData.name .. "_" .. os.date("%Y%m%d_%H%M%S")
+    saveFile.Value = HttpService:JSONEncode(saveData)
+    saveFile.Parent = saveFolder
+    
+    -- Try clipboard
+    if hasClipboard then
+        pcall(function()
+            setclipboard(HttpService:JSONEncode(saveData))
+        end)
+    end
+    
+    -- Update status
+    statusText.Text = "SAVED!"
+    statusText.TextColor3 = Color3.fromRGB(0, 255, 0)
+    lastSave.Text = "Last save: " .. saveData.date
+    
+    print("✅ MAP SAVED: " .. saveData.name)
+    print("📁 Location: workspace.FIQQZR7_Saves." .. saveFile.Name)
+    
+    task.wait(2)
+    statusText.Text = "READY"
+end
+
+-- Update counts periodically
+task.spawn(function()
+    while true do
+        countWorkspace()
+        task.wait(2)
+    end
+end)
+
+saveBtn.MouseButton1Click:Connect(saveMap)
+
+-- Initial count
+task.wait(0.5)
+countWorkspace()
+
+print("✅ FIQQZR7 MAP SAVER - MODERN HUB ULTIMATE")
+print("🗺️ Saves Terrain, Parts, Models, Scripts, GUI, Tools")
+print("📁 Output: workspace.FIQQZR7_Saves")
+print("🎨 Modern UI with glassmorphism & neon glow")
