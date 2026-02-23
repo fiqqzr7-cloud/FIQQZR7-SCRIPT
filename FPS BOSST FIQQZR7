@@ -1,0 +1,899 @@
+-- FIQQZR7 FPS BOOST - MODERN HUB ULTIMATE V3
+-- Smooth UI, boleh close, toggle ON/OFF, hide player
+
+local player = game.Players.LocalPlayer
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+
+repeat task.wait() until player and player:FindFirstChild("PlayerGui")
+
+-- ==============================================
+-- VARIABLES
+-- ==============================================
+local boostActive = false
+local fps = 0
+local ping = "0ms"
+local frameCount = 0
+local lastTime = tick()
+local hiddenObjects = {}
+local uiVisible = true
+
+-- Simpan pengaturan asli
+local originalSettings = {
+    GlobalShadows = Lighting.GlobalShadows,
+    FogEnd = Lighting.FogEnd,
+    Brightness = Lighting.Brightness
+}
+
+-- Status hide options (9 pilihan)
+local hideOptions = {
+    Shadows = false,
+    Fog = false,
+    Trees = false,
+    Water = false,
+    Particles = false,
+    Grass = false,
+    Decals = false,
+    Clouds = false,
+    OtherPlayers = false
+}
+
+-- ==============================================
+-- FUNGSI HIDE PLAYER
+-- ==============================================
+local function hideOtherPlayers(hide)
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character then
+            for _, part in ipairs(plr.Character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    if hide then
+                        table.insert(hiddenObjects, part)
+                        part.Transparency = 1
+                    else
+                        part.Transparency = 0
+                    end
+                end
+                if part:IsA("Accessory") and part:FindFirstChild("Handle") then
+                    if hide then
+                        table.insert(hiddenObjects, part.Handle)
+                        part.Handle.Transparency = 1
+                    else
+                        part.Handle.Transparency = 0
+                    end
+                end
+            end
+        end
+    end
+end
+
+-- ==============================================
+-- FUNGSI FPS BOOST
+-- ==============================================
+local function clearHidden()
+    for _, obj in ipairs(hiddenObjects) do
+        if obj and obj.Parent then
+            if obj:IsA("BasePart") then
+                obj.Transparency = 0
+            elseif obj:IsA("ParticleEmitter") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+                obj.Enabled = true
+            elseif obj:IsA("Grass") then
+                obj.Enabled = true
+            elseif obj:IsA("Decal") or obj:IsA("Texture") then
+                obj.Transparency = 0
+            end
+        end
+    end
+    hiddenObjects = {}
+end
+
+local function applyBoost(enable)
+    if enable then
+        -- Bersihkan dulu
+        clearHidden()
+        
+        -- Terapkan pengaturan
+        if hideOptions.Shadows then
+            Lighting.GlobalShadows = false
+        end
+        
+        if hideOptions.Fog then
+            Lighting.FogEnd = 9e9
+        end
+        
+        if hideOptions.Clouds then
+            Lighting.Clouds = nil
+        end
+        
+        -- Loop semua objek
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            -- Sembunyikan partikel
+            if hideOptions.Particles and (obj:IsA("ParticleEmitter") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles")) then
+                table.insert(hiddenObjects, obj)
+                obj.Enabled = false
+            end
+            
+            -- Sembunyikan rumput
+            if hideOptions.Grass and obj:IsA("Grass") then
+                table.insert(hiddenObjects, obj)
+                obj.Enabled = false
+            end
+            
+            -- Sembunyikan decals
+            if hideOptions.Decals and (obj:IsA("Decal") or obj:IsA("Texture")) then
+                table.insert(hiddenObjects, obj)
+                obj.Transparency = 1
+            end
+            
+            if obj:IsA("BasePart") then
+                -- Sembunyikan pohon
+                if hideOptions.Trees then
+                    local name = obj.Name:lower()
+                    if name:find("tree") or name:find("bush") or name:find("leaf") or name:find("plant") then
+                        table.insert(hiddenObjects, obj)
+                        obj.Transparency = 1
+                    end
+                end
+                -- Sembunyikan air
+                if hideOptions.Water and obj.Material == Enum.Material.Water then
+                    table.insert(hiddenObjects, obj)
+                    obj.Transparency = 1
+                end
+            end
+        end
+        
+        -- Sembunyikan pemain lain
+        if hideOptions.OtherPlayers then
+            hideOtherPlayers(true)
+        end
+        
+        boostActive = true
+    else
+        -- Kembalikan semua
+        Lighting.GlobalShadows = originalSettings.GlobalShadows
+        Lighting.FogEnd = originalSettings.FogEnd
+        Lighting.Brightness = originalSettings.Brightness
+        Lighting.Clouds = Instance.new("Clouds")
+        
+        clearHidden()
+        hideOtherPlayers(false)
+        boostActive = false
+    end
+    
+    -- Update UI
+    updateUI()
+end
+
+-- ==============================================
+-- FUNGSI UPDATE UI
+-- ==============================================
+local function updateUI()
+    if boostActive then
+        boostBtn.Text = "ON"
+        boostBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+        statusIndicator.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    else
+        boostBtn.Text = "OFF"
+        boostBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+        statusIndicator.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+    end
+end
+
+-- ==============================================
+-- FUNGSI MONITOR
+-- ==============================================
+RunService.RenderStepped:Connect(function()
+    frameCount = frameCount + 1
+    local currentTime = tick()
+    if currentTime - lastTime >= 1 then
+        fps = frameCount
+        frameCount = 0
+        lastTime = currentTime
+        
+        -- Dapatkan ping
+        local success = pcall(function()
+            ping = game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValueString()
+        end)
+        
+        if fpsValue and pingValue then
+            fpsValue.Text = fps .. " FPS"
+            pingValue.Text = ping
+        end
+    end
+end)
+
+-- ==============================================
+-- MODERN HUB ULTIMATE V3 (SMOOTH UI)
+-- ==============================================
+local gui = Instance.new("ScreenGui")
+gui.Name = "FIQQZR7_FPSBoost"
+gui.Parent = player.PlayerGui
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- Main Container (dengan efek glow)
+local container = Instance.new("Frame")
+container.Size = UDim2.new(0, 360, 0, 550)
+container.Position = UDim2.new(0.5, -180, 0.5, -275)
+container.BackgroundTransparency = 1
+container.Active = true
+container.Draggable = true
+container.Parent = gui
+
+-- Main Frame (Glass Effect Premium)
+local main = Instance.new("Frame")
+main.Size = UDim2.new(1, 0, 1, 0)
+main.BackgroundColor3 = Color3.fromRGB(5, 8, 18)
+main.BackgroundTransparency = 0.05
+main.BorderColor3 = Color3.fromRGB(0, 150, 255)
+main.BorderSizePixel = 2
+main.ClipsDescendants = true
+main.Parent = container
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 24)
+mainCorner.Parent = main
+
+-- Glass Blur Effect
+local blur = Instance.new("Frame")
+blur.Size = UDim2.new(1, 0, 1, 0)
+blur.BackgroundColor3 = Color3.fromRGB(10, 15, 30)
+blur.BackgroundTransparency = 0.7
+blur.BorderSizePixel = 0
+blur.ZIndex = 0
+blur.Parent = main
+
+local blurCorner = Instance.new("UICorner")
+blurCorner.CornerRadius = UDim.new(0, 24)
+blurCorner.Parent = blur
+
+-- Gradient premium
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 25, 50)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(8, 18, 40)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(3, 12, 35))
+})
+gradient.Rotation = 45
+gradient.Parent = main
+
+-- ==============================================
+-- TITLE BAR PREMIUM (SMOOTH)
+-- ==============================================
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, -20, 0, 70)
+titleBar.Position = UDim2.new(0, 10, 0, 8)
+titleBar.BackgroundColor3 = Color3.fromRGB(0, 70, 150)
+titleBar.BackgroundTransparency = 0.2
+titleBar.BorderColor3 = Color3.fromRGB(0, 200, 255)
+titleBar.BorderSizePixel = 1
+titleBar.Parent = main
+
+local titleBarCorner = Instance.new("UICorner")
+titleBarCorner.CornerRadius = UDim.new(0, 18)
+titleBarCorner.Parent = titleBar
+
+-- Icon kiri (premium)
+local leftIcon = Instance.new("TextLabel")
+leftIcon.Size = UDim2.new(0, 45, 1, 0)
+leftIcon.Position = UDim2.new(0, 12, 0, 0)
+leftIcon.BackgroundTransparency = 1
+leftIcon.Text = "⚡"
+leftIcon.TextColor3 = Color3.fromRGB(0, 255, 200)
+leftIcon.TextSize = 32
+leftIcon.Font = Enum.Font.GothamBlack
+leftIcon.Parent = titleBar
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0.5, 0, 0.5, 0)
+title.Position = UDim2.new(0, 65, 0, 12)
+title.BackgroundTransparency = 1
+title.Text = "FPS BOOST FIQQZR7"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 20
+title.Font = Enum.Font.GothamBlack
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
+
+-- Subtitle premium
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(0.5, 0, 0.3, 0)
+subtitle.Position = UDim2.new(0, 65, 0, 40)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "⚡ NO LAG • ULTRA PERFORMANCE"
+subtitle.TextColor3 = Color3.fromRGB(150, 220, 255)
+subtitle.TextSize = 10
+subtitle.Font = Enum.Font.GothamBold
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.Parent = titleBar
+
+-- Status indicator premium
+local statusFrame = Instance.new("Frame")
+statusFrame.Size = UDim2.new(0, 70, 0, 28)
+statusFrame.Position = UDim2.new(1, -140, 0.5, -14)
+statusFrame.BackgroundColor3 = Color3.fromRGB(20, 25, 40)
+statusFrame.BorderColor3 = Color3.fromRGB(0, 200, 255)
+statusFrame.BorderSizePixel = 1
+statusFrame.Parent = titleBar
+
+local statusFrameCorner = Instance.new("UICorner")
+statusFrameCorner.CornerRadius = UDim.new(0, 14)
+statusFrameCorner.Parent = statusFrame
+
+statusIndicator = Instance.new("Frame")
+statusIndicator.Size = UDim2.new(0, 10, 0, 10)
+statusIndicator.Position = UDim2.new(0, 8, 0.5, -5)
+statusIndicator.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+statusIndicator.BorderSizePixel = 0
+statusIndicator.Parent = statusFrame
+
+local statusIndicatorCorner = Instance.new("UICorner")
+statusIndicatorCorner.CornerRadius = UDim.new(0, 5)
+statusIndicatorCorner.Parent = statusIndicator
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -20, 1, 0)
+statusLabel.Position = UDim2.new(0, 20, 0, 0)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "OFF"
+statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+statusLabel.TextSize = 12
+statusLabel.Font = Enum.Font.GothamBold
+statusLabel.Parent = statusFrame
+
+-- Minimize button
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 32, 0, 32)
+minimizeBtn.Position = UDim2.new(1, -105, 0.5, -16)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(25, 40, 65)
+minimizeBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
+minimizeBtn.BorderSizePixel = 1
+minimizeBtn.Text = "−"
+minimizeBtn.TextColor3 = Color3.fromRGB(0, 255, 200)
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 22
+minimizeBtn.Parent = titleBar
+
+local minimizeCorner = Instance.new("UICorner")
+minimizeCorner.CornerRadius = UDim.new(0, 10)
+minimizeCorner.Parent = minimizeBtn
+
+-- Close button (FIXED - boleh close)
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 32, 0, 32)
+closeBtn.Position = UDim2.new(1, -45, 0.5, -16)
+closeBtn.BackgroundColor3 = Color3.fromRGB(60, 25, 35)
+closeBtn.BorderColor3 = Color3.fromRGB(255, 100, 100)
+closeBtn.BorderSizePixel = 1
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255, 120, 120)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 18
+closeBtn.Parent = titleBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 10)
+closeCorner.Parent = closeBtn
+
+closeBtn.MouseButton1Click:Connect(function()
+    if boostActive then applyBoost(false) end
+    gui:Destroy()
+end)
+
+-- ==============================================
+-- CONTENT CONTAINER (SCROLLING)
+-- ==============================================
+local contentContainer = Instance.new("Frame")
+contentContainer.Size = UDim2.new(1, -20, 1, -95)
+contentContainer.Position = UDim2.new(0, 10, 0, 85)
+contentContainer.BackgroundTransparency = 1
+contentContainer.ClipsDescendants = true
+contentContainer.Parent = main
+
+-- Scrolling Frame (smooth)
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
+scrollingFrame.BackgroundTransparency = 1
+scrollingFrame.BorderSizePixel = 0
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 580)
+scrollingFrame.ScrollBarThickness = 4
+scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
+scrollingFrame.Parent = contentContainer
+
+-- ==============================================
+-- STATS CARD PREMIUM
+-- ==============================================
+local statsCard = Instance.new("Frame")
+statsCard.Size = UDim2.new(0.95, 0, 0, 85)
+statsCard.Position = UDim2.new(0.025, 0, 0, 5)
+statsCard.BackgroundColor3 = Color3.fromRGB(12, 18, 30)
+statsCard.BorderColor3 = Color3.fromRGB(0, 150, 255)
+statsCard.BorderSizePixel = 1
+statsCard.Parent = scrollingFrame
+
+local statsCorner = Instance.new("UICorner")
+statsCorner.CornerRadius = UDim.new(0, 16)
+statsCorner.Parent = statsCard
+
+local statsGradient = Instance.new("UIGradient")
+statsGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 22, 38)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 14, 28))
+})
+statsGradient.Rotation = 90
+statsGradient.Parent = statsCard
+
+-- FPS
+local fpsIcon = Instance.new("TextLabel")
+fpsIcon.Size = UDim2.new(0, 40, 0, 40)
+fpsIcon.Position = UDim2.new(0.1, -15, 0.5, -20)
+fpsIcon.BackgroundTransparency = 1
+fpsIcon.Text = "🎮"
+fpsIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+fpsIcon.TextSize = 30
+fpsIcon.Font = Enum.Font.GothamBold
+fpsIcon.Parent = statsCard
+
+fpsValue = Instance.new("TextLabel")
+fpsValue.Size = UDim2.new(0.3, 0, 0.5, 0)
+fpsValue.Position = UDim2.new(0.25, 0, 0.25, 0)
+fpsValue.BackgroundTransparency = 1
+fpsValue.Text = "0 FPS"
+fpsValue.TextColor3 = Color3.fromRGB(0, 255, 0)
+fpsValue.TextSize = 24
+fpsValue.Font = Enum.Font.GothamBlack
+fpsValue.TextXAlignment = Enum.TextXAlignment.Left
+fpsValue.Parent = statsCard
+
+-- Ping
+local pingIcon = Instance.new("TextLabel")
+pingIcon.Size = UDim2.new(0, 40, 0, 40)
+pingIcon.Position = UDim2.new(0.6, -15, 0.5, -20)
+pingIcon.BackgroundTransparency = 1
+pingIcon.Text = "📶"
+pingIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+pingIcon.TextSize = 28
+pingIcon.Font = Enum.Font.GothamBold
+pingIcon.Parent = statsCard
+
+pingValue = Instance.new("TextLabel")
+pingValue.Size = UDim2.new(0.3, 0, 0.5, 0)
+pingValue.Position = UDim2.new(0.75, -20, 0.25, 0)
+pingValue.BackgroundTransparency = 1
+pingValue.Text = "0ms"
+pingValue.TextColor3 = Color3.fromRGB(0, 255, 0)
+pingValue.TextSize = 24
+pingValue.Font = Enum.Font.GothamBlack
+pingValue.TextXAlignment = Enum.TextXAlignment.Left
+pingValue.Parent = statsCard
+
+-- ==============================================
+-- BOOST CARD PREMIUM
+-- ==============================================
+local boostCard = Instance.new("Frame")
+boostCard.Size = UDim2.new(0.95, 0, 0, 80)
+boostCard.Position = UDim2.new(0.025, 0, 0, 95)
+boostCard.BackgroundColor3 = Color3.fromRGB(12, 18, 30)
+boostCard.BorderColor3 = Color3.fromRGB(0, 150, 255)
+boostCard.BorderSizePixel = 1
+boostCard.Parent = scrollingFrame
+
+local boostCorner = Instance.new("UICorner")
+boostCorner.CornerRadius = UDim.new(0, 16)
+boostCorner.Parent = boostCard
+
+local boostGradient = Instance.new("UIGradient")
+boostGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 22, 38)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 14, 28))
+})
+boostGradient.Rotation = 90
+boostGradient.Parent = boostCard
+
+local boostIcon = Instance.new("TextLabel")
+boostIcon.Size = UDim2.new(0, 50, 1, 0)
+boostIcon.Position = UDim2.new(0, 12, 0, 0)
+boostIcon.BackgroundTransparency = 1
+boostIcon.Text = "⚡"
+boostIcon.TextColor3 = Color3.fromRGB(0, 255, 200)
+boostIcon.TextSize = 38
+boostIcon.Font = Enum.Font.GothamBlack
+boostIcon.Parent = boostCard
+
+local boostTitle = Instance.new("TextLabel")
+boostTitle.Size = UDim2.new(0.5, 0, 0.4, 0)
+boostTitle.Position = UDim2.new(0, 70, 0, 12)
+boostTitle.BackgroundTransparency = 1
+boostTitle.Text = "BOOST MODE"
+boostTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+boostTitle.TextSize = 18
+boostTitle.Font = Enum.Font.GothamBlack
+boostTitle.TextXAlignment = Enum.TextXAlignment.Left
+boostTitle.Parent = boostCard
+
+local boostDesc = Instance.new("TextLabel")
+boostDesc.Size = UDim2.new(0.5, 0, 0.3, 0)
+boostDesc.Position = UDim2.new(0, 70, 0, 40)
+boostDesc.BackgroundTransparency = 1
+boostDesc.Text = "ultra performance • hide elements"
+boostDesc.TextColor3 = Color3.fromRGB(150, 200, 255)
+boostDesc.TextSize = 10
+boostDesc.Font = Enum.Font.Gotham
+boostDesc.TextXAlignment = Enum.TextXAlignment.Left
+boostDesc.Parent = boostCard
+
+-- ON/OFF button premium
+boostBtn = Instance.new("TextButton")
+boostBtn.Size = UDim2.new(0, 75, 0, 42)
+boostBtn.Position = UDim2.new(1, -85, 0.5, -21)
+boostBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+boostBtn.BorderColor3 = Color3.fromRGB(0, 200, 255)
+boostBtn.BorderSizePixel = 2
+boostBtn.Text = "OFF"
+boostBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+boostBtn.Font = Enum.Font.GothamBlack
+boostBtn.TextSize = 18
+boostBtn.Parent = boostCard
+
+local boostBtnCorner = Instance.new("UICorner")
+boostBtnCorner.CornerRadius = UDim.new(0, 21)
+boostBtnCorner.Parent = boostBtn
+
+-- ==============================================
+-- OPTIMIZATION LEVEL CARD
+-- ==============================================
+local levelCard = Instance.new("Frame")
+levelCard.Size = UDim2.new(0.95, 0, 0, 70)
+levelCard.Position = UDim2.new(0.025, 0, 0, 180)
+levelCard.BackgroundColor3 = Color3.fromRGB(12, 18, 30)
+levelCard.BorderColor3 = Color3.fromRGB(0, 150, 255)
+levelCard.BorderSizePixel = 1
+levelCard.Parent = scrollingFrame
+
+local levelCorner = Instance.new("UICorner")
+levelCorner.CornerRadius = UDim.new(0, 16)
+levelCorner.Parent = levelCard
+
+local levelIcon = Instance.new("TextLabel")
+levelIcon.Size = UDim2.new(0, 30, 1, 0)
+levelIcon.Position = UDim2.new(0, 12, 0, 0)
+levelIcon.BackgroundTransparency = 1
+levelIcon.Text = "🎚️"
+levelIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+levelIcon.TextSize = 22
+levelIcon.Font = Enum.Font.GothamBold
+levelIcon.Parent = levelCard
+
+local levelTitle = Instance.new("TextLabel")
+levelTitle.Size = UDim2.new(1, -50, 0.4, 0)
+levelTitle.Position = UDim2.new(0, 50, 0, 10)
+levelTitle.BackgroundTransparency = 1
+levelTitle.Text = "OPTIMIZATION LEVEL"
+levelTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+levelTitle.TextSize = 14
+levelTitle.Font = Enum.Font.GothamBold
+levelTitle.TextXAlignment = Enum.TextXAlignment.Left
+levelTitle.Parent = levelCard
+
+-- Slider background
+local sliderBg = Instance.new("Frame")
+sliderBg.Size = UDim2.new(0.6, 0, 0, 6)
+sliderBg.Position = UDim2.new(0.2, 0, 0.7, -3)
+sliderBg.BackgroundColor3 = Color3.fromRGB(40, 45, 60)
+sliderBg.BorderColor3 = Color3.fromRGB(0, 150, 255)
+sliderBg.BorderSizePixel = 1
+sliderBg.Parent = levelCard
+
+local sliderBgCorner = Instance.new("UICorner")
+sliderBgCorner.CornerRadius = UDim.new(0, 3)
+sliderBgCorner.Parent = sliderBg
+
+-- Slider fill
+local sliderFill = Instance.new("Frame")
+sliderFill.Size = UDim2.new(0.5, 0, 1, 0)
+sliderFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+sliderFill.BorderSizePixel = 0
+sliderFill.Parent = sliderBg
+
+local sliderFillCorner = Instance.new("UICorner")
+sliderFillCorner.CornerRadius = UDim.new(0, 3)
+sliderFillCorner.Parent = sliderFill
+
+-- Slider knob
+local sliderKnob = Instance.new("Frame")
+sliderKnob.Size = UDim2.new(0, 16, 0, 16)
+sliderKnob.Position = UDim2.new(0.5, -8, 0.5, -8)
+sliderKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+sliderKnob.BorderColor3 = Color3.fromRGB(0, 200, 255)
+sliderKnob.BorderSizePixel = 2
+sliderKnob.Parent = sliderBg
+
+local sliderKnobCorner = Instance.new("UICorner")
+sliderKnobCorner.CornerRadius = UDim.new(0, 8)
+sliderKnobCorner.Parent = sliderKnob
+
+-- Slider value
+local sliderValue = Instance.new("TextLabel")
+sliderValue.Size = UDim2.new(0.15, 0, 0, 20)
+sliderValue.Position = UDim2.new(0.85, -10, 0.5, -10)
+sliderValue.BackgroundTransparency = 1
+sliderValue.Text = "50%"
+sliderValue.TextColor3 = Color3.fromRGB(0, 255, 200)
+sliderValue.TextSize = 12
+sliderValue.Font = Enum.Font.GothamBold
+sliderValue.Parent = levelCard
+
+-- ==============================================
+-- QUICK OPTIONS CARD
+-- ==============================================
+local optionsCard = Instance.new("Frame")
+optionsCard.Size = UDim2.new(0.95, 0, 0, 210)
+optionsCard.Position = UDim2.new(0.025, 0, 0, 255)
+optionsCard.BackgroundColor3 = Color3.fromRGB(12, 18, 30)
+optionsCard.BorderColor3 = Color3.fromRGB(0, 150, 255)
+optionsCard.BorderSizePixel = 1
+optionsCard.Parent = scrollingFrame
+
+local optionsCorner = Instance.new("UICorner")
+optionsCorner.CornerRadius = UDim.new(0, 16)
+optionsCorner.Parent = optionsCard
+
+local optionsGradient = Instance.new("UIGradient")
+optionsGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 22, 38)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 14, 28))
+})
+optionsGradient.Rotation = 90
+optionsGradient.Parent = optionsCard
+
+local optionsTitle = Instance.new("TextLabel")
+optionsTitle.Size = UDim2.new(1, -20, 0, 30)
+optionsTitle.Position = UDim2.new(0, 12, 0, 8)
+optionsTitle.BackgroundTransparency = 1
+optionsTitle.Text = "🎮 QUICK OPTIONS"
+optionsTitle.TextColor3 = Color3.fromRGB(0, 200, 255)
+optionsTitle.TextSize = 16
+optionsTitle.Font = Enum.Font.GothamBold
+optionsTitle.TextXAlignment = Enum.TextXAlignment.Left
+optionsTitle.Parent = optionsCard
+
+-- Toggle premium
+local function createToggle(y, text, icon, key)
+    local row = Instance.new("Frame")
+    row.Size = UDim2.new(1, -20, 0, 32)
+    row.Position = UDim2.new(0, 10, 0, y)
+    row.BackgroundTransparency = 1
+    row.Parent = optionsCard
+    
+    local toggleBg = Instance.new("Frame")
+    toggleBg.Size = UDim2.new(0, 44, 0, 22)
+    toggleBg.Position = UDim2.new(0, 0, 0.5, -11)
+    toggleBg.BackgroundColor3 = hideOptions[key] and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(40, 45, 60)
+    toggleBg.BorderColor3 = hideOptions[key] and Color3.fromRGB(0, 200, 255) or Color3.fromRGB(0, 150, 255)
+    toggleBg.BorderSizePixel = 1
+    toggleBg.Parent = row
+    
+    local toggleBgCorner = Instance.new("UICorner")
+    toggleBgCorner.CornerRadius = UDim.new(0, 11)
+    toggleBgCorner.Parent = toggleBg
+    
+    local toggleIndicator = Instance.new("Frame")
+    toggleIndicator.Size = UDim2.new(0, 18, 0, 18)
+    toggleIndicator.Position = hideOptions[key] and UDim2.new(1, -20, 0.5, -9) or UDim2.new(0, 2, 0.5, -9)
+    toggleIndicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    toggleIndicator.BorderSizePixel = 0
+    toggleIndicator.Parent = toggleBg
+    
+    local toggleIndicatorCorner = Instance.new("UICorner")
+    toggleIndicatorCorner.CornerRadius = UDim.new(0, 9)
+    toggleIndicatorCorner.Parent = toggleIndicator
+    
+    local iconLabel = Instance.new("TextLabel")
+    iconLabel.Size = UDim2.new(0, 24, 0, 24)
+    iconLabel.Position = UDim2.new(0, 50, 0.5, -12)
+    iconLabel.BackgroundTransparency = 1
+    iconLabel.Text = icon
+    iconLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+    iconLabel.TextSize = 16
+    iconLabel.Font = Enum.Font.GothamBold
+    iconLabel.Parent = row
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -80, 1, 0)
+    label.Position = UDim2.new(0, 80, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(220, 220, 240)
+    label.TextSize = 13
+    label.Font = Enum.Font.Gotham
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = row
+    
+    local clickBtn = Instance.new("TextButton")
+    clickBtn.Size = UDim2.new(1, 0, 1, 0)
+    clickBtn.BackgroundTransparency = 1
+    clickBtn.Text = ""
+    clickBtn.Parent = row
+    
+    clickBtn.MouseButton1Click:Connect(function()
+        hideOptions[key] = not hideOptions[key]
+        
+        if hideOptions[key] then
+            toggleBg.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+            toggleBg.BorderColor3 = Color3.fromRGB(0, 200, 255)
+            toggleIndicator.Position = UDim2.new(1, -20, 0.5, -9)
+        else
+            toggleBg.BackgroundColor3 = Color3.fromRGB(40, 45, 60)
+            toggleBg.BorderColor3 = Color3.fromRGB(0, 150, 255)
+            toggleIndicator.Position = UDim2.new(0, 2, 0.5, -9)
+        end
+        
+        if boostActive then
+            applyBoost(true)
+        end
+    end)
+end
+
+createToggle(40, "Shadows (Bayangan)", "⬛", "Shadows")
+createToggle(75, "Fog (Kabut)", "🌫️", "Fog")
+createToggle(110, "Particles (Partikel)", "✨", "Particles")
+createToggle(145, "Trees (Pohon)", "🌳", "Trees")
+createToggle(180, "Hide Player", "👥", "OtherPlayers")
+
+-- ==============================================
+-- RESET CARD
+-- ==============================================
+local resetCard = Instance.new("Frame")
+resetCard.Size = UDim2.new(0.95, 0, 0, 70)
+resetCard.Position = UDim2.new(0.025, 0, 0, 470)
+resetCard.BackgroundColor3 = Color3.fromRGB(12, 18, 30)
+resetCard.BorderColor3 = Color3.fromRGB(0, 150, 255)
+resetCard.BorderSizePixel = 1
+resetCard.Parent = scrollingFrame
+
+local resetCorner = Instance.new("UICorner")
+resetCorner.CornerRadius = UDim.new(0, 16)
+resetCorner.Parent = resetCard
+
+local resetIcon = Instance.new("TextLabel")
+resetIcon.Size = UDim2.new(0, 35, 1, 0)
+resetIcon.Position = UDim2.new(0, 12, 0, 0)
+resetIcon.BackgroundTransparency = 1
+resetIcon.Text = "🔄"
+resetIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+resetIcon.TextSize = 24
+resetIcon.Font = Enum.Font.GothamBold
+resetIcon.Parent = resetCard
+
+local resetTitle = Instance.new("TextLabel")
+resetTitle.Size = UDim2.new(1, -50, 0.4, 0)
+resetTitle.Position = UDim2.new(0, 55, 0, 12)
+resetTitle.BackgroundTransparency = 1
+resetTitle.Text = "RESET SETTINGS"
+resetTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+resetTitle.TextSize = 14
+resetTitle.Font = Enum.Font.GothamBold
+resetTitle.TextXAlignment = Enum.TextXAlignment.Left
+resetTitle.Parent = resetCard
+
+local resetDesc = Instance.new("TextLabel")
+resetDesc.Size = UDim2.new(1, -50, 0.3, 0)
+resetDesc.Position = UDim2.new(0, 55, 0, 36)
+resetDesc.BackgroundTransparency = 1
+resetDesc.Text = "Kembalikan semua ke default"
+resetDesc.TextColor3 = Color3.fromRGB(150, 200, 255)
+resetDesc.TextSize = 10
+resetDesc.Font = Enum.Font.Gotham
+resetDesc.TextXAlignment = Enum.TextXAlignment.Left
+resetDesc.Parent = resetCard
+
+-- Reset button
+local resetBtn = Instance.new("TextButton")
+resetBtn.Size = UDim2.new(0, 70, 0, 36)
+resetBtn.Position = UDim2.new(1, -80, 0.5, -18)
+resetBtn.BackgroundColor3 = Color3.fromRGB(150, 60, 80)
+resetBtn.BorderColor3 = Color3.fromRGB(255, 100, 100)
+resetBtn.BorderSizePixel = 2
+resetBtn.Text = "RESET"
+resetBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+resetBtn.Font = Enum.Font.GothamBold
+resetBtn.TextSize = 12
+resetBtn.Parent = resetCard
+
+local resetBtnCorner = Instance.new("UICorner")
+resetBtnCorner.CornerRadius = UDim.new(0, 18)
+resetBtnCorner.Parent = resetBtn
+
+-- ==============================================
+-- FOOTER
+-- ==============================================
+local footer = Instance.new("TextLabel")
+footer.Size = UDim2.new(1, -20, 0, 25)
+footer.Position = UDim2.new(0, 10, 0, 545)
+footer.BackgroundTransparency = 1
+footer.Text = "DEVELOPER FIQQZR7"
+footer.TextColor3 = Color3.fromRGB(100, 120, 150)
+footer.TextSize = 10
+footer.Font = Enum.Font.GothamBold
+footer.Parent = scrollingFrame
+
+-- Update canvas size
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 580)
+
+-- ==============================================
+-- BUTTON FUNCTIONS
+-- ==============================================
+boostBtn.MouseButton1Click:Connect(function()
+    boostActive = not boostActive
+    applyBoost(boostActive)
+end)
+
+resetBtn.MouseButton1Click:Connect(function()
+    -- Reset semua opsi ke false
+    for key, _ in pairs(hideOptions) do
+        hideOptions[key] = false
+    end
+    
+    -- Matikan boost jika aktif
+    if boostActive then
+        applyBoost(false)
+    end
+    
+    -- Update UI reset
+    boostActive = false
+    updateUI()
+    
+    -- Update semua toggle visuals
+    for _, child in ipairs(optionsCard:GetChildren()) do
+        if child:IsA("Frame") then
+            local toggleBg = child:FindFirstChildOfClass("Frame")
+            if toggleBg and toggleBg ~= resetCard and toggleBg ~= statsCard and toggleBg ~= boostCard then
+                toggleBg.BackgroundColor3 = Color3.fromRGB(40, 45, 60)
+                toggleBg.BorderColor3 = Color3.fromRGB(0, 150, 255)
+                local indicator = toggleBg:FindFirstChildOfClass("Frame")
+                if indicator then
+                    indicator.Position = UDim2.new(0, 2, 0.5, -9)
+                end
+            end
+        end
+    end
+end)
+
+-- Minimize function
+minimizeBtn.MouseButton1Click:Connect(function()
+    uiVisible = not uiVisible
+    
+    if uiVisible then
+        TweenService:Create(container, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
+            Size = UDim2.new(0, 360, 0, 550)
+        }):Play()
+        task.wait(0.1)
+        contentContainer.Visible = true
+        minimizeBtn.Text = "−"
+        minimizeBtn.TextColor3 = Color3.fromRGB(0, 255, 200)
+    else
+        contentContainer.Visible = false
+        TweenService:Create(container, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
+            Size = UDim2.new(0, 360, 0, 70)
+        }):Play()
+        minimizeBtn.Text = "+"
+        minimizeBtn.TextColor3 = Color3.fromRGB(255, 200, 0)
+    end
+end)
+
+-- Insert key toggle
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Insert then
+        container.Visible = not container.Visible
+    end
+end)
+
+print("✅ FIQQZR7 FPS BOOST - ULTIMATE V3")
+print("⚡ Close button berfungsi")
+print("🎨 UI lebih smooth & modern")
+print("🎚️ Slider optimization level")
+print("🎮 5 toggle premium")
+print("💎 Glass morphism effect")
