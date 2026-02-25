@@ -1,0 +1,874 @@
+-- FIQQZR7 FOLDER SYSTEM - DRAG HANYA PADA TITLE BAR
+-- Tekan − → semua content hilang, tinggal title bar kosong
+-- Tekan + → content muncul balik
+-- Setiap folder ada butang DELETE (✕)
+-- Hanya title bar boleh drag, kawasan lain tak boleh
+
+local player = game.Players.LocalPlayer
+
+repeat task.wait() until player and player:FindFirstChild("PlayerGui")
+
+-- Services
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
+local Lighting = game:GetService("Lighting")
+
+-- ==============================================
+-- KONFIGURASI
+-- ==============================================
+local SAVE_KEY = "FIQQZR7_FOLDER_SYSTEM"
+
+-- ==============================================
+-- DATA SAVE SYSTEM (FOLDER BASED)
+-- ==============================================
+local defaultData = {
+    folders = {
+
+    },
+    autoPlay = {
+        enabled = false,
+        delay = 3
+    }
+}
+
+-- Load data (simplified)
+local saveData = defaultData
+
+local function saveDataFunc()
+    print("Data saved!")
+end
+
+-- ==============================================
+-- MAIN UI
+-- ==============================================
+local gui = Instance.new("ScreenGui")
+gui.Name = "FIQQZR7_FolderSystem"
+gui.Parent = player.PlayerGui
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.DisplayOrder = 999
+
+-- ==============================================
+-- MAIN CONTAINER (Draggable = false)
+-- ==============================================
+local container = Instance.new("Frame")
+container.Size = UDim2.new(0, 340, 0, 420)
+container.Position = UDim2.new(0.5, -170, 0.5, -210)
+container.BackgroundTransparency = 1
+container.Active = false  -- Tak boleh drag
+container.Draggable = false  -- Pastikan tak boleh drag
+container.Visible = true
+container.Parent = gui
+
+-- Main Frame (Hitam Putih)
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 320, 0, 400)
+main.Position = UDim2.new(0.5, -160, 0.5, -200)
+main.BackgroundColor3 = Color3.fromRGB(5, 5, 10)  -- Hitam gelap
+main.BorderColor3 = Color3.fromRGB(150, 150, 150)  -- Kelabu
+main.BorderSizePixel = 1
+main.Active = false  -- Tak boleh drag
+main.ClipsDescendants = true
+main.Parent = container
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 15)
+mainCorner.Parent = main
+
+-- Gradient Background (hitam ke kelabu gelap)
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 10, 15)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 5, 8))
+})
+gradient.Rotation = 45
+gradient.Parent = main
+
+-- ==============================================
+-- TITLE BAR (BOLEH DRAG)
+-- ==============================================
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, -20, 0, 70)
+titleBar.Position = UDim2.new(0, 10, 0, 10)
+titleBar.BackgroundColor3 = Color3.fromRGB(15, 15, 20)  -- Hitam sedikit cerah
+titleBar.BackgroundTransparency = 0.1
+titleBar.BorderColor3 = Color3.fromRGB(200, 200, 200)  -- Putih kelabu
+titleBar.BorderSizePixel = 1
+titleBar.Active = true  -- Boleh drag
+titleBar.Parent = main
+
+local titleBarCorner = Instance.new("UICorner")
+titleBarCorner.CornerRadius = UDim.new(0, 12)
+titleBarCorner.Parent = titleBar
+
+-- DRAG FUNCTIONALITY untuk title bar
+local dragging = false
+local dragInput
+local dragStart
+local startPos
+
+local function updateDrag(input)
+    local delta = input.Position - dragStart
+    container.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = container.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+titleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        updateDrag(input)
+    end
+end)
+
+-- Icon (folder putih)
+local icon = Instance.new("TextLabel")
+icon.Size = UDim2.new(0, 45, 1, 0)
+icon.Position = UDim2.new(0, 10, 0, 0)
+icon.BackgroundTransparency = 1
+icon.Text = "📁"
+icon.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
+icon.TextSize = 28
+icon.Font = Enum.Font.GothamBold
+icon.Parent = titleBar
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0.5, 0, 0.5, 0)
+title.Position = UDim2.new(0, 65, 0, 10)
+title.BackgroundTransparency = 1
+title.Text = "TELEPORT SET"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
+title.TextSize = 16
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
+
+-- Subtitle
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(0.5, 0, 0.3, 0)
+subtitle.Position = UDim2.new(0, 65, 0, 38)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "Developer Fiqqzr7"
+subtitle.TextColor3 = Color3.fromRGB(180, 180, 180)  -- Kelabu muda
+subtitle.TextSize = 11
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.Parent = titleBar
+
+-- Status indicator (bulat)
+local statusIndicator = Instance.new("Frame")
+statusIndicator.Size = UDim2.new(0, 8, 0, 8)
+statusIndicator.Position = UDim2.new(1, -25, 0.5, -4)
+statusIndicator.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- Hijau (ON)
+statusIndicator.BorderSizePixel = 0
+statusIndicator.Parent = titleBar
+
+local statusCorner = Instance.new("UICorner")
+statusCorner.CornerRadius = UDim.new(0, 4)
+statusCorner.Parent = statusIndicator
+
+-- ==============================================
+-- MINIMIZE/RESTORE BUTTON (− jadi +)
+-- ==============================================
+local uiExpanded = true  -- Status UI (true = ada content, false = title bar je)
+
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 30, 0, 28)
+minimizeBtn.Position = UDim2.new(1, -80, 0.5, -14)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)  -- Kelabu gelap
+minimizeBtn.BorderColor3 = Color3.fromRGB(200, 200, 200)  -- Putih kelabu
+minimizeBtn.BorderSizePixel = 1
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
+minimizeBtn.Text = "−"  -- Mula dengan −
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 16
+minimizeBtn.Parent = titleBar
+
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 6)
+minCorner.Parent = minimizeBtn
+
+-- Close button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 30, 0, 28)
+closeBtn.Position = UDim2.new(1, -40, 0.5, -14)
+closeBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)  -- Merah gelap
+closeBtn.BorderColor3 = Color3.fromRGB(200, 200, 200)  -- Putih kelabu
+closeBtn.BorderSizePixel = 1
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 16
+closeBtn.Parent = titleBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 6)
+closeCorner.Parent = closeBtn
+
+-- ==============================================
+-- SCROLLING FRAME (CONTENT)
+-- ==============================================
+local mainScroll = Instance.new("ScrollingFrame")
+mainScroll.Size = UDim2.new(1, -20, 1, -100)
+mainScroll.Position = UDim2.new(0, 10, 0, 90)
+mainScroll.BackgroundTransparency = 1
+mainScroll.BorderSizePixel = 0
+mainScroll.CanvasSize = UDim2.new(0, 0, 0, 480)
+mainScroll.ScrollBarThickness = 4
+mainScroll.ScrollBarImageColor3 = Color3.fromRGB(150, 150, 150)  -- Kelabu
+mainScroll.Parent = main
+
+-- Content container
+local contentContainer = Instance.new("Frame")
+contentContainer.Size = UDim2.new(1, -10, 0, 480)
+contentContainer.Position = UDim2.new(0, 5, 0, 0)
+contentContainer.BackgroundTransparency = 1
+contentContainer.Parent = mainScroll
+
+-- ==============================================
+-- SLIDE IN ANIMATION
+-- ==============================================
+TweenService:Create(container, TweenInfo.new(0.7, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+    Position = UDim2.new(0.5, -170, 0.5, -210)
+}):Play()
+
+-- ==============================================
+-- CURRENT POSITION
+-- ==============================================
+local currentFrame = Instance.new("Frame")
+currentFrame.Size = UDim2.new(1, 0, 0, 60)
+currentFrame.Position = UDim2.new(0, 0, 0, 0)
+currentFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+currentFrame.BorderColor3 = Color3.fromRGB(100, 100, 100)
+currentFrame.BorderSizePixel = 1
+currentFrame.Parent = contentContainer
+
+local currentCorner = Instance.new("UICorner")
+currentCorner.CornerRadius = UDim.new(0, 8)
+currentCorner.Parent = currentFrame
+
+local currentTitle = Instance.new("TextLabel")
+currentTitle.Size = UDim2.new(1, -10, 0, 18)
+currentTitle.Position = UDim2.new(0, 5, 0, 3)
+currentTitle.BackgroundTransparency = 1
+currentTitle.Text = "📍 CURRENT"
+currentTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+currentTitle.TextSize = 10
+currentTitle.Font = Enum.Font.GothamBold
+currentTitle.TextXAlignment = Enum.TextXAlignment.Left
+currentTitle.Parent = currentFrame
+
+-- X Y Z Display
+local coordFrame = Instance.new("Frame")
+coordFrame.Size = UDim2.new(0.7, 0, 0, 25)
+coordFrame.Position = UDim2.new(0.02, 0, 0, 25)
+coordFrame.BackgroundTransparency = 1
+coordFrame.Parent = currentFrame
+
+local xLabel = Instance.new("TextLabel")
+xLabel.Size = UDim2.new(0.3, 0, 1, 0)
+xLabel.Position = UDim2.new(0, 0, 0, 0)
+xLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+xLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+xLabel.Text = "X:0"
+xLabel.TextSize = 10
+xLabel.Font = Enum.Font.GothamBold
+xLabel.Parent = coordFrame
+
+local xCorner = Instance.new("UICorner")
+xCorner.CornerRadius = UDim.new(0, 4)
+xCorner.Parent = xLabel
+
+local yLabel = Instance.new("TextLabel")
+yLabel.Size = UDim2.new(0.3, 0, 1, 0)
+yLabel.Position = UDim2.new(0.35, 0, 0, 0)
+yLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+yLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+yLabel.Text = "Y:0"
+yLabel.TextSize = 10
+yLabel.Font = Enum.Font.GothamBold
+yLabel.Parent = coordFrame
+
+local yCorner = Instance.new("UICorner")
+yCorner.CornerRadius = UDim.new(0, 4)
+yCorner.Parent = yLabel
+
+local zLabel = Instance.new("TextLabel")
+zLabel.Size = UDim2.new(0.3, 0, 1, 0)
+zLabel.Position = UDim2.new(0.7, 0, 0, 0)
+zLabel.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+zLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+zLabel.Text = "Z:0"
+zLabel.TextSize = 10
+zLabel.Font = Enum.Font.GothamBold
+zLabel.Parent = coordFrame
+
+local zCorner = Instance.new("UICorner")
+zCorner.CornerRadius = UDim.new(0, 4)
+zCorner.Parent = zLabel
+
+-- Get button
+local getBtn = Instance.new("TextButton")
+getBtn.Size = UDim2.new(0.2, 0, 0, 25)
+getBtn.Position = UDim2.new(0.75, 0, 0, 25)
+getBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+getBtn.BorderColor3 = Color3.fromRGB(150, 150, 150)
+getBtn.BorderSizePixel = 1
+getBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+getBtn.Text = "GET"
+getBtn.Font = Enum.Font.GothamBold
+getBtn.TextSize = 10
+getBtn.Parent = currentFrame
+
+local getCorner = Instance.new("UICorner")
+getCorner.CornerRadius = UDim.new(0, 4)
+getCorner.Parent = getBtn
+
+-- Update position
+local function updateCurrentPos()
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local pos = player.Character.HumanoidRootPart.Position
+        xLabel.Text = string.format("X:%.0f", pos.X)
+        yLabel.Text = string.format("Y:%.0f", pos.Y)
+        zLabel.Text = string.format("Z:%.0f", pos.Z)
+    end
+end
+
+spawn(function()
+    while true do
+        task.wait(0.5)
+        updateCurrentPos()
+    end
+end)
+
+-- ==============================================
+-- FOLDER MANAGEMENT (DENGAN BUTANG DELETE)
+-- ==============================================
+local folderManagerFrame = Instance.new("Frame")
+folderManagerFrame.Size = UDim2.new(1, 0, 0, 200)
+folderManagerFrame.Position = UDim2.new(0, 0, 0, 65)
+folderManagerFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+folderManagerFrame.BorderColor3 = Color3.fromRGB(100, 100, 100)
+folderManagerFrame.BorderSizePixel = 1
+folderManagerFrame.Parent = contentContainer
+
+local managerCorner = Instance.new("UICorner")
+managerCorner.CornerRadius = UDim.new(0, 8)
+managerCorner.Parent = folderManagerFrame
+
+local managerTitle = Instance.new("TextLabel")
+managerTitle.Size = UDim2.new(1, -10, 0, 18)
+managerTitle.Position = UDim2.new(0, 5, 0, 3)
+managerTitle.BackgroundTransparency = 1
+managerTitle.Text = "📁 FOLDERS"
+managerTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+managerTitle.TextSize = 10
+managerTitle.Font = Enum.Font.GothamBold
+managerTitle.TextXAlignment = Enum.TextXAlignment.Left
+managerTitle.Parent = folderManagerFrame
+
+-- Create new folder
+local createFrame = Instance.new("Frame")
+createFrame.Size = UDim2.new(1, -10, 0, 40)
+createFrame.Position = UDim2.new(0, 5, 0, 25)
+createFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+createFrame.BorderColor3 = Color3.fromRGB(100, 100, 100)
+createFrame.BorderSizePixel = 1
+createFrame.Parent = folderManagerFrame
+
+local createCorner = Instance.new("UICorner")
+createCorner.CornerRadius = UDim.new(0, 6)
+createCorner.Parent = createFrame
+
+local newNameBox = Instance.new("TextBox")
+newNameBox.Size = UDim2.new(0, 100, 0, 25)
+newNameBox.Position = UDim2.new(0.05, 0, 0.5, -12)
+newNameBox.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+newNameBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+newNameBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+newNameBox.PlaceholderText = "folder name"
+newNameBox.Text = ""
+newNameBox.TextSize = 9
+newNameBox.Font = Enum.Font.Gotham
+newNameBox.Parent = createFrame
+
+local newNameCorner = Instance.new("UICorner")
+newNameCorner.CornerRadius = UDim.new(0, 4)
+newNameCorner.Parent = newNameBox
+
+local createBtn = Instance.new("TextButton")
+createBtn.Size = UDim2.new(0, 50, 0, 25)
+createBtn.Position = UDim2.new(0.65, 0, 0.5, -12)
+createBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+createBtn.BorderColor3 = Color3.fromRGB(150, 150, 150)
+createBtn.BorderSizePixel = 1
+createBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+createBtn.Text = "CREATE"
+createBtn.Font = Enum.Font.GothamBold
+createBtn.TextSize = 8
+createBtn.Parent = createFrame
+
+local createCorner2 = Instance.new("UICorner")
+createCorner2.CornerRadius = UDim.new(0, 4)
+createCorner2.Parent = createBtn
+
+-- Folders list
+local foldersScroll = Instance.new("ScrollingFrame")
+foldersScroll.Size = UDim2.new(1, -10, 0, 120)
+foldersScroll.Position = UDim2.new(0, 5, 0, 70)
+foldersScroll.BackgroundTransparency = 1
+foldersScroll.BorderSizePixel = 0
+foldersScroll.CanvasSize = UDim2.new(0, 0, 0, 150)
+foldersScroll.ScrollBarThickness = 4
+foldersScroll.ScrollBarImageColor3 = Color3.fromRGB(150, 150, 150)
+foldersScroll.Parent = folderManagerFrame
+
+-- Refresh folder list
+local function refreshFolderList()
+    -- Clear existing
+    for _, v in ipairs(foldersScroll:GetChildren()) do
+        if v:IsA("Frame") then
+            v:Destroy()
+        end
+    end
+    
+    -- Create folder items dengan butang DELETE
+    for i, folder in ipairs(saveData.folders) do
+        local yPos = (i-1) * 45
+        
+        local itemFrame = Instance.new("Frame")
+        itemFrame.Size = UDim2.new(1, -5, 0, 40)
+        itemFrame.Position = UDim2.new(0, 0, 0, yPos)
+        itemFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+        itemFrame.BorderColor3 = Color3.fromRGB(100, 100, 100)
+        itemFrame.BorderSizePixel = 1
+        itemFrame.Parent = foldersScroll
+        
+        local itemCorner = Instance.new("UICorner")
+        itemCorner.CornerRadius = UDim.new(0, 6)
+        itemCorner.Parent = itemFrame
+        
+        -- Folder name
+        local nameLabel = Instance.new("TextLabel")
+        nameLabel.Size = UDim2.new(0, 60, 0, 25)
+        nameLabel.Position = UDim2.new(0.05, 0, 0.5, -12)
+        nameLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+        nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        nameLabel.Text = folder.name
+        nameLabel.TextSize = 9
+        nameLabel.Font = Enum.Font.GothamBold
+        nameLabel.Parent = itemFrame
+        
+        local nameCorner = Instance.new("UICorner")
+        nameCorner.CornerRadius = UDim.new(0, 4)
+        nameCorner.Parent = nameLabel
+        
+        -- Coordinates
+        local coordLabel = Instance.new("TextLabel")
+        coordLabel.Size = UDim2.new(0, 65, 0, 25)
+        coordLabel.Position = UDim2.new(0.4, 0, 0.5, -12)
+        coordLabel.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+        coordLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+        coordLabel.Text = string.format("%.0f,%.0f,%.0f", folder.x, folder.y, folder.z)
+        coordLabel.TextSize = 7
+        coordLabel.Font = Enum.Font.Gotham
+        coordLabel.Parent = itemFrame
+        
+        local coordCorner = Instance.new("UICorner")
+        coordCorner.CornerRadius = UDim.new(0, 4)
+        coordCorner.Parent = coordLabel
+        
+        -- Go button
+        local goBtn = Instance.new("TextButton")
+        goBtn.Size = UDim2.new(0, 25, 0, 25)
+        goBtn.Position = UDim2.new(1, -80, 0.5, -12)
+        goBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+        goBtn.BorderColor3 = Color3.fromRGB(150, 150, 150)
+        goBtn.BorderSizePixel = 1
+        goBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        goBtn.Text = "GO"
+        goBtn.Font = Enum.Font.GothamBold
+        goBtn.TextSize = 8
+        goBtn.Parent = itemFrame
+        
+        local goCorner = Instance.new("UICorner")
+        goCorner.CornerRadius = UDim.new(0, 4)
+        goCorner.Parent = goBtn
+        
+        -- Save button
+        local saveBtn = Instance.new("TextButton")
+        saveBtn.Size = UDim2.new(0, 25, 0, 25)
+        saveBtn.Position = UDim2.new(1, -50, 0.5, -12)
+        saveBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+        saveBtn.BorderColor3 = Color3.fromRGB(150, 150, 150)
+        saveBtn.BorderSizePixel = 1
+        saveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        saveBtn.Text = "SV"
+        saveBtn.Font = Enum.Font.GothamBold
+        saveBtn.TextSize = 8
+        saveBtn.Parent = itemFrame
+        
+        local saveCorner = Instance.new("UICorner")
+        saveCorner.CornerRadius = UDim.new(0, 4)
+        saveCorner.Parent = saveBtn
+        
+        -- DELETE button (✕)
+        local delBtn = Instance.new("TextButton")
+        delBtn.Size = UDim2.new(0, 20, 0, 25)
+        delBtn.Position = UDim2.new(1, -20, 0.5, -12)
+        delBtn.BackgroundColor3 = Color3.fromRGB(100, 40, 40)  -- Merah gelap
+        delBtn.BorderColor3 = Color3.fromRGB(150, 150, 150)
+        delBtn.BorderSizePixel = 1
+        delBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        delBtn.Text = "✕"
+        delBtn.Font = Enum.Font.GothamBold
+        delBtn.TextSize = 10
+        delBtn.Parent = itemFrame
+        
+        local delCorner = Instance.new("UICorner")
+        delCorner.CornerRadius = UDim.new(0, 4)
+        delCorner.Parent = delBtn
+        
+        -- Functions
+        goBtn.MouseButton1Click:Connect(function()
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(folder.x, folder.y, folder.z)
+            end
+        end)
+        
+        saveBtn.MouseButton1Click:Connect(function()
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local pos = player.Character.HumanoidRootPart.Position
+                folder.x = math.floor(pos.X)
+                folder.y = math.floor(pos.Y)
+                folder.z = math.floor(pos.Z)
+                coordLabel.Text = string.format("%.0f,%.0f,%.0f", pos.X, pos.Y, pos.Z)
+                saveDataFunc()
+            end
+        end)
+        
+        -- DELETE function
+        delBtn.MouseButton1Click:Connect(function()
+            -- Remove folder from table
+            table.remove(saveData.folders, i)
+            -- Refresh the list
+            refreshFolderList()
+            -- Save data
+            saveDataFunc()
+        end)
+    end
+    
+    foldersScroll.CanvasSize = UDim2.new(0, 0, 0, #saveData.folders * 45 + 10)
+end
+
+-- Create folder function
+createBtn.MouseButton1Click:Connect(function()
+    if newNameBox.Text ~= "" then
+        table.insert(saveData.folders, {
+            name = newNameBox.Text,
+            x = 0,
+            y = 0,
+            z = 0
+        })
+        newNameBox.Text = ""
+        refreshFolderList()
+        saveDataFunc()
+    end
+end)
+
+-- Initial refresh
+refreshFolderList()
+
+-- ==============================================
+-- AUTO PLAY (HITAM PUTIH)
+-- ==============================================
+local autoFrame = Instance.new("Frame")
+autoFrame.Size = UDim2.new(1, 0, 0, 60)
+autoFrame.Position = UDim2.new(0, 0, 0, 270)
+autoFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+autoFrame.BorderColor3 = Color3.fromRGB(100, 100, 100)
+autoFrame.BorderSizePixel = 1
+autoFrame.Parent = contentContainer
+
+local autoCorner = Instance.new("UICorner")
+autoCorner.CornerRadius = UDim.new(0, 8)
+autoCorner.Parent = autoFrame
+
+local autoTitle = Instance.new("TextLabel")
+autoTitle.Size = UDim2.new(1, -10, 0, 18)
+autoTitle.Position = UDim2.new(0, 5, 0, 3)
+autoTitle.BackgroundTransparency = 1
+autoTitle.Text = "⚡ AUTO PLAY"
+autoTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+autoTitle.TextSize = 10
+autoTitle.Font = Enum.Font.GothamBold
+autoTitle.TextXAlignment = Enum.TextXAlignment.Left
+autoTitle.Parent = autoFrame
+
+-- Delay
+local delayLabel = Instance.new("TextLabel")
+delayLabel.Size = UDim2.new(0, 30, 0, 20)
+delayLabel.Position = UDim2.new(0.05, 0, 0, 30)
+delayLabel.BackgroundTransparency = 1
+delayLabel.Text = "Delay:"
+delayLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+delayLabel.TextSize = 9
+delayLabel.Font = Enum.Font.Gotham
+delayLabel.Parent = autoFrame
+
+local delayBox = Instance.new("TextBox")
+delayBox.Size = UDim2.new(0, 35, 0, 20)
+delayBox.Position = UDim2.new(0.18, 0, 0, 30)
+delayBox.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+delayBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+delayBox.Text = tostring(saveData.autoPlay.delay)
+delayBox.TextSize = 9
+delayBox.Font = Enum.Font.Gotham
+delayBox.Parent = autoFrame
+
+local delayCorner = Instance.new("UICorner")
+delayCorner.CornerRadius = UDim.new(0, 4)
+delayCorner.Parent = delayBox
+
+-- ON/OFF button
+local autoToggle = Instance.new("TextButton")
+autoToggle.Size = UDim2.new(0, 35, 0, 20)
+autoToggle.Position = UDim2.new(0.35, 0, 0, 30)
+autoToggle.BackgroundColor3 = saveData.autoPlay.enabled and Color3.fromRGB(40, 40, 45) or Color3.fromRGB(30, 30, 35)
+autoToggle.BorderColor3 = Color3.fromRGB(150, 150, 150)
+autoToggle.BorderSizePixel = 1
+autoToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+autoToggle.Text = saveData.autoPlay.enabled and "ON" or "OFF"
+autoToggle.Font = Enum.Font.GothamBold
+autoToggle.TextSize = 8
+autoToggle.Parent = autoFrame
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(0, 4)
+toggleCorner.Parent = autoToggle
+
+-- Stop button
+local stopBtn = Instance.new("TextButton")
+stopBtn.Size = UDim2.new(0, 35, 0, 20)
+stopBtn.Position = UDim2.new(0.55, 0, 0, 30)
+stopBtn.BackgroundColor3 = Color3.fromRGB(100, 40, 40)
+stopBtn.BorderColor3 = Color3.fromRGB(150, 150, 150)
+stopBtn.BorderSizePixel = 1
+stopBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+stopBtn.Text = "STOP"
+stopBtn.Font = Enum.Font.GothamBold
+stopBtn.TextSize = 7
+stopBtn.Parent = autoFrame
+
+local stopCorner = Instance.new("UICorner")
+stopCorner.CornerRadius = UDim.new(0, 4)
+stopCorner.Parent = stopBtn
+
+-- Auto Play logic
+local autoPlaying = false
+local scriptEnabled = true  -- Status script (ON/OFF)
+
+local function startAutoPlay()
+    if not scriptEnabled then return end
+    if autoPlaying then return end
+    autoPlaying = true
+    autoToggle.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    autoToggle.Text = "ON"
+    
+    autoConnection = task.spawn(function()
+        while autoPlaying and scriptEnabled do
+            for _, folder in ipairs(saveData.folders) do
+                if not autoPlaying or not scriptEnabled then break end
+                if folder.x ~= 0 then
+                    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        player.Character.HumanoidRootPart.CFrame = CFrame.new(folder.x, folder.y, folder.z)
+                    end
+                    task.wait(saveData.autoPlay.delay)
+                end
+            end
+        end
+    end)
+end
+
+local function stopAutoPlay()
+    autoPlaying = false
+    autoToggle.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    autoToggle.Text = "OFF"
+    if autoConnection then
+        task.cancel(autoConnection)
+        autoConnection = nil
+    end
+end
+
+autoToggle.MouseButton1Click:Connect(function()
+    if autoPlaying then
+        stopAutoPlay()
+    else
+        startAutoPlay()
+    end
+end)
+
+stopBtn.MouseButton1Click:Connect(function()
+    stopAutoPlay()
+end)
+
+delayBox.FocusLost:Connect(function()
+    local val = tonumber(delayBox.Text)
+    if val and val > 0 then
+        saveData.autoPlay.delay = val
+    else
+        delayBox.Text = tostring(saveData.autoPlay.delay)
+    end
+end)
+
+-- Padding
+local bottomPadding = Instance.new("Frame")
+bottomPadding.Size = UDim2.new(1, 0, 0, 20)
+bottomPadding.Position = UDim2.new(0, 0, 0, 335)
+bottomPadding.BackgroundTransparency = 1
+bottomPadding.Parent = contentContainer
+
+-- Update canvas size
+mainScroll.CanvasSize = UDim2.new(0, 0, 0, 360)
+
+-- ==============================================
+-- GET BUTTON
+-- ==============================================
+getBtn.MouseButton1Click:Connect(function()
+    updateCurrentPos()
+end)
+
+-- ==============================================
+-- MINIMIZE FUNCTION (CONTENT HILANG, TINGGAL TITLE BAR)
+-- ==============================================
+minimizeBtn.MouseButton1Click:Connect(function()
+    if uiExpanded then
+        -- Minimize: content hilang, tinggal title bar
+        mainScroll.Visible = false
+        main.Size = UDim2.new(0, 320, 0, 90)  -- Kecilkan frame
+        
+        -- Tukar butang jadi +
+        minimizeBtn.Text = "+"
+        uiExpanded = false
+    else
+        -- Restore: content muncul balik
+        mainScroll.Visible = true
+        main.Size = UDim2.new(0, 320, 0, 400)  -- Besarkan frame
+        
+        -- Tukar butang jadi −
+        minimizeBtn.Text = "−"
+        uiExpanded = true
+    end
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
+
+-- INSERT key untuk toggle minimize
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Insert then
+        if uiExpanded then
+            mainScroll.Visible = false
+            main.Size = UDim2.new(0, 320, 0, 90)
+            minimizeBtn.Text = "+"
+            uiExpanded = false
+        else
+            mainScroll.Visible = true
+            main.Size = UDim2.new(0, 320, 0, 400)
+            minimizeBtn.Text = "−"
+            uiExpanded = true
+        end
+    end
+end)
+
+-- END key untuk toggle ON/OFF script
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.End then
+        scriptEnabled = not scriptEnabled
+        
+        if scriptEnabled then
+            statusIndicator.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- Hijau
+            
+            -- Enable all interactive elements
+            getBtn.Active = true
+            createBtn.Active = true
+            autoToggle.Active = true
+            stopBtn.Active = true
+            delayBox.Active = true
+            newNameBox.Active = true
+            
+            -- Enable all folder buttons
+            for _, v in ipairs(foldersScroll:GetChildren()) do
+                if v:IsA("Frame") then
+                    for _, btn in ipairs(v:GetChildren()) do
+                        if btn:IsA("TextButton") then
+                            btn.Active = true
+                        end
+                    end
+                end
+            end
+        else
+            statusIndicator.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Merah
+            
+            -- Disable all interactive elements
+            getBtn.Active = false
+            createBtn.Active = false
+            autoToggle.Active = false
+            stopBtn.Active = false
+            delayBox.Active = false
+            newNameBox.Active = false
+            
+            -- Disable all folder buttons
+            for _, v in ipairs(foldersScroll:GetChildren()) do
+                if v:IsA("Frame") then
+                    for _, btn in ipairs(v:GetChildren()) do
+                        if btn:IsA("TextButton") then
+                            btn.Active = false
+                        end
+                    end
+                end
+            end
+            
+            -- Stop auto play if running
+            if autoPlaying then
+                stopAutoPlay()
+            end
+        end
+    end
+end)
+
+-- ==============================================
+-- PRINT
+-- ==============================================
+print("✅ FIQQZR7 FOLDER SYSTEM - DRAG HANYA TITLE BAR")
+print("📁 CREATE - Buat folder baru")
+print("📁 SV - Simpan koordinat current")
+print("📁 GO - Teleport ke koordinat")
+print("📁 ✕ - Padam folder")
+print("📌 Hanya title bar boleh drag - kawasan lain tak boleh")
+print("📌 Tekan − → content hilang, tinggal title bar")
+print("📌 Tekan + → content muncul balik")
+print("📌 Tekan End → ON/OFF script (status bulat)")
