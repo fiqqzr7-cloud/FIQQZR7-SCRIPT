@@ -1,0 +1,468 @@
+-- FIQQZR7 NOCLIP BYPASS - MODERN HUB
+-- Boleh tembus part berbayar/restricted
+-- Auto reset bila mati, modern UI dengan glow tepi
+
+local player = game.Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+repeat task.wait() until player and player.Character
+
+-- ==============================================
+-- VARIABLES
+-- ==============================================
+local noclipEnabled = false
+local noclipConnection = nil
+
+-- ==============================================
+-- NOCLIP FUNCTIONS (BYpass version)
+-- ==============================================
+local function noclipOn()
+    if noclipConnection then
+        noclipConnection:Disconnect()
+    end
+    
+    noclipConnection = RunService.Stepped:Connect(function()
+        if not noclipEnabled or not player.Character then return end
+        
+        -- Loop semua part dalam character
+        for _, part in pairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                -- Force CanCollide = false (bypass)
+                part.CanCollide = false
+                
+                -- Untuk part yang dikunci (berbayar), kita set juga
+                -- properties lain yang mungkin block movement
+                if part:IsA("MeshPart") or part:IsA("Part") then
+                    part.Massless = true  -- Buat part tanpa berat
+                end
+            end
+        end
+        
+        -- Bypass untuk part dalam workspace yang menghalang
+        -- (optional - boleh activate kalau nak tembus semua)
+        -- for _, part in pairs(workspace:GetDescendants()) do
+        --     if part:IsA("BasePart") and part:IsA("MeshPart") then
+        --         part.CanCollide = false
+        --     end
+        -- end
+    end)
+    
+    print("✅ Noclip BYPASS activated")
+end
+
+local function noclipOff()
+    if noclipConnection then
+        noclipConnection:Disconnect()
+        noclipConnection = nil
+    end
+    
+    -- Reset semua part character ke normal
+    if player.Character then
+        for _, part in pairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true
+                if part:IsA("MeshPart") or part:IsA("Part") then
+                    part.Massless = false
+                end
+            end
+        end
+    end
+    
+    print("✅ Noclip BYPASS deactivated")
+end
+
+-- Auto reset bila character mati
+player.CharacterAdded:Connect(function(char)
+    -- Tunggu character siap
+    task.wait(1)
+    
+    -- Kalau noclip still on, activate balik
+    if noclipEnabled then
+        noclipOn()
+    end
+end)
+
+-- ==============================================
+-- CREATE UI MODERN (GLOW TEPI)
+-- ==============================================
+local gui = Instance.new("ScreenGui")
+gui.Name = "FIQQZR7_Noclip"
+gui.Parent = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.DisplayOrder = 999
+
+-- Main Container
+local container = Instance.new("Frame")
+container.Size = UDim2.new(0, 300, 0, 200)
+container.Position = UDim2.new(0.5, -150, 0.5, -100)
+container.BackgroundTransparency = 1
+container.Active = false
+container.Draggable = false
+container.Parent = gui
+
+-- Main Frame (Hitam Solid)
+local main = Instance.new("Frame")
+main.Size = UDim2.new(1, 0, 1, 0)
+main.Position = UDim2.new(0, 0, 0, 0)
+main.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
+main.BackgroundTransparency = 0
+main.BorderColor3 = Color3.fromRGB(0, 150, 255)
+main.BorderSizePixel = 1
+main.ClipsDescendants = true
+main.Active = false
+main.Parent = container
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 14)
+mainCorner.Parent = main
+
+-- GLOW TEPI (3 lapis)
+local glow1 = Instance.new("UIStroke")
+glow1.Color = Color3.fromRGB(0, 100, 200)
+glow1.Thickness = 4
+glow1.Transparency = 0.7
+glow1.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+glow1.Parent = main
+
+local glow2 = Instance.new("UIStroke")
+glow2.Color = Color3.fromRGB(0, 150, 255)
+glow2.Thickness = 2.5
+glow2.Transparency = 0.6
+glow2.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+glow2.Parent = main
+
+local glow3 = Instance.new("UIStroke")
+glow3.Color = Color3.fromRGB(100, 200, 255)
+glow3.Thickness = 1
+glow3.Transparency = 0.5
+glow3.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+glow3.Parent = main
+
+-- Animasi pulsing
+spawn(function()
+    while true do
+        for i = 1, 40 do
+            local t = i / 40
+            glow1.Transparency = 0.7 + (math.sin(t * math.pi) * 0.15)
+            glow2.Transparency = 0.6 + (math.sin(t * math.pi) * 0.15)
+            glow3.Transparency = 0.5 + (math.sin(t * math.pi) * 0.15)
+            task.wait(0.02)
+        end
+    end
+end)
+
+-- ==============================================
+-- TITLE BAR (BOLEH DRAG)
+-- ==============================================
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, -20, 0, 60)
+titleBar.Position = UDim2.new(0, 10, 0, 8)
+titleBar.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+titleBar.BackgroundTransparency = 0
+titleBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
+titleBar.BorderSizePixel = 1
+titleBar.ZIndex = 10
+titleBar.Active = true
+titleBar.Parent = main
+
+local titleBarCorner = Instance.new("UICorner")
+titleBarCorner.CornerRadius = UDim.new(0, 10)
+titleBarCorner.Parent = titleBar
+
+-- Glow title bar
+local titleGlow = Instance.new("UIStroke")
+titleGlow.Color = Color3.fromRGB(0, 150, 255)
+titleGlow.Thickness = 1.5
+titleGlow.Transparency = 0.4
+titleGlow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+titleGlow.Parent = titleBar
+
+-- DRAG FUNCTIONALITY
+local dragging = false
+local dragInput
+local dragStart
+local startPos
+
+local function updateDrag(input)
+    local delta = input.Position - dragStart
+    container.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = container.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+titleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        updateDrag(input)
+    end
+end)
+
+-- Icon
+local icon = Instance.new("TextLabel")
+icon.Size = UDim2.new(0, 40, 1, 0)
+icon.Position = UDim2.new(0, 8, 0, 0)
+icon.BackgroundTransparency = 1
+icon.Text = "⚡"
+icon.TextColor3 = Color3.fromRGB(0, 200, 255)
+icon.TextSize = 24
+icon.Font = Enum.Font.GothamBold
+icon.ZIndex = 11
+icon.Parent = titleBar
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0.5, 0, 0.5, 0)
+title.Position = UDim2.new(0, 55, 0, 8)
+title.BackgroundTransparency = 1
+title.Text = "NOCLIP V1"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 14
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.ZIndex = 11
+title.Parent = titleBar
+
+-- Subtitle
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(0.5, 0, 0.3, 0)
+subtitle.Position = UDim2.new(0, 55, 0, 32)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "Developer Fiqqzr7"
+subtitle.TextColor3 = Color3.fromRGB(150, 200, 255)
+subtitle.TextSize = 9
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.ZIndex = 11
+subtitle.Parent = titleBar
+
+-- Minimize Button
+local uiVisible = true
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 22, 0, 22)
+minimizeBtn.Position = UDim2.new(1, -60, 0.5, -11)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+minimizeBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+minimizeBtn.BorderSizePixel = 1
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeBtn.Text = "−"
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 16
+minimizeBtn.ZIndex = 11
+minimizeBtn.Parent = titleBar
+
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 5)
+minCorner.Parent = minimizeBtn
+
+-- Close Button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 22, 0, 22)
+closeBtn.Position = UDim2.new(1, -32, 0.5, -11)
+closeBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+closeBtn.BorderColor3 = Color3.fromRGB(255, 100, 100)
+closeBtn.BorderSizePixel = 1
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 12
+closeBtn.ZIndex = 11
+closeBtn.Parent = titleBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 5)
+closeCorner.Parent = closeBtn
+
+-- ==============================================
+-- CONTENT FRAME
+-- ==============================================
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, -20, 1, -80)
+contentFrame.Position = UDim2.new(0, 10, 0, 75)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = main
+
+-- ==============================================
+-- STATUS CARD
+-- ==============================================
+local statusCard = Instance.new("Frame")
+statusCard.Size = UDim2.new(1, 0, 0, 70)
+statusCard.Position = UDim2.new(0, 0, 0, 0)
+statusCard.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+statusCard.BorderColor3 = Color3.fromRGB(0, 150, 255)
+statusCard.BorderSizePixel = 1
+statusCard.Parent = contentFrame
+
+local statusCorner = Instance.new("UICorner")
+statusCorner.CornerRadius = UDim.new(0, 8)
+statusCorner.Parent = statusCard
+
+local statusIcon = Instance.new("TextLabel")
+statusIcon.Size = UDim2.new(0, 25, 0, 25)
+statusIcon.Position = UDim2.new(0, 10, 0.5, -12)
+statusIcon.BackgroundTransparency = 1
+statusIcon.Text = "⚡"
+statusIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+statusIcon.TextSize = 18
+statusIcon.Font = Enum.Font.GothamBold
+statusIcon.Parent = statusCard
+
+local statusTitle = Instance.new("TextLabel")
+statusTitle.Size = UDim2.new(1, -80, 0, 20)
+statusTitle.Position = UDim2.new(0, 40, 0, 15)
+statusTitle.BackgroundTransparency = 1
+statusTitle.Text = "Status"
+statusTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+statusTitle.TextSize = 11
+statusTitle.Font = Enum.Font.Gotham
+statusTitle.TextXAlignment = Enum.TextXAlignment.Left
+statusTitle.Parent = statusCard
+
+local statusValue = Instance.new("TextLabel")
+statusValue.Size = UDim2.new(1, -80, 0, 20)
+statusValue.Position = UDim2.new(0, 40, 0, 35)
+statusValue.BackgroundTransparency = 1
+statusValue.Text = noclipEnabled and "ON" or "OFF"
+statusValue.TextColor3 = noclipEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+statusValue.TextSize = 14
+statusValue.Font = Enum.Font.GothamBold
+statusValue.TextXAlignment = Enum.TextXAlignment.Left
+statusValue.Parent = statusCard
+
+-- Toggle Button
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0, 50, 0, 30)
+toggleBtn.Position = UDim2.new(1, -60, 0.5, -15)
+toggleBtn.BackgroundColor3 = noclipEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(50, 50, 60)
+toggleBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+toggleBtn.BorderSizePixel = 1
+toggleBtn.Text = noclipEnabled and "ON" or "OFF"
+toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextSize = 11
+toggleBtn.Parent = statusCard
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(0, 6)
+toggleCorner.Parent = toggleBtn
+
+-- ==============================================
+-- INFO CARD
+-- ==============================================
+local infoCard = Instance.new("Frame")
+infoCard.Size = UDim2.new(1, 0, 0, 50)
+infoCard.Position = UDim2.new(0, 0, 0, 80)
+infoCard.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+infoCard.BorderColor3 = Color3.fromRGB(0, 150, 255)
+infoCard.BorderSizePixel = 1
+infoCard.Parent = contentFrame
+
+local infoCorner = Instance.new("UICorner")
+infoCorner.CornerRadius = UDim.new(0, 8)
+infoCorner.Parent = infoCard
+
+local infoIcon = Instance.new("TextLabel")
+infoIcon.Size = UDim2.new(0, 25, 0, 25)
+infoIcon.Position = UDim2.new(0, 10, 0.5, -12)
+infoIcon.BackgroundTransparency = 1
+infoIcon.Text = "ℹ️"
+infoIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+infoIcon.TextSize = 18
+infoIcon.Font = Enum.Font.GothamBold
+infoIcon.Parent = infoCard
+
+local infoText = Instance.new("TextLabel")
+infoText.Size = UDim2.new(1, -40, 1, 0)
+infoText.Position = UDim2.new(0, 40, 0, 0)
+infoText.BackgroundTransparency = 1
+infoText.Text = "Bypass anticheat"
+infoText.TextColor3 = Color3.fromRGB(200, 200, 200)
+infoText.TextSize = 11
+infoText.Font = Enum.Font.Gotham
+infoText.TextXAlignment = Enum.TextXAlignment.Left
+infoText.Parent = infoCard
+
+-- ==============================================
+-- TOGGLE FUNCTION
+-- ==============================================
+local function toggleNoclip()
+    noclipEnabled = not noclipEnabled
+    
+    statusValue.Text = noclipEnabled and "ON" or "OFF"
+    statusValue.TextColor3 = noclipEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    toggleBtn.Text = noclipEnabled and "ON" or "OFF"
+    toggleBtn.BackgroundColor3 = noclipEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(50, 50, 60)
+    
+    if noclipEnabled then
+        noclipOn()
+    else
+        noclipOff()
+    end
+end
+
+toggleBtn.MouseButton1Click:Connect(toggleNoclip)
+
+-- ==============================================
+-- MINIMIZE FUNCTION
+-- ==============================================
+minimizeBtn.MouseButton1Click:Connect(function()
+    if uiVisible then
+        contentFrame.Visible = false
+        main.BorderSizePixel = 0
+        main.Size = UDim2.new(0, 300, 0, 80)
+        minimizeBtn.Text = "+"
+        uiVisible = false
+    else
+        contentFrame.Visible = true
+        main.BorderSizePixel = 1
+        main.Size = UDim2.new(0, 300, 0, 200)
+        minimizeBtn.Text = "−"
+        uiVisible = true
+    end
+end)
+
+-- ==============================================
+-- CLOSE FUNCTION
+-- ==============================================
+closeBtn.MouseButton1Click:Connect(function()
+    if noclipEnabled then
+        noclipOff()
+    end
+    gui:Destroy()
+end)
+
+-- ==============================================
+-- TOGGLE WITH INSERT KEY
+-- ==============================================
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Insert then
+        container.Visible = not container.Visible
+    end
+end)
+
+-- ==============================================
+-- PRINT INFO
+-- ==============================================
+print("✅ FIQQZR7 NOCLIP BYPASS - MODERN HUB")
+print("👻 Boleh tembus part berbayar/restricted")
+print("📌 Auto reset bila character mati")
+print("📌 Tekan Insert untuk toggle UI")
