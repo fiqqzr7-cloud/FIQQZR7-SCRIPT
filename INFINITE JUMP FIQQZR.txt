@@ -1,0 +1,457 @@
+-- FIQQZR7 INFINITE JUMP - GLOW TEPI SAHAJA
+-- Glow hanya di border, bukan fill area besar
+-- Background hitam solid
+
+local player = game.Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+repeat task.wait() until player and player.Character
+
+-- ==============================================
+-- VARIABLES
+-- ==============================================
+local infiniteJumpEnabled = false
+local jumpHeight = 50
+local jumpConnection = nil
+
+-- ==============================================
+-- CREATE UI (GLOW TEPI)
+-- ==============================================
+local gui = Instance.new("ScreenGui")
+gui.Name = "FIQQZR7_InfiniteJump"
+gui.Parent = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.DisplayOrder = 999
+
+-- Main Container
+local container = Instance.new("Frame")
+container.Size = UDim2.new(0, 300, 0, 250)
+container.Position = UDim2.new(0.5, -150, 0.5, -125)
+container.BackgroundTransparency = 1
+container.Active = false
+container.Draggable = false
+container.Parent = gui
+
+-- Main Frame (HITAM SOLID)
+local main = Instance.new("Frame")
+main.Size = UDim2.new(1, 0, 1, 0)
+main.Position = UDim2.new(0, 0, 0, 0)
+main.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
+main.BackgroundTransparency = 0
+main.BorderColor3 = Color3.fromRGB(0, 150, 255)
+main.BorderSizePixel = 1
+main.ClipsDescendants = true
+main.Active = false
+main.Parent = container
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 14)
+mainCorner.Parent = main
+
+-- GLOW TEPI LAPIS 1 (biru gelap, paling luar)
+local glow1 = Instance.new("UIStroke")
+glow1.Color = Color3.fromRGB(0, 100, 200)
+glow1.Thickness = 4
+glow1.Transparency = 0.7
+glow1.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+glow1.Parent = main
+
+-- GLOW TEPI LAPIS 2 (biru terang, tengah)
+local glow2 = Instance.new("UIStroke")
+glow2.Color = Color3.fromRGB(0, 150, 255)
+glow2.Thickness = 2.5
+glow2.Transparency = 0.6
+glow2.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+glow2.Parent = main
+
+-- GLOW TEPI LAPIS 3 (biru muda, paling dalam)
+local glow3 = Instance.new("UIStroke")
+glow3.Color = Color3.fromRGB(100, 200, 255)
+glow3.Thickness = 1
+glow3.Transparency = 0.5
+glow3.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+glow3.Parent = main
+
+-- Animasi pulsing untuk glow tepi
+spawn(function()
+    while true do
+        for i = 1, 40 do
+            local t = i / 40
+            glow1.Transparency = 0.7 + (math.sin(t * math.pi) * 0.15)
+            glow2.Transparency = 0.6 + (math.sin(t * math.pi) * 0.15)
+            glow3.Transparency = 0.5 + (math.sin(t * math.pi) * 0.15)
+            task.wait(0.02)
+        end
+    end
+end)
+
+-- ==============================================
+-- TITLE BAR (BOLEH DRAG)
+-- ==============================================
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, -20, 0, 60)
+titleBar.Position = UDim2.new(0, 10, 0, 8)
+titleBar.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+titleBar.BackgroundTransparency = 0
+titleBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
+titleBar.BorderSizePixel = 1
+titleBar.ZIndex = 10
+titleBar.Active = true
+titleBar.Parent = main
+
+local titleBarCorner = Instance.new("UICorner")
+titleBarCorner.CornerRadius = UDim.new(0, 10)
+titleBarCorner.Parent = titleBar
+
+-- Glow tepi untuk title bar (lebih nipis)
+local titleGlow = Instance.new("UIStroke")
+titleGlow.Color = Color3.fromRGB(0, 150, 255)
+titleGlow.Thickness = 1.5
+titleGlow.Transparency = 0.4
+titleGlow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+titleGlow.Parent = titleBar
+
+-- DRAG FUNCTIONALITY
+local dragging = false
+local dragInput
+local dragStart
+local startPos
+
+local function updateDrag(input)
+    local delta = input.Position - dragStart
+    container.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = container.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+titleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        updateDrag(input)
+    end
+end)
+
+-- Icon
+local icon = Instance.new("TextLabel")
+icon.Size = UDim2.new(0, 40, 1, 0)
+icon.Position = UDim2.new(0, 8, 0, 0)
+icon.BackgroundTransparency = 1
+icon.Text = "🦘"
+icon.TextColor3 = Color3.fromRGB(0, 200, 255)
+icon.TextSize = 24
+icon.Font = Enum.Font.GothamBold
+icon.ZIndex = 11
+icon.Parent = titleBar
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0.5, 0, 0.5, 0)
+title.Position = UDim2.new(0, 55, 0, 8)
+title.BackgroundTransparency = 1
+title.Text = "INFINITE JUMP"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 14
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.ZIndex = 11
+title.Parent = titleBar
+
+-- Subtitle
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(0.5, 0, 0.3, 0)
+subtitle.Position = UDim2.new(0, 55, 0, 32)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "Developer Fiqqzr7"
+subtitle.TextColor3 = Color3.fromRGB(150, 200, 255)
+subtitle.TextSize = 9
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.ZIndex = 11
+subtitle.Parent = titleBar
+
+-- Minimize Button
+local uiVisible = true
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 22, 0, 22)
+minimizeBtn.Position = UDim2.new(1, -60, 0.5, -11)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+minimizeBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+minimizeBtn.BorderSizePixel = 1
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeBtn.Text = "−"
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 16
+minimizeBtn.ZIndex = 11
+minimizeBtn.Parent = titleBar
+
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 5)
+minCorner.Parent = minimizeBtn
+
+-- Close Button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 22, 0, 22)
+closeBtn.Position = UDim2.new(1, -32, 0.5, -11)
+closeBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+closeBtn.BorderColor3 = Color3.fromRGB(255, 100, 100)
+closeBtn.BorderSizePixel = 1
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 12
+closeBtn.ZIndex = 11
+closeBtn.Parent = titleBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 5)
+closeCorner.Parent = closeBtn
+
+-- ==============================================
+-- CONTENT FRAME
+-- ==============================================
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, -20, 1, -80)
+contentFrame.Position = UDim2.new(0, 10, 0, 75)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = main
+
+-- ==============================================
+-- STATUS CARD
+-- ==============================================
+local statusCard = Instance.new("Frame")
+statusCard.Size = UDim2.new(1, 0, 0, 70)
+statusCard.Position = UDim2.new(0, 0, 0, 0)
+statusCard.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+statusCard.BorderColor3 = Color3.fromRGB(0, 150, 255)
+statusCard.BorderSizePixel = 1
+statusCard.Parent = contentFrame
+
+local statusCorner = Instance.new("UICorner")
+statusCorner.CornerRadius = UDim.new(0, 8)
+statusCorner.Parent = statusCard
+
+local statusIcon = Instance.new("TextLabel")
+statusIcon.Size = UDim2.new(0, 25, 0, 25)
+statusIcon.Position = UDim2.new(0, 10, 0.5, -12)
+statusIcon.BackgroundTransparency = 1
+statusIcon.Text = "⚡"
+statusIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+statusIcon.TextSize = 18
+statusIcon.Font = Enum.Font.GothamBold
+statusIcon.Parent = statusCard
+
+local statusTitle = Instance.new("TextLabel")
+statusTitle.Size = UDim2.new(1, -80, 0, 20)
+statusTitle.Position = UDim2.new(0, 40, 0, 15)
+statusTitle.BackgroundTransparency = 1
+statusTitle.Text = "Status"
+statusTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+statusTitle.TextSize = 11
+statusTitle.Font = Enum.Font.Gotham
+statusTitle.TextXAlignment = Enum.TextXAlignment.Left
+statusTitle.Parent = statusCard
+
+local statusValue = Instance.new("TextLabel")
+statusValue.Size = UDim2.new(1, -80, 0, 20)
+statusValue.Position = UDim2.new(0, 40, 0, 35)
+statusValue.BackgroundTransparency = 1
+statusValue.Text = infiniteJumpEnabled and "ON" or "OFF"
+statusValue.TextColor3 = infiniteJumpEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+statusValue.TextSize = 14
+statusValue.Font = Enum.Font.GothamBold
+statusValue.TextXAlignment = Enum.TextXAlignment.Left
+statusValue.Parent = statusCard
+
+-- Toggle Button
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0, 50, 0, 30)
+toggleBtn.Position = UDim2.new(1, -60, 0.5, -15)
+toggleBtn.BackgroundColor3 = infiniteJumpEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(50, 50, 60)
+toggleBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+toggleBtn.BorderSizePixel = 1
+toggleBtn.Text = infiniteJumpEnabled and "ON" or "OFF"
+toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextSize = 11
+toggleBtn.Parent = statusCard
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(0, 6)
+toggleCorner.Parent = toggleBtn
+
+-- ==============================================
+-- HEIGHT CONTROL CARD
+-- ==============================================
+local heightCard = Instance.new("Frame")
+heightCard.Size = UDim2.new(1, 0, 0, 80)
+heightCard.Position = UDim2.new(0, 0, 0, 80)
+heightCard.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+heightCard.BorderColor3 = Color3.fromRGB(0, 150, 255)
+heightCard.BorderSizePixel = 1
+heightCard.Parent = contentFrame
+
+local heightCorner = Instance.new("UICorner")
+heightCorner.CornerRadius = UDim.new(0, 8)
+heightCorner.Parent = heightCard
+
+local heightIcon = Instance.new("TextLabel")
+heightIcon.Size = UDim2.new(0, 25, 0, 25)
+heightIcon.Position = UDim2.new(0, 10, 0, 15)
+heightIcon.BackgroundTransparency = 1
+heightIcon.Text = "📏"
+heightIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+heightIcon.TextSize = 18
+heightIcon.Font = Enum.Font.GothamBold
+heightIcon.Parent = heightCard
+
+local heightTitle = Instance.new("TextLabel")
+heightTitle.Size = UDim2.new(1, -120, 0, 20)
+heightTitle.Position = UDim2.new(0, 40, 0, 15)
+heightTitle.BackgroundTransparency = 1
+heightTitle.Text = "Jump Height (1-2000)"
+heightTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+heightTitle.TextSize = 11
+heightTitle.Font = Enum.Font.Gotham
+heightTitle.TextXAlignment = Enum.TextXAlignment.Left
+heightTitle.Parent = heightCard
+
+-- TextBox
+local heightInput = Instance.new("TextBox")
+heightInput.Size = UDim2.new(0, 60, 0, 30)
+heightInput.Position = UDim2.new(1, -70, 0.5, -15)
+heightInput.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+heightInput.BorderColor3 = Color3.fromRGB(0, 150, 255)
+heightInput.BorderSizePixel = 1
+heightInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+heightInput.PlaceholderText = "50"
+heightInput.Text = tostring(jumpHeight)
+heightInput.Font = Enum.Font.GothamBold
+heightInput.TextSize = 14
+heightInput.ClearTextOnFocus = false
+heightInput.Parent = heightCard
+
+local inputCorner = Instance.new("UICorner")
+inputCorner.CornerRadius = UDim.new(0, 6)
+inputCorner.Parent = heightInput
+
+-- ==============================================
+-- INFINITE JUMP FUNCTION
+-- ==============================================
+local function toggleInfiniteJump()
+    infiniteJumpEnabled = not infiniteJumpEnabled
+    
+    statusValue.Text = infiniteJumpEnabled and "ON" or "OFF"
+    statusValue.TextColor3 = infiniteJumpEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    toggleBtn.Text = infiniteJumpEnabled and "ON" or "OFF"
+    toggleBtn.BackgroundColor3 = infiniteJumpEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(50, 50, 60)
+    
+    if infiniteJumpEnabled then
+        jumpConnection = UserInputService.JumpRequest:Connect(function()
+            local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                humanoid.JumpPower = jumpHeight
+            else
+                player.CharacterAdded:Connect(function(char)
+                    local newHumanoid = char:WaitForChild("Humanoid")
+                    newHumanoid.JumpPower = jumpHeight
+                end)
+            end
+        end)
+    else
+        if jumpConnection then
+            jumpConnection:Disconnect()
+            jumpConnection = nil
+        end
+        local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.JumpPower = 50
+        end
+    end
+end
+
+-- ==============================================
+-- UPDATE JUMP HEIGHT
+-- ==============================================
+local function updateJumpHeight(newHeight)
+    local num = tonumber(newHeight)
+    if num then
+        jumpHeight = math.clamp(math.floor(num), 10, 200)
+        heightInput.Text = tostring(jumpHeight)
+        
+        if infiniteJumpEnabled then
+            local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.JumpPower = jumpHeight
+            end
+        end
+    else
+        heightInput.Text = tostring(jumpHeight)
+    end
+end
+
+heightInput.FocusLost:Connect(function()
+    updateJumpHeight(heightInput.Text)
+end)
+
+toggleBtn.MouseButton1Click:Connect(toggleInfiniteJump)
+
+-- ==============================================
+-- MINIMIZE FUNCTION
+-- ==============================================
+minimizeBtn.MouseButton1Click:Connect(function()
+    if uiVisible then
+        contentFrame.Visible = false
+        main.BorderSizePixel = 0
+        main.Size = UDim2.new(0, 300, 0, 80)
+        minimizeBtn.Text = "+"
+        uiVisible = false
+    else
+        contentFrame.Visible = true
+        main.BorderSizePixel = 1
+        main.Size = UDim2.new(0, 300, 0, 250)
+        minimizeBtn.Text = "−"
+        uiVisible = true
+    end
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    if infiniteJumpEnabled then
+        toggleInfiniteJump()
+    end
+    gui:Destroy()
+end)
+
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Insert then
+        container.Visible = not container.Visible
+    end
+end)
+
+local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+if humanoid then
+    humanoid.JumpPower = 50
+end
+
+print("✅ FIQQZR7 INFINITE JUMP - GLOW TEPI SAHAJA")
+print("🦘 Glow hanya di border, bukan fill area besar")
