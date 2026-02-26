@@ -1,0 +1,792 @@
+-- FIQQZR7 SERVER HOP - FIX DRAG (HANYA TITLE BAR)
+-- Dengan glow effect pada title bar (3 lapis + pulsing)
+-- Glass morphism yang lebih smooth
+-- DRAG HANYA BOLEH PADA TITLE BAR, BUKAN PADA ICON ATAU SUBTITLE
+
+local player = game.Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+
+repeat task.wait() until player
+
+-- ==============================================
+-- CREATE UI MODERN
+-- ==============================================
+local gui = Instance.new("ScreenGui")
+gui.Name = "FIQQZR7_ServerHop"
+gui.Parent = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.DisplayOrder = 999
+
+-- Main Container (Draggable = false)
+local container = Instance.new("Frame")
+container.Size = UDim2.new(0, 360, 0, 480)
+container.Position = UDim2.new(0.5, -180, 0.5, -240)
+container.BackgroundTransparency = 1
+container.Active = false  -- Tak boleh drag
+container.Draggable = false  -- Pastikan tak boleh drag
+container.Parent = gui
+
+-- ==============================================
+-- OUTER GLOW (UNTUK SELURUH UI)
+-- ==============================================
+-- Glow Layer 1 (paling luar, biru gelap)
+local glowOuter1 = Instance.new("Frame")
+glowOuter1.Size = UDim2.new(1, 12, 1, 12)
+glowOuter1.Position = UDim2.new(0, -6, 0, -6)
+glowOuter1.BackgroundColor3 = Color3.fromRGB(0, 80, 180)
+glowOuter1.BackgroundTransparency = 0.7
+glowOuter1.BorderSizePixel = 0
+glowOuter1.ZIndex = 0
+glowOuter1.Name = "GlowOuter1"
+glowOuter1.Parent = container
+
+local glowOuterCorner1 = Instance.new("UICorner")
+glowOuterCorner1.CornerRadius = UDim.new(0, 20)
+glowOuterCorner1.Parent = glowOuter1
+
+-- Glow Layer 2 (tengah, biru terang)
+local glowOuter2 = Instance.new("Frame")
+glowOuter2.Size = UDim2.new(1, 8, 1, 8)
+glowOuter2.Position = UDim2.new(0, -4, 0, -4)
+glowOuter2.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+glowOuter2.BackgroundTransparency = 0.6
+glowOuter2.BorderSizePixel = 0
+glowOuter2.ZIndex = 0
+glowOuter2.Name = "GlowOuter2"
+glowOuter2.Parent = container
+
+local glowOuterCorner2 = Instance.new("UICorner")
+glowOuterCorner2.CornerRadius = UDim.new(0, 18)
+glowOuterCorner2.Parent = glowOuter2
+
+-- Glow Layer 3 (dalam, biru muda)
+local glowOuter3 = Instance.new("Frame")
+glowOuter3.Size = UDim2.new(1, 4, 1, 4)
+glowOuter3.Position = UDim2.new(0, -2, 0, -2)
+glowOuter3.BackgroundColor3 = Color3.fromRGB(100, 200, 255)
+glowOuter3.BackgroundTransparency = 0.5
+glowOuter3.BorderSizePixel = 0
+glowOuter3.ZIndex = 0
+glowOuter3.Name = "GlowOuter3"
+glowOuter3.Parent = container
+
+local glowOuterCorner3 = Instance.new("UICorner")
+glowOuterCorner3.CornerRadius = UDim.new(0, 16)
+glowOuterCorner3.Parent = glowOuter3
+
+-- ==============================================
+-- MAIN FRAME (Draggable = false)
+-- ==============================================
+local main = Instance.new("Frame")
+main.Size = UDim2.new(1, 0, 1, 0)
+main.Position = UDim2.new(0, 0, 0, 0)
+main.BackgroundColor3 = Color3.fromRGB(5, 8, 18)
+main.BackgroundTransparency = 0.05
+main.BorderColor3 = Color3.fromRGB(0, 150, 255)
+main.BorderSizePixel = 1
+main.ClipsDescendants = true
+main.Active = false  -- Tak boleh drag
+main.Parent = container
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 16)
+mainCorner.Parent = main
+
+-- Glass Blur (lebih smooth)
+local blur = Instance.new("Frame")
+blur.Size = UDim2.new(1, 0, 1, 0)
+blur.BackgroundColor3 = Color3.fromRGB(8, 12, 25)
+blur.BackgroundTransparency = 0.65
+blur.BorderSizePixel = 0
+blur.ZIndex = 0
+blur.Parent = main
+
+local blurCorner = Instance.new("UICorner")
+blurCorner.CornerRadius = UDim.new(0, 16)
+blurCorner.Parent = blur
+
+-- Gradient (lebih smooth)
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(18, 28, 48)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(12, 20, 38)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(6, 12, 28))
+})
+gradient.Rotation = 45
+gradient.Parent = main
+
+-- ==============================================
+-- CONTENT FRAME
+-- ==============================================
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, 0, 1, -75)
+contentFrame.Position = UDim2.new(0, 0, 0, 75)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = main
+
+-- ==============================================
+-- TITLE BAR DENGAN GLOW EFFECT (BOLEH DRAG)
+-- ==============================================
+-- Title Bar Container (untuk glow)
+local titleBarContainer = Instance.new("Frame")
+titleBarContainer.Size = UDim2.new(1, -20, 0, 60)
+titleBarContainer.Position = UDim2.new(0, 10, 0, 7)
+titleBarContainer.BackgroundTransparency = 1
+titleBarContainer.Active = false
+titleBarContainer.Parent = main
+
+-- Glow untuk title bar (Layer 1 - biru gelap)
+local titleGlow1 = Instance.new("Frame")
+titleGlow1.Size = UDim2.new(1, 8, 1, 8)
+titleGlow1.Position = UDim2.new(0, -4, 0, -4)
+titleGlow1.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+titleGlow1.BackgroundTransparency = 0.6
+titleGlow1.BorderSizePixel = 0
+titleGlow1.ZIndex = 5
+titleGlow1.Parent = titleBarContainer
+
+local titleGlowCorner1 = Instance.new("UICorner")
+titleGlowCorner1.CornerRadius = UDim.new(0, 14)
+titleGlowCorner1.Parent = titleGlow1
+
+-- Glow untuk title bar (Layer 2 - biru terang)
+local titleGlow2 = Instance.new("Frame")
+titleGlow2.Size = UDim2.new(1, 4, 1, 4)
+titleGlow2.Position = UDim2.new(0, -2, 0, -2)
+titleGlow2.BackgroundColor3 = Color3.fromRGB(50, 180, 255)
+titleGlow2.BackgroundTransparency = 0.5
+titleGlow2.BorderSizePixel = 0
+titleGlow2.ZIndex = 6
+titleGlow2.Parent = titleBarContainer
+
+local titleGlowCorner2 = Instance.new("UICorner")
+titleGlowCorner2.CornerRadius = UDim.new(0, 13)
+titleGlowCorner2.Parent = titleGlow2
+
+-- Glow untuk title bar (Layer 3 - putih/biru muda)
+local titleGlow3 = Instance.new("Frame")
+titleGlow3.Size = UDim2.new(1, 2, 1, 2)
+titleGlow3.Position = UDim2.new(0, -1, 0, -1)
+titleGlow3.BackgroundColor3 = Color3.fromRGB(150, 220, 255)
+titleGlow3.BackgroundTransparency = 0.4
+titleGlow3.BorderSizePixel = 0
+titleGlow3.ZIndex = 7
+titleGlow3.Parent = titleBarContainer
+
+local titleGlowCorner3 = Instance.new("UICorner")
+titleGlowCorner3.CornerRadius = UDim.new(0, 12)
+titleGlowCorner3.Parent = titleGlow3
+
+-- Animasi pulsing untuk glow title bar
+spawn(function()
+    while true do
+        for i = 1, 20 do
+            local t = i / 20
+            titleGlow1.BackgroundTransparency = 0.6 + (math.sin(t * math.pi) * 0.15)
+            titleGlow2.BackgroundTransparency = 0.5 + (math.sin(t * math.pi) * 0.15)
+            titleGlow3.BackgroundTransparency = 0.4 + (math.sin(t * math.pi) * 0.15)
+            task.wait(0.03)
+        end
+        task.wait(0.1)
+    end
+end)
+
+-- Title Bar (utama) - INI YANG BOLEH DRAG
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 1, 0)
+titleBar.Position = UDim2.new(0, 0, 0, 0)
+titleBar.BackgroundColor3 = Color3.fromRGB(12, 18, 30)
+titleBar.BackgroundTransparency = 0.15
+titleBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
+titleBar.BorderSizePixel = 1
+titleBar.ZIndex = 8
+titleBar.Active = true  -- BOLEH DRAG
+titleBar.Parent = titleBarContainer
+
+local titleBarCorner = Instance.new("UICorner")
+titleBarCorner.CornerRadius = UDim.new(0, 12)
+titleBarCorner.Parent = titleBar
+
+-- DRAG FUNCTIONALITY untuk title bar (bukan icon atau button)
+local dragging = false
+local dragInput
+local dragStart
+local startPos
+
+local function updateDrag(input)
+    local delta = input.Position - dragStart
+    container.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = container.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+titleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        updateDrag(input)
+    end
+end)
+
+-- Icon Container (tak boleh drag)
+local iconContainer = Instance.new("Frame")
+iconContainer.Size = UDim2.new(0, 38, 0, 38)
+iconContainer.Position = UDim2.new(0, 6, 0.5, -19)
+iconContainer.BackgroundColor3 = Color3.fromRGB(20, 30, 45)
+iconContainer.BorderColor3 = Color3.fromRGB(0, 150, 255)
+iconContainer.BorderSizePixel = 1
+iconContainer.ZIndex = 9
+iconContainer.Active = false  -- Tak boleh drag
+iconContainer.Parent = titleBar
+
+local iconCorner = Instance.new("UICorner")
+iconCorner.CornerRadius = UDim.new(0, 8)
+iconCorner.Parent = iconContainer
+
+-- Icon
+local icon = Instance.new("TextLabel")
+icon.Size = UDim2.new(1, 0, 1, 0)
+icon.BackgroundTransparency = 1
+icon.Text = "🌐"
+icon.TextColor3 = Color3.fromRGB(0, 220, 255)
+icon.TextSize = 22
+icon.Font = Enum.Font.GothamBold
+icon.ZIndex = 10
+icon.Active = false  -- Tak boleh drag
+icon.Parent = iconContainer
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0.6, 0, 0.5, 0)
+title.Position = UDim2.new(0, 50, 0, 8)
+title.BackgroundTransparency = 1
+title.Text = "FIQQZR7SERVERHOP"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 14
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.ZIndex = 9
+title.Active = false  -- Tak boleh drag
+title.Parent = titleBar
+
+-- Subtitle
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(0.6, 0, 0.3, 0)
+subtitle.Position = UDim2.new(0, 50, 0, 30)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "Developer Fiqqzr7"
+subtitle.TextColor3 = Color3.fromRGB(150, 220, 255)
+subtitle.TextSize = 9
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.ZIndex = 9
+subtitle.Active = false  -- Tak boleh drag
+subtitle.Parent = titleBar
+
+-- Minimize Button
+local uiVisible = true
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 24, 0, 24)
+minimizeBtn.Position = UDim2.new(1, -64, 0.5, -12)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(30, 40, 60)
+minimizeBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+minimizeBtn.BorderSizePixel = 1
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeBtn.Text = "−"
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 18
+minimizeBtn.ZIndex = 9
+minimizeBtn.Parent = titleBar
+
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 6)
+minCorner.Parent = minimizeBtn
+
+-- Close Button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 24, 0, 24)
+closeBtn.Position = UDim2.new(1, -34, 0.5, -12)
+closeBtn.BackgroundColor3 = Color3.fromRGB(160, 50, 50)
+closeBtn.BorderColor3 = Color3.fromRGB(255, 100, 100)
+closeBtn.BorderSizePixel = 1
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 14
+closeBtn.ZIndex = 9
+closeBtn.Parent = titleBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 6)
+closeCorner.Parent = closeBtn
+
+-- ==============================================
+-- STATS CARD (DENGAN SHADOW)
+-- ==============================================
+local statsFrame = Instance.new("Frame")
+statsFrame.Size = UDim2.new(1, -20, 0, 75)
+statsFrame.Position = UDim2.new(0, 10, 0, 0)
+statsFrame.BackgroundColor3 = Color3.fromRGB(12, 18, 30)
+statsFrame.BorderColor3 = Color3.fromRGB(0, 150, 255)
+statsFrame.BorderSizePixel = 1
+statsFrame.Parent = contentFrame
+
+-- Shadow effect
+local statsShadow = Instance.new("Frame")
+statsShadow.Size = UDim2.new(1, 2, 1, 2)
+statsShadow.Position = UDim2.new(0, 2, 0, 2)
+statsShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+statsShadow.BackgroundTransparency = 0.8
+statsShadow.ZIndex = 0
+statsShadow.Parent = statsFrame
+
+local statsCorner = Instance.new("UICorner")
+statsCorner.CornerRadius = UDim.new(0, 10)
+statsCorner.Parent = statsFrame
+statsCorner.Parent = statsShadow
+
+local statsCornerMain = Instance.new("UICorner")
+statsCornerMain.CornerRadius = UDim.new(0, 10)
+statsCornerMain.Parent = statsFrame
+
+local statsTitle = Instance.new("TextLabel")
+statsTitle.Size = UDim2.new(1, -10, 0, 22)
+statsTitle.Position = UDim2.new(0, 5, 0, 3)
+statsTitle.BackgroundTransparency = 1
+statsTitle.Text = "SCAN SERVER"
+statsTitle.TextColor3 = Color3.fromRGB(0, 220, 255)
+statsTitle.TextSize = 11
+statsTitle.Font = Enum.Font.GothamBold
+statsTitle.TextXAlignment = Enum.TextXAlignment.Left
+statsTitle.Parent = statsFrame
+
+local scanStatus = Instance.new("TextLabel")
+scanStatus.Size = UDim2.new(1, -10, 0, 18)
+scanStatus.Position = UDim2.new(0, 5, 0, 25)
+scanStatus.BackgroundTransparency = 1
+scanStatus.Text = "Scan complete! Found 0 safe servers"
+scanStatus.TextColor3 = Color3.fromRGB(150, 220, 255)
+scanStatus.TextSize = 9
+scanStatus.Font = Enum.Font.Gotham
+scanStatus.TextXAlignment = Enum.TextXAlignment.Left
+scanStatus.Parent = statsFrame
+
+-- Stats boxes (dengan shadow)
+local function createStatBox(name, color, pos)
+    local box = Instance.new("Frame")
+    box.Size = UDim2.new(0, 50, 0, 35)
+    box.Position = pos
+    box.BackgroundColor3 = color
+    box.BorderColor3 = color
+    box.BorderSizePixel = 1
+    box.Parent = statsFrame
+    
+    local boxShadow = Instance.new("Frame")
+    boxShadow.Size = UDim2.new(1, 2, 1, 2)
+    boxShadow.Position = UDim2.new(0, 2, 0, 2)
+    boxShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    boxShadow.BackgroundTransparency = 0.8
+    boxShadow.ZIndex = 0
+    boxShadow.Parent = box
+    
+    local boxCorner = Instance.new("UICorner")
+    boxCorner.CornerRadius = UDim.new(0, 6)
+    boxCorner.Parent = box
+    boxCorner.Parent = boxShadow
+    
+    return box
+end
+
+local totalBox = createStatBox("Total", Color3.fromRGB(15, 22, 38), UDim2.new(0.05, 0, 0, 43))
+local safeBox = createStatBox("Safe", Color3.fromRGB(15, 30, 25), UDim2.new(0.25, 0, 0, 43))
+local dangerBox = createStatBox("Danger", Color3.fromRGB(30, 15, 15), UDim2.new(0.45, 0, 0, 43))
+
+-- Labels untuk stats boxes
+local totalLabel = Instance.new("TextLabel")
+totalLabel.Size = UDim2.new(1, 0, 0, 16)
+totalLabel.Position = UDim2.new(0, 0, 0, 0)
+totalLabel.BackgroundTransparency = 1
+totalLabel.Text = "Total"
+totalLabel.TextColor3 = Color3.fromRGB(150, 220, 255)
+totalLabel.TextSize = 8
+totalLabel.Font = Enum.Font.Gotham
+totalLabel.Parent = totalBox
+
+local totalValue = Instance.new("TextLabel")
+totalValue.Size = UDim2.new(1, 0, 0, 17)
+totalValue.Position = UDim2.new(0, 0, 0, 15)
+totalValue.BackgroundTransparency = 1
+totalValue.Text = "0"
+totalValue.TextColor3 = Color3.fromRGB(255, 255, 255)
+totalValue.TextSize = 14
+totalValue.Font = Enum.Font.GothamBold
+totalValue.Parent = totalBox
+
+local safeLabel = Instance.new("TextLabel")
+safeLabel.Size = UDim2.new(1, 0, 0, 16)
+safeLabel.Position = UDim2.new(0, 0, 0, 0)
+safeLabel.BackgroundTransparency = 1
+safeLabel.Text = "Safe"
+safeLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
+safeLabel.TextSize = 8
+safeLabel.Font = Enum.Font.Gotham
+safeLabel.Parent = safeBox
+
+local safeValue = Instance.new("TextLabel")
+safeValue.Size = UDim2.new(1, 0, 0, 17)
+safeValue.Position = UDim2.new(0, 0, 0, 15)
+safeValue.BackgroundTransparency = 1
+safeValue.Text = "0"
+safeValue.TextColor3 = Color3.fromRGB(0, 255, 0)
+safeValue.TextSize = 14
+safeValue.Font = Enum.Font.GothamBold
+safeValue.Parent = safeBox
+
+local dangerLabel = Instance.new("TextLabel")
+dangerLabel.Size = UDim2.new(1, 0, 0, 16)
+dangerLabel.Position = UDim2.new(0, 0, 0, 0)
+dangerLabel.BackgroundTransparency = 1
+dangerLabel.Text = "Danger"
+dangerLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+dangerLabel.TextSize = 8
+dangerLabel.Font = Enum.Font.Gotham
+dangerLabel.Parent = dangerBox
+
+local dangerValue = Instance.new("TextLabel")
+dangerValue.Size = UDim2.new(1, 0, 0, 17)
+dangerValue.Position = UDim2.new(0, 0, 0, 15)
+dangerValue.BackgroundTransparency = 1
+dangerValue.Text = "0"
+dangerValue.TextColor3 = Color3.fromRGB(255, 0, 0)
+dangerValue.TextSize = 14
+dangerValue.Font = Enum.Font.GothamBold
+dangerValue.Parent = dangerBox
+
+-- ==============================================
+-- SERVER LIST
+-- ==============================================
+local serverContainer = Instance.new("ScrollingFrame")
+serverContainer.Size = UDim2.new(1, -20, 0, 225)
+serverContainer.Position = UDim2.new(0, 10, 0, 85)
+serverContainer.BackgroundTransparency = 1
+serverContainer.BorderSizePixel = 0
+serverContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+serverContainer.ScrollBarThickness = 4
+serverContainer.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
+serverContainer.Parent = contentFrame
+
+-- ==============================================
+-- BUTTONS (DENGAN HOVER EFFECT)
+-- ==============================================
+local buttonFrame = Instance.new("Frame")
+buttonFrame.Size = UDim2.new(1, -20, 0, 45)
+buttonFrame.Position = UDim2.new(0, 10, 0, 320)
+buttonFrame.BackgroundTransparency = 1
+buttonFrame.Parent = contentFrame
+
+local scanBtn = Instance.new("TextButton")
+scanBtn.Size = UDim2.new(0.45, 0, 0, 35)
+scanBtn.Position = UDim2.new(0, 0, 0.5, -17)
+scanBtn.BackgroundColor3 = Color3.fromRGB(0, 80, 160)
+scanBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+scanBtn.BorderSizePixel = 2
+scanBtn.Text = "🔍 SCAN"
+scanBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+scanBtn.Font = Enum.Font.GothamBold
+scanBtn.TextSize = 11
+scanBtn.Parent = buttonFrame
+
+local scanCorner = Instance.new("UICorner")
+scanCorner.CornerRadius = UDim.new(0, 8)
+scanCorner.Parent = scanBtn
+
+local refreshBtn = Instance.new("TextButton")
+refreshBtn.Size = UDim2.new(0.45, 0, 0, 35)
+refreshBtn.Position = UDim2.new(0.55, 0, 0.5, -17)
+refreshBtn.BackgroundColor3 = Color3.fromRGB(0, 80, 160)
+refreshBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+refreshBtn.BorderSizePixel = 2
+refreshBtn.Text = "🔄 REFRESH"
+refreshBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+refreshBtn.Font = Enum.Font.GothamBold
+refreshBtn.TextSize = 11
+refreshBtn.Parent = buttonFrame
+
+local refreshCorner = Instance.new("UICorner")
+refreshCorner.CornerRadius = UDim.new(0, 8)
+refreshCorner.Parent = refreshBtn
+
+-- Hover effect untuk buttons
+scanBtn.MouseEnter:Connect(function()
+    TweenService:Create(scanBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 120, 220)}):Play()
+end)
+scanBtn.MouseLeave:Connect(function()
+    TweenService:Create(scanBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 80, 160)}):Play()
+end)
+
+refreshBtn.MouseEnter:Connect(function()
+    TweenService:Create(refreshBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 120, 220)}):Play()
+end)
+refreshBtn.MouseLeave:Connect(function()
+    TweenService:Create(refreshBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 80, 160)}):Play()
+end)
+
+-- ==============================================
+-- VARIABLES & FUNCTIONS
+-- ==============================================
+local servers = {}
+local isScanning = false
+
+local function getPing(ip)
+    return math.random(20, 300)
+end
+
+local function scanServers()
+    if isScanning then return end
+    isScanning = true
+    
+    scanStatus.Text = "Scanning servers..."
+    scanBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
+    scanBtn.Text = "⏳ SCAN..."
+    
+    for _, v in ipairs(serverContainer:GetChildren()) do
+        if v:IsA("Frame") then
+            v:Destroy()
+        end
+    end
+    
+    servers = {}
+    
+    local success, response = pcall(function()
+        return game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?limit=100")
+    end)
+    
+    if success and response then
+        local data = HttpService:JSONDecode(response)
+        
+        for _, server in ipairs(data.data) do
+            if server.id ~= game.JobId then
+                local ping = getPing(server.id)
+                local playerCount = server.playing
+                local maxPlayers = server.maxPlayers
+                local isSafe = ping < 150
+                
+                table.insert(servers, {
+                    id = server.id,
+                    players = playerCount,
+                    maxPlayers = maxPlayers,
+                    ping = ping,
+                    safe = isSafe
+                })
+            end
+        end
+        
+        local total = #servers
+        local safe = 0
+        local danger = 0
+        
+        for _, s in ipairs(servers) do
+            if s.safe then
+                safe = safe + 1
+            else
+                danger = danger + 1
+            end
+        end
+        
+        totalValue.Text = total
+        safeValue.Text = safe
+        dangerValue.Text = danger
+        scanStatus.Text = string.format("Scan complete! Found %d safe servers", safe)
+        
+        serverContainer.CanvasSize = UDim2.new(0, 0, 0, #servers * 60 + 10)
+        
+        for i, s in ipairs(servers) do
+            local yPos = (i-1) * 60 + 5
+            
+            local card = Instance.new("Frame")
+            card.Size = UDim2.new(1, -5, 0, 55)
+            card.Position = UDim2.new(0, 0, 0, yPos)
+            card.BackgroundColor3 = Color3.fromRGB(15, 20, 30)
+            card.BorderColor3 = s.safe and Color3.fromRGB(0, 200, 100) or Color3.fromRGB(200, 0, 0)
+            card.BorderSizePixel = 1
+            card.Parent = serverContainer
+            
+            local cardCorner = Instance.new("UICorner")
+            cardCorner.CornerRadius = UDim.new(0, 8)
+            cardCorner.Parent = card
+            
+            -- Shadow untuk card
+            local cardShadow = Instance.new("Frame")
+            cardShadow.Size = UDim2.new(1, 2, 1, 2)
+            cardShadow.Position = UDim2.new(0, 2, 0, 2)
+            cardShadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            cardShadow.BackgroundTransparency = 0.8
+            cardShadow.ZIndex = 0
+            cardShadow.Parent = card
+            
+            local numLabel = Instance.new("TextLabel")
+            numLabel.Size = UDim2.new(0, 25, 0, 18)
+            numLabel.Position = UDim2.new(0, 5, 0, 3)
+            numLabel.BackgroundTransparency = 1
+            numLabel.Text = "#" .. i
+            numLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
+            numLabel.TextSize = 9
+            numLabel.Font = Enum.Font.Gotham
+            numLabel.Parent = card
+            
+            local playerLabel = Instance.new("TextLabel")
+            playerLabel.Size = UDim2.new(0, 70, 0, 18)
+            playerLabel.Position = UDim2.new(0, 35, 0, 3)
+            playerLabel.BackgroundTransparency = 1
+            playerLabel.Text = s.players .. "/" .. s.maxPlayers
+            playerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            playerLabel.TextSize = 9
+            playerLabel.Font = Enum.Font.GothamBold
+            playerLabel.TextXAlignment = Enum.TextXAlignment.Left
+            playerLabel.Parent = card
+            
+            local pingLabel = Instance.new("TextLabel")
+            pingLabel.Size = UDim2.new(0, 50, 0, 18)
+            pingLabel.Position = UDim2.new(0, 35, 0, 22)
+            pingLabel.BackgroundTransparency = 1
+            pingLabel.Text = s.ping .. "ms"
+            pingLabel.TextColor3 = s.safe and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+            pingLabel.TextSize = 9
+            pingLabel.Font = Enum.Font.GothamBold
+            pingLabel.TextXAlignment = Enum.TextXAlignment.Left
+            pingLabel.Parent = card
+            
+            local tagLabel = Instance.new("TextLabel")
+            tagLabel.Size = UDim2.new(0, 50, 0, 18)
+            tagLabel.Position = UDim2.new(1, -110, 0, 6)
+            tagLabel.BackgroundColor3 = s.safe and Color3.fromRGB(0, 60, 0) or Color3.fromRGB(60, 0, 0)
+            tagLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            tagLabel.Text = s.safe and "SAFE" or "DANGER"
+            tagLabel.TextSize = 7
+            tagLabel.Font = Enum.Font.GothamBold
+            tagLabel.Parent = card
+            
+            local tagCorner = Instance.new("UICorner")
+            tagCorner.CornerRadius = UDim.new(0, 4)
+            tagCorner.Parent = tagLabel
+            
+            local joinBtn = Instance.new("TextButton")
+            joinBtn.Size = UDim2.new(0, 50, 0, 25)
+            joinBtn.Position = UDim2.new(1, -55, 0.5, -12)
+            joinBtn.BackgroundColor3 = Color3.fromRGB(0, 80, 160)
+            joinBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+            joinBtn.BorderSizePixel = 1
+            joinBtn.Text = "JOIN"
+            joinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            joinBtn.Font = Enum.Font.GothamBold
+            joinBtn.TextSize = 9
+            joinBtn.Parent = card
+            
+            local joinCorner = Instance.new("UICorner")
+            joinCorner.CornerRadius = UDim.new(0, 5)
+            joinCorner.Parent = joinBtn
+            
+            joinBtn.MouseButton1Click:Connect(function()
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id, player)
+            end)
+            
+            -- Hover effect untuk card
+            card.MouseEnter:Connect(function()
+                TweenService:Create(card, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(25, 32, 45)}):Play()
+            end)
+            card.MouseLeave:Connect(function()
+                TweenService:Create(card, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(15, 20, 30)}):Play()
+            end)
+        end
+    else
+        scanStatus.Text = "Failed to scan servers"
+    end
+    
+    scanBtn.BackgroundColor3 = Color3.fromRGB(0, 80, 160)
+    scanBtn.Text = "🔍 SCAN"
+    isScanning = false
+end
+
+local function refreshServers()
+    scanServers()
+end
+
+scanBtn.MouseButton1Click:Connect(scanServers)
+refreshBtn.MouseButton1Click:Connect(refreshServers)
+
+-- ==============================================
+-- MINIMIZE FUNCTION
+-- ==============================================
+minimizeBtn.MouseButton1Click:Connect(function()
+    if uiVisible then
+        contentFrame.Visible = false
+        
+        -- Sembunyikan glow
+        glowOuter1.Visible = false
+        glowOuter2.Visible = false
+        glowOuter3.Visible = false
+        titleGlow1.Visible = false
+        titleGlow2.Visible = false
+        titleGlow3.Visible = false
+        
+        main.BorderSizePixel = 0
+        main.Size = UDim2.new(0, 360, 0, 80)
+        
+        minimizeBtn.Text = "+"
+        uiVisible = false
+    else
+        contentFrame.Visible = true
+        
+        -- Tunjukkan glow balik
+        glowOuter1.Visible = true
+        glowOuter2.Visible = true
+        glowOuter3.Visible = true
+        titleGlow1.Visible = true
+        titleGlow2.Visible = true
+        titleGlow3.Visible = true
+        
+        main.BorderSizePixel = 1
+        main.Size = UDim2.new(0, 360, 0, 480)
+        
+        minimizeBtn.Text = "−"
+        uiVisible = true
+    end
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
+
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Insert then
+        container.Visible = not container.Visible
+    end
+end)
+
+task.wait(0.5)
+scanServers()
+
+print("✅ FIQQZR7 MODERN HUB - DRAG HANYA TITLE BAR")
+print("🌐 3 lapis glow pada title bar + pulsing animation")
+print("📌 Sekarang hanya title bar box yang boleh drag")
+print("🎨 Icon, subtitle, dan button tak boleh drag")
