@@ -90,14 +90,14 @@ local function generatePayload()
         {cmd = "execute", code = "print('hi')"},
         
         -- Admin-related
-        "admin",
-        "kick",
-        "ban",
+        "excute",
+        "yahhahHa",
+        "ijinn",
         "exploit",
         "bypass",
-        "fly",
-        "noclip",
-        "infinite yield",
+        "spam remote",
+        "EXPLOITMALAY",
+        "FIQQZR7 FAMILY",
         
         -- Values
         1337,
