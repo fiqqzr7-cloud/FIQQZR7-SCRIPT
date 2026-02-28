@@ -1,0 +1,503 @@
+local player = game.Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local GuiService = game:GetService("GuiService")
+
+repeat task.wait() until player and player.Character
+
+local bypassEnabled = false
+local bypassConnection = nil
+local pausedDetected = false
+
+-- ==============================================
+-- CREATE UI MODERN
+-- ==============================================
+local gui = Instance.new("ScreenGui")
+gui.Name = "FIQQZR7_PauseBypass"
+gui.Parent = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.DisplayOrder = 999
+
+-- Main Container
+local container = Instance.new("Frame")
+container.Size = UDim2.new(0, 300, 0, 200)
+container.Position = UDim2.new(0.5, -150, 0.5, -100)
+container.BackgroundTransparency = 1
+container.Active = false
+container.Draggable = false
+container.Parent = gui
+
+-- Main Frame
+local main = Instance.new("Frame")
+main.Size = UDim2.new(1, 0, 1, 0)
+main.Position = UDim2.new(0, 0, 0, 0)
+main.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
+main.BackgroundTransparency = 0
+main.BorderColor3 = Color3.fromRGB(0, 150, 255)
+main.BorderSizePixel = 1
+main.ClipsDescendants = true
+main.Active = false
+main.Parent = container
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 14)
+mainCorner.Parent = main
+
+-- GLOW TEPI (3 lapis)
+local glow1 = Instance.new("UIStroke")
+glow1.Color = Color3.fromRGB(0, 100, 200)
+glow1.Thickness = 4
+glow1.Transparency = 0.7
+glow1.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+glow1.Parent = main
+
+local glow2 = Instance.new("UIStroke")
+glow2.Color = Color3.fromRGB(0, 150, 255)
+glow2.Thickness = 2.5
+glow2.Transparency = 0.6
+glow2.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+glow2.Parent = main
+
+local glow3 = Instance.new("UIStroke")
+glow3.Color = Color3.fromRGB(100, 200, 255)
+glow3.Thickness = 1
+glow3.Transparency = 0.5
+glow3.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+glow3.Parent = main
+
+-- Gradient
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 15, 25)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 5, 15))
+})
+gradient.Rotation = 45
+gradient.Parent = main
+
+-- ==============================================
+-- TITLE BAR
+-- ==============================================
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, -20, 0, 50)
+titleBar.Position = UDim2.new(0, 10, 0, 8)
+titleBar.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+titleBar.BackgroundTransparency = 0
+titleBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
+titleBar.BorderSizePixel = 1
+titleBar.ZIndex = 10
+titleBar.Active = true
+titleBar.Parent = main
+
+local titleBarCorner = Instance.new("UICorner")
+titleBarCorner.CornerRadius = UDim.new(0, 10)
+titleBarCorner.Parent = titleBar
+
+-- DRAG FUNCTIONALITY
+local dragging = false
+local dragInput
+local dragStart
+local startPos
+
+local function updateDrag(input)
+    local delta = input.Position - dragStart
+    container.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = container.Position
+        
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+titleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        updateDrag(input)
+    end
+end)
+
+-- Icon
+local icon = Instance.new("TextLabel")
+icon.Size = UDim2.new(0, 30, 1, 0)
+icon.Position = UDim2.new(0, 8, 0, 0)
+icon.BackgroundTransparency = 1
+icon.Text = "⏸️"
+icon.TextColor3 = Color3.fromRGB(0, 200, 255)
+icon.TextSize = 20
+icon.Font = Enum.Font.GothamBold
+icon.ZIndex = 11
+icon.Parent = titleBar
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0.5, 0, 0.5, 0)
+title.Position = UDim2.new(0, 45, 0, 6)
+title.BackgroundTransparency = 1
+title.Text = "BYPASS GAME PAUSE"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 13
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.ZIndex = 11
+title.Parent = titleBar
+
+-- Subtitle
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(0.5, 0, 0.3, 0)
+subtitle.Position = UDim2.new(0, 45, 0, 26)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "developer fiqqzr7"
+subtitle.TextColor3 = Color3.fromRGB(150, 200, 255)
+subtitle.TextSize = 9
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+subtitle.ZIndex = 11
+subtitle.Parent = titleBar
+
+-- Minimize Button
+local uiVisible = true
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 22, 0, 22)
+minimizeBtn.Position = UDim2.new(1, -60, 0.5, -11)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+minimizeBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+minimizeBtn.BorderSizePixel = 1
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeBtn.Text = "−"
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 16
+minimizeBtn.ZIndex = 11
+minimizeBtn.Parent = titleBar
+
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 5)
+minCorner.Parent = minimizeBtn
+
+-- Close Button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 22, 0, 22)
+closeBtn.Position = UDim2.new(1, -32, 0.5, -11)
+closeBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
+closeBtn.BorderColor3 = Color3.fromRGB(255, 100, 100)
+closeBtn.BorderSizePixel = 1
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 12
+closeBtn.ZIndex = 11
+closeBtn.Parent = titleBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 5)
+closeCorner.Parent = closeBtn
+
+-- ==============================================
+-- CONTENT FRAME
+-- ==============================================
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, -20, 1, -70)
+contentFrame.Position = UDim2.new(0, 10, 0, 65)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = main
+
+-- ==============================================
+-- STATUS CARD
+-- ==============================================
+local statusCard = Instance.new("Frame")
+statusCard.Size = UDim2.new(1, 0, 0, 60)
+statusCard.Position = UDim2.new(0, 0, 0, 0)
+statusCard.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+statusCard.BorderColor3 = Color3.fromRGB(0, 150, 255)
+statusCard.BorderSizePixel = 1
+statusCard.Parent = contentFrame
+
+local statusCorner = Instance.new("UICorner")
+statusCorner.CornerRadius = UDim.new(0, 8)
+statusCorner.Parent = statusCard
+
+local statusIcon = Instance.new("TextLabel")
+statusIcon.Size = UDim2.new(0, 25, 0, 25)
+statusIcon.Position = UDim2.new(0, 10, 0.5, -12)
+statusIcon.BackgroundTransparency = 1
+statusIcon.Text = "⏸️"
+statusIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+statusIcon.TextSize = 16
+statusIcon.Font = Enum.Font.GothamBold
+statusIcon.Parent = statusCard
+
+local statusTitle = Instance.new("TextLabel")
+statusTitle.Size = UDim2.new(1, -80, 0, 20)
+statusTitle.Position = UDim2.new(0, 40, 0, 10)
+statusTitle.BackgroundTransparency = 1
+statusTitle.Text = "Bypass Status"
+statusTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+statusTitle.TextSize = 11
+statusTitle.Font = Enum.Font.Gotham
+statusTitle.TextXAlignment = Enum.TextXAlignment.Left
+statusTitle.Parent = statusCard
+
+local statusValue = Instance.new("TextLabel")
+statusValue.Size = UDim2.new(1, -80, 0, 20)
+statusValue.Position = UDim2.new(0, 40, 0, 30)
+statusValue.BackgroundTransparency = 1
+statusValue.Text = bypassEnabled and "ACTIVE" or "OFF"
+statusValue.TextColor3 = bypassEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+statusValue.TextSize = 14
+statusValue.Font = Enum.Font.GothamBold
+statusValue.TextXAlignment = Enum.TextXAlignment.Left
+statusValue.Parent = statusCard
+
+-- Toggle Button
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0, 50, 0, 30)
+toggleBtn.Position = UDim2.new(1, -60, 0.5, -15)
+toggleBtn.BackgroundColor3 = bypassEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(50, 50, 60)
+toggleBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+toggleBtn.BorderSizePixel = 1
+toggleBtn.Text = bypassEnabled and "ON" or "OFF"
+toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextSize = 11
+toggleBtn.Parent = statusCard
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(0, 6)
+toggleCorner.Parent = toggleBtn
+
+-- ==============================================
+-- INFO CARD
+-- ==============================================
+local infoCard = Instance.new("Frame")
+infoCard.Size = UDim2.new(1, 0, 0, 60)
+infoCard.Position = UDim2.new(0, 0, 0, 70)
+infoCard.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+infoCard.BorderColor3 = Color3.fromRGB(0, 150, 255)
+infoCard.BorderSizePixel = 1
+infoCard.Parent = contentFrame
+
+local infoCorner = Instance.new("UICorner")
+infoCorner.CornerRadius = UDim.new(0, 8)
+infoCorner.Parent = infoCard
+
+local infoIcon = Instance.new("TextLabel")
+infoIcon.Size = UDim2.new(0, 25, 0, 25)
+infoIcon.Position = UDim2.new(0, 10, 0.5, -12)
+infoIcon.BackgroundTransparency = 1
+infoIcon.Text = "ℹ️"
+infoIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+infoIcon.TextSize = 16
+infoIcon.Font = Enum.Font.GothamBold
+infoIcon.Parent = infoCard
+
+local infoTitle = Instance.new("TextLabel")
+infoTitle.Size = UDim2.new(1, -40, 0, 20)
+infoTitle.Position = UDim2.new(0, 40, 0, 8)
+infoTitle.BackgroundTransparency = 1
+infoTitle.Text = "Game Paused Detected:"
+infoTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+infoTitle.TextSize = 11
+infoTitle.Font = Enum.Font.Gotham
+infoTitle.TextXAlignment = Enum.TextXAlignment.Left
+infoTitle.Parent = infoCard
+
+local pauseStatus = Instance.new("TextLabel")
+pauseStatus.Size = UDim2.new(1, -40, 0, 20)
+pauseStatus.Position = UDim2.new(0, 40, 0, 30)
+pauseStatus.BackgroundTransparency = 1
+pauseStatus.Text = "None"
+pauseStatus.TextColor3 = Color3.fromRGB(150, 150, 150)
+pauseStatus.TextSize = 11
+pauseStatus.Font = Enum.Font.GothamBold
+pauseStatus.TextXAlignment = Enum.TextXAlignment.Left
+pauseStatus.Parent = infoCard
+
+-- ==============================================
+-- BYPASS FUNCTIONS
+-- ==============================================
+
+-- Method 1: Simulate user input
+local function unpauseMethod1()
+    -- Simulate pressing ESC
+    keypress(Enum.KeyCode.Escape.Value)
+    task.wait(0.1)
+    keyrelease(Enum.KeyCode.Escape.Value)
+end
+
+-- Method 2: Toggle GuiService
+local function unpauseMethod2()
+    GuiService.SelectedObject = nil
+    GuiService:ToggleMenuBarVisibility()
+end
+
+-- Method 3: Force close all dialogs
+local function unpauseMethod3()
+    for _, v in ipairs(CoreGui:GetDescendants()) do
+        if v:IsA("Frame") and v.Visible and v.Name:lower():find("pause") or v.Name:lower():find("menu") then
+            v.Visible = false
+        end
+    end
+end
+
+-- Method 4: Click somewhere
+local function unpauseMethod4()
+    local mouse = player:GetMouse()
+    if mouse then
+        mouse:Button1Down()
+        task.wait(0.1)
+        mouse:Button1Up()
+    end
+end
+
+-- Combined bypass
+local function bypassPause()
+    if not bypassEnabled then return end
+    
+    -- Try all methods
+    local success, err = pcall(function()
+        unpauseMethod1()
+        task.wait(0.05)
+        unpauseMethod2()
+        task.wait(0.05)
+        unpauseMethod3()
+        task.wait(0.05)
+        unpauseMethod4()
+    end)
+    
+    if success then
+        pausedDetected = false
+        pauseStatus.Text = "Bypassed!"
+        pauseStatus.TextColor3 = Color3.fromRGB(0, 255, 0)
+        task.wait(0.5)
+        pauseStatus.Text = "None"
+        pauseStatus.TextColor3 = Color3.fromRGB(150, 150, 150)
+    end
+end
+
+-- Monitor for pause
+local function monitorPause()
+    bypassConnection = RunService.Heartbeat:Connect(function()
+        if not bypassEnabled then return end
+        
+        -- Check if game might be paused
+        -- Method: Check if player input is blocked
+        local paused = false
+        
+        -- Check if any pause menu exists
+        for _, v in ipairs(CoreGui:GetDescendants()) do
+            if v:IsA("Frame") and v.Visible then
+                local name = v.Name:lower()
+                if name:find("pause") or name:find("menu") or name:find("escape") then
+                    paused = true
+                    break
+                end
+            end
+        end
+        
+        -- Check if GuiService is in menu mode
+        if GuiService.MenuIsOpen then
+            paused = true
+        end
+        
+        if paused and not pausedDetected then
+            pausedDetected = true
+            pauseStatus.Text = "Paused!"
+            pauseStatus.TextColor3 = Color3.fromRGB(255, 255, 0)
+            
+            -- Bypass immediately
+            bypassPause()
+        elseif not paused then
+            pausedDetected = false
+        end
+    end)
+end
+
+-- Toggle function
+local function toggleBypass()
+    bypassEnabled = not bypassEnabled
+    
+    -- Update UI
+    statusValue.Text = bypassEnabled and "ACTIVE" or "OFF"
+    statusValue.TextColor3 = bypassEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+    toggleBtn.Text = bypassEnabled and "ON" or "OFF"
+    toggleBtn.BackgroundColor3 = bypassEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(50, 50, 60)
+    
+    if bypassEnabled then
+        monitorPause()
+        WindUI:Notify({
+            Title = "Pause Bypass",
+            Content = "Bypass activated!",
+            Duration = 1
+        })
+    else
+        if bypassConnection then
+            bypassConnection:Disconnect()
+            bypassConnection = nil
+        end
+        pauseStatus.Text = "None"
+        pauseStatus.TextColor3 = Color3.fromRGB(150, 150, 150)
+        WindUI:Notify({
+            Title = "Pause Bypass",
+            Content = "Bypass deactivated",
+            Duration = 1
+        })
+    end
+end
+
+-- ==============================================
+-- BUTTON FUNCTIONS
+-- ==============================================
+toggleBtn.MouseButton1Click:Connect(toggleBypass)
+
+-- ==============================================
+-- MINIMIZE FUNCTION
+-- ==============================================
+minimizeBtn.MouseButton1Click:Connect(function()
+    if uiVisible then
+        contentFrame.Visible = false
+        main.BorderSizePixel = 0
+        main.Size = UDim2.new(0, 300, 0, 70)
+        minimizeBtn.Text = "+"
+        uiVisible = false
+    else
+        contentFrame.Visible = true
+        main.BorderSizePixel = 1
+        main.Size = UDim2.new(0, 300, 0, 200)
+        minimizeBtn.Text = "−"
+        uiVisible = true
+    end
+end)
+
+-- ==============================================
+-- CLOSE FUNCTION
+-- ==============================================
+closeBtn.MouseButton1Click:Connect(function()
+    if bypassEnabled then
+        toggleBypass()
+    end
+    gui:Destroy()
+end)
+
+-- ==============================================
+-- TOGGLE WITH INSERT KEY
+-- ==============================================
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Insert then
+        container.Visible = not container.Visible
+    end
+end)
