@@ -1,7 +1,6 @@
 -- ============================================================
--- FIQQZR7 SKYBOX CHANGER - CLEAN EDITION
+-- FIQQZR7 SKYBOX CHANGER - FIXED EDITION
 -- By Fiqqzr7 | Support Semua ID Roblox (Gambar/Decal/Asset)
--- Toggle Frame DIBUANG
 -- ============================================================
 
 local Lighting = game:GetService("Lighting")
@@ -173,6 +172,21 @@ layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     contentFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 15)
 end)
 
+-- Skybox aktif
+local skyboxEnabled = true
+
+-- Fungsi untuk reset placeholder
+local function resetAllPlaceholders()
+    singleBox.PlaceholderText = "Masukkan ID Gambar/Decal"
+    
+    for i, side in ipairs(sides) do
+        local box = sidesFrame:FindFirstChildOfClass("TextBox")
+        if box then
+            box.PlaceholderText = "ID"
+        end
+    end
+end
+
 -- ===== SINGLE ID INPUT (UNTUK SEMUA SISI) =====
 local singleFrame = Instance.new("Frame")
 singleFrame.Size = UDim2.new(0.95, 0, 0, 70)
@@ -230,9 +244,6 @@ singleApply.Parent = singleFrame
 local singleApplyCorner = Instance.new("UICorner")
 singleApplyCorner.CornerRadius = UDim.new(0, 5)
 singleApplyCorner.Parent = singleApply
-
--- Skybox aktif (tanpa toggle)
-local skyboxEnabled = true
 
 singleApply.MouseButton1Click:Connect(function()
     local id = singleBox.Text:match("%d+")
@@ -294,6 +305,9 @@ local sides = {
     {"Right", "SkyboxRt", 155},
 }
 
+-- Simpan referensi ke semua box untuk reset
+local sideBoxes = {}
+
 for _, side in ipairs(sides) do
     local name = side[1]
     local prop = side[2]
@@ -324,6 +338,7 @@ for _, side in ipairs(sides) do
     sideBox.TextSize = 10
     sideBox.ClearTextOnFocus = false
     sideBox.Parent = sidesFrame
+    table.insert(sideBoxes, sideBox)
 
     local sideBoxCorner = Instance.new("UICorner")
     sideBoxCorner.CornerRadius = UDim.new(0, 4)
@@ -342,7 +357,7 @@ for _, side in ipairs(sides) do
     sideBtn.Parent = sidesFrame
 
     local sideBtnCorner = Instance.new("UICorner")
-sideBtnCorner.CornerRadius = UDim.new(0, 4)
+    sideBtnCorner.CornerRadius = UDim.new(0, 4)
     sideBtnCorner.Parent = sideBtn
 
     sideBtn.MouseButton1Click:Connect(function()
@@ -364,6 +379,7 @@ sideBtnCorner.CornerRadius = UDim.new(0, 4)
             }):Play()
             
             sideBox.Text = ""
+            sideBox.PlaceholderText = "✓ Set"
         end
     end)
 end
@@ -391,10 +407,11 @@ presetsLabel.TextSize = 12
 presetsLabel.TextXAlignment = Enum.TextXAlignment.Left
 presetsLabel.Parent = presetsFrame
 
+-- FIXED: Gunakan ID yang valid untuk semua preset
 local presetButtons = {
     {"FIQQZR7 LOGO", "137113558220288", 30},
-    {"ERROR 404", "404", 55},
-    {"FIQQZR7 DARK", "137113558220289", 80},
+    {"SPACE NEBULA", "161578838", 55},      -- ID nebula yang valid
+    {"SUNSET ORANGE", "145927644", 80},      -- ID sunset yang valid
 }
 
 for _, preset in ipairs(presetButtons) do
@@ -439,6 +456,9 @@ for _, preset in ipairs(presetButtons) do
             TweenService:Create(presetBtn, TweenInfo.new(0.2), {
                 BackgroundColor3 = Color3.fromRGB(35, 35, 45)
             }):Play()
+            
+            -- Update placeholder di single box
+            singleBox.PlaceholderText = "✓ Applied preset: " .. name
         end
     end)
 end
@@ -467,9 +487,17 @@ resetBtn.MouseButton1Click:Connect(function()
     
     -- Clear all input boxes
     singleBox.Text = ""
-    for _, side in ipairs(sides) do
-        local box = sidesFrame:FindFirstChildOfClass("TextBox") -- simplified
+    singleBox.PlaceholderText = "Masukkan ID Gambar/Decal"
+    
+    for _, box in ipairs(sideBoxes) do
+        box.Text = ""
+        box.PlaceholderText = "ID"
     end
+    
+    resetBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+    TweenService:Create(resetBtn, TweenInfo.new(0.2), {
+        BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+    }):Play()
 end)
 
 -- ===== INSERT KEY TOGGLE =====
@@ -485,7 +513,7 @@ notify.Size = UDim2.new(0, 200, 0, 30)
 notify.Position = UDim2.new(0.5, -100, 0, 10)
 notify.BackgroundColor3 = Color3.fromRGB(0, 80, 0)
 notify.BackgroundTransparency = 0.1
-notify.Text = "✅ FIQQZR7 SKYBOX READY"
+notify.Text = "✅ FIQQZR7 SKYBOX FIXED"
 notify.TextColor3 = Color3.fromRGB(255, 255, 255)
 notify.Font = Enum.Font.GothamBold
 notify.TextSize = 12
@@ -507,6 +535,6 @@ TweenService:Create(notify, TweenInfo.new(0.3), {
 task.wait(0.3)
 notify:Destroy()
 
-print("✅ FIQQZR7 Skybox Changer - Clean Edition Loaded!")
-print("📌 Toggle Frame Removed • All IDs Supported")
+print("✅ FIQQZR7 Skybox Changer - FIXED EDITION Loaded!")
+print("📌 ID Presets: FIQQZR7 LOGO, SPACE NEBULA, SUNSET ORANGE")
 print("📌 Press INSERT to toggle UI")
