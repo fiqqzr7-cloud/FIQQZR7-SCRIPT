@@ -1,6 +1,7 @@
--- FIQQZR7 INFINITE JUMP - GLOW TEPI SAHAJA
+-- FIQQZR7 INFINITE JUMP - RED EDITION
 -- Glow hanya di border, bukan fill area besar
 -- Background hitam solid
+-- TITLE BAR KECIL (35px)
 
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
@@ -17,7 +18,7 @@ local jumpHeight = 50
 local jumpConnection = nil
 
 -- ==============================================
--- CREATE UI (GLOW TEPI)
+-- CREATE UI (GLOW TEPI MERAH)
 -- ==============================================
 local gui = Instance.new("ScreenGui")
 gui.Name = "FIQQZR7_InfiniteJump"
@@ -35,13 +36,13 @@ container.Active = false
 container.Draggable = false
 container.Parent = gui
 
--- Main Frame (HITAM SOLID)
+-- Main Frame (HITAM KEMERAHAN)
 local main = Instance.new("Frame")
 main.Size = UDim2.new(1, 0, 1, 0)
 main.Position = UDim2.new(0, 0, 0, 0)
-main.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
+main.BackgroundColor3 = Color3.fromRGB(20, 8, 10)  -- Hitam kemerahan
 main.BackgroundTransparency = 0
-main.BorderColor3 = Color3.fromRGB(0, 150, 255)
+main.BorderColor3 = Color3.fromRGB(200, 50, 50)  -- Merah
 main.BorderSizePixel = 1
 main.ClipsDescendants = true
 main.Active = false
@@ -51,31 +52,29 @@ local mainCorner = Instance.new("UICorner")
 mainCorner.CornerRadius = UDim.new(0, 14)
 mainCorner.Parent = main
 
--- GLOW TEPI LAPIS 1 (biru gelap, paling luar)
+-- GLOW TEPI MERAH (3 lapis)
 local glow1 = Instance.new("UIStroke")
-glow1.Color = Color3.fromRGB(0, 100, 200)
+glow1.Color = Color3.fromRGB(150, 0, 0)  -- Merah gelap
 glow1.Thickness = 4
 glow1.Transparency = 0.7
 glow1.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 glow1.Parent = main
 
--- GLOW TEPI LAPIS 2 (biru terang, tengah)
 local glow2 = Instance.new("UIStroke")
-glow2.Color = Color3.fromRGB(0, 150, 255)
+glow2.Color = Color3.fromRGB(200, 50, 50)  -- Merah terang
 glow2.Thickness = 2.5
 glow2.Transparency = 0.6
 glow2.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 glow2.Parent = main
 
--- GLOW TEPI LAPIS 3 (biru muda, paling dalam)
 local glow3 = Instance.new("UIStroke")
-glow3.Color = Color3.fromRGB(100, 200, 255)
+glow3.Color = Color3.fromRGB(255, 100, 100)  -- Merah muda
 glow3.Thickness = 1
 glow3.Transparency = 0.5
 glow3.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 glow3.Parent = main
 
--- Animasi pulsing untuk glow tepi
+-- Animasi pulsing merah
 spawn(function()
     while true do
         for i = 1, 40 do
@@ -89,26 +88,26 @@ spawn(function()
 end)
 
 -- ==============================================
--- TITLE BAR (BOLEH DRAG)
+-- TITLE BAR (KECIK 35px - BOLEH DRAG)
 -- ==============================================
 local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, -20, 0, 60)
-titleBar.Position = UDim2.new(0, 10, 0, 8)
-titleBar.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+titleBar.Size = UDim2.new(1, -20, 0, 35)  -- Dikurangkan dari 60 ke 35
+titleBar.Position = UDim2.new(0, 10, 0, 6)  -- Adjusted position
+titleBar.BackgroundColor3 = Color3.fromRGB(25, 10, 12)  -- Merah gelap
 titleBar.BackgroundTransparency = 0
-titleBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
+titleBar.BorderColor3 = Color3.fromRGB(200, 50, 50)  -- Merah
 titleBar.BorderSizePixel = 1
 titleBar.ZIndex = 10
 titleBar.Active = true
 titleBar.Parent = main
 
 local titleBarCorner = Instance.new("UICorner")
-titleBarCorner.CornerRadius = UDim.new(0, 10)
+titleBarCorner.CornerRadius = UDim.new(0, 8)  -- Kurang bulat
 titleBarCorner.Parent = titleBar
 
--- Glow tepi untuk title bar (lebih nipis)
+-- Glow tepi untuk title bar (lebih nipis) - merah
 local titleGlow = Instance.new("UIStroke")
-titleGlow.Color = Color3.fromRGB(0, 150, 255)
+titleGlow.Color = Color3.fromRGB(200, 50, 50)
 titleGlow.Thickness = 1.5
 titleGlow.Transparency = 0.4
 titleGlow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -151,98 +150,98 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- Icon
+-- Icon (lebih kecil)
 local icon = Instance.new("TextLabel")
-icon.Size = UDim2.new(0, 40, 1, 0)
-icon.Position = UDim2.new(0, 8, 0, 0)
+icon.Size = UDim2.new(0, 30, 1, 0)  -- Dikurangkan dari 40 ke 30
+icon.Position = UDim2.new(0, 6, 0, 0)  -- Adjusted
 icon.BackgroundTransparency = 1
 icon.Text = "🦘"
-icon.TextColor3 = Color3.fromRGB(0, 200, 255)
-icon.TextSize = 24
+icon.TextColor3 = Color3.fromRGB(255, 100, 100)  -- Merah
+icon.TextSize = 18  -- Dikurangkan
 icon.Font = Enum.Font.GothamBold
 icon.ZIndex = 11
 icon.Parent = titleBar
 
--- Title
+-- Title (lebih kecil)
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(0.5, 0, 0.5, 0)
-title.Position = UDim2.new(0, 55, 0, 8)
+title.Position = UDim2.new(0, 40, 0, 5)  -- Adjusted
 title.BackgroundTransparency = 1
 title.Text = "INFINITE JUMP"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 14
+title.TextSize = 12  -- Dikurangkan
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.ZIndex = 11
 title.Parent = titleBar
 
--- Subtitle
+-- Subtitle (lebih kecil)
 local subtitle = Instance.new("TextLabel")
 subtitle.Size = UDim2.new(0.5, 0, 0.3, 0)
-subtitle.Position = UDim2.new(0, 55, 0, 32)
+subtitle.Position = UDim2.new(0, 40, 0, 20)  -- Adjusted
 subtitle.BackgroundTransparency = 1
-subtitle.Text = "Developer Fiqqzr7"
-subtitle.TextColor3 = Color3.fromRGB(150, 200, 255)
-subtitle.TextSize = 9
+subtitle.Text = "By Fiqqzr7XCode"
+subtitle.TextColor3 = Color3.fromRGB(255, 150, 150)  -- Merah muda
+subtitle.TextSize = 8
 subtitle.Font = Enum.Font.Gotham
 subtitle.TextXAlignment = Enum.TextXAlignment.Left
 subtitle.ZIndex = 11
 subtitle.Parent = titleBar
 
--- Minimize Button
+-- Minimize Button (lebih kecil)
 local uiVisible = true
 local minimizeBtn = Instance.new("TextButton")
-minimizeBtn.Size = UDim2.new(0, 22, 0, 22)
-minimizeBtn.Position = UDim2.new(1, -60, 0.5, -11)
-minimizeBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-minimizeBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+minimizeBtn.Size = UDim2.new(0, 18, 0, 18)  -- Dikurangkan dari 22 ke 18
+minimizeBtn.Position = UDim2.new(1, -50, 0.5, -9)  -- Adjusted
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(40, 20, 22)  -- Merah gelap
+minimizeBtn.BorderColor3 = Color3.fromRGB(200, 50, 50)
 minimizeBtn.BorderSizePixel = 1
 minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 minimizeBtn.Text = "−"
 minimizeBtn.Font = Enum.Font.GothamBold
-minimizeBtn.TextSize = 16
+minimizeBtn.TextSize = 14
 minimizeBtn.ZIndex = 11
 minimizeBtn.Parent = titleBar
 
 local minCorner = Instance.new("UICorner")
-minCorner.CornerRadius = UDim.new(0, 5)
+minCorner.CornerRadius = UDim.new(0, 4)
 minCorner.Parent = minimizeBtn
 
--- Close Button
+-- Close Button (lebih kecil)
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 22, 0, 22)
-closeBtn.Position = UDim2.new(1, -32, 0.5, -11)
-closeBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
-closeBtn.BorderColor3 = Color3.fromRGB(255, 100, 100)
+closeBtn.Size = UDim2.new(0, 18, 0, 18)  -- Dikurangkan dari 22 ke 18
+closeBtn.Position = UDim2.new(1, -28, 0.5, -9)  -- Adjusted
+closeBtn.BackgroundColor3 = Color3.fromRGB(120, 30, 30)  -- Merah gelap
+closeBtn.BorderColor3 = Color3.fromRGB(200, 50, 50)
 closeBtn.BorderSizePixel = 1
 closeBtn.Text = "✕"
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 12
+closeBtn.TextSize = 10
 closeBtn.ZIndex = 11
 closeBtn.Parent = titleBar
 
 local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 5)
+closeCorner.CornerRadius = UDim.new(0, 4)
 closeCorner.Parent = closeBtn
 
 -- ==============================================
--- CONTENT FRAME
+-- CONTENT FRAME (adjusted)
 -- ==============================================
 local contentFrame = Instance.new("Frame")
-contentFrame.Size = UDim2.new(1, -20, 1, -80)
-contentFrame.Position = UDim2.new(0, 10, 0, 75)
+contentFrame.Size = UDim2.new(1, -20, 1, -55)  -- Adjusted (title bar 35px + padding)
+contentFrame.Position = UDim2.new(0, 10, 0, 45)  -- Adjusted
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = main
 
 -- ==============================================
--- STATUS CARD
+-- STATUS CARD (merah theme)
 -- ==============================================
 local statusCard = Instance.new("Frame")
 statusCard.Size = UDim2.new(1, 0, 0, 70)
 statusCard.Position = UDim2.new(0, 0, 0, 0)
-statusCard.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
-statusCard.BorderColor3 = Color3.fromRGB(0, 150, 255)
+statusCard.BackgroundColor3 = Color3.fromRGB(18, 8, 10)  -- Merah gelap
+statusCard.BorderColor3 = Color3.fromRGB(200, 50, 50)
 statusCard.BorderSizePixel = 1
 statusCard.Parent = contentFrame
 
@@ -252,20 +251,20 @@ statusCorner.Parent = statusCard
 
 local statusIcon = Instance.new("TextLabel")
 statusIcon.Size = UDim2.new(0, 25, 0, 25)
-statusIcon.Position = UDim2.new(0, 10, 0.5, -12)
+statusIcon.Position = UDim2.new(0, 8, 0.5, -12)
 statusIcon.BackgroundTransparency = 1
 statusIcon.Text = "⚡"
-statusIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+statusIcon.TextColor3 = Color3.fromRGB(255, 100, 100)
 statusIcon.TextSize = 18
 statusIcon.Font = Enum.Font.GothamBold
 statusIcon.Parent = statusCard
 
 local statusTitle = Instance.new("TextLabel")
 statusTitle.Size = UDim2.new(1, -80, 0, 20)
-statusTitle.Position = UDim2.new(0, 40, 0, 15)
+statusTitle.Position = UDim2.new(0, 38, 0, 15)
 statusTitle.BackgroundTransparency = 1
 statusTitle.Text = "Status"
-statusTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+statusTitle.TextColor3 = Color3.fromRGB(220, 220, 220)
 statusTitle.TextSize = 11
 statusTitle.Font = Enum.Font.Gotham
 statusTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -273,7 +272,7 @@ statusTitle.Parent = statusCard
 
 local statusValue = Instance.new("TextLabel")
 statusValue.Size = UDim2.new(1, -80, 0, 20)
-statusValue.Position = UDim2.new(0, 40, 0, 35)
+statusValue.Position = UDim2.new(0, 38, 0, 35)
 statusValue.BackgroundTransparency = 1
 statusValue.Text = infiniteJumpEnabled and "ON" or "OFF"
 statusValue.TextColor3 = infiniteJumpEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
@@ -286,8 +285,8 @@ statusValue.Parent = statusCard
 local toggleBtn = Instance.new("TextButton")
 toggleBtn.Size = UDim2.new(0, 50, 0, 30)
 toggleBtn.Position = UDim2.new(1, -60, 0.5, -15)
-toggleBtn.BackgroundColor3 = infiniteJumpEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(50, 50, 60)
-toggleBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+toggleBtn.BackgroundColor3 = infiniteJumpEnabled and Color3.fromRGB(150, 0, 0) or Color3.fromRGB(40, 20, 22)
+toggleBtn.BorderColor3 = Color3.fromRGB(200, 50, 50)
 toggleBtn.BorderSizePixel = 1
 toggleBtn.Text = infiniteJumpEnabled and "ON" or "OFF"
 toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -300,13 +299,13 @@ toggleCorner.CornerRadius = UDim.new(0, 6)
 toggleCorner.Parent = toggleBtn
 
 -- ==============================================
--- HEIGHT CONTROL CARD
+-- HEIGHT CONTROL CARD (merah theme)
 -- ==============================================
 local heightCard = Instance.new("Frame")
 heightCard.Size = UDim2.new(1, 0, 0, 80)
 heightCard.Position = UDim2.new(0, 0, 0, 80)
-heightCard.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
-heightCard.BorderColor3 = Color3.fromRGB(0, 150, 255)
+heightCard.BackgroundColor3 = Color3.fromRGB(18, 8, 10)
+heightCard.BorderColor3 = Color3.fromRGB(200, 50, 50)
 heightCard.BorderSizePixel = 1
 heightCard.Parent = contentFrame
 
@@ -316,20 +315,20 @@ heightCorner.Parent = heightCard
 
 local heightIcon = Instance.new("TextLabel")
 heightIcon.Size = UDim2.new(0, 25, 0, 25)
-heightIcon.Position = UDim2.new(0, 10, 0, 15)
+heightIcon.Position = UDim2.new(0, 8, 0, 15)
 heightIcon.BackgroundTransparency = 1
 heightIcon.Text = "📏"
-heightIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
+heightIcon.TextColor3 = Color3.fromRGB(255, 100, 100)
 heightIcon.TextSize = 18
 heightIcon.Font = Enum.Font.GothamBold
 heightIcon.Parent = heightCard
 
 local heightTitle = Instance.new("TextLabel")
 heightTitle.Size = UDim2.new(1, -120, 0, 20)
-heightTitle.Position = UDim2.new(0, 40, 0, 15)
+heightTitle.Position = UDim2.new(0, 38, 0, 15)
 heightTitle.BackgroundTransparency = 1
-heightTitle.Text = "Jump Height (1-2000)"
-heightTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+heightTitle.Text = "Jump Height (10-200)"
+heightTitle.TextColor3 = Color3.fromRGB(220, 220, 220)
 heightTitle.TextSize = 11
 heightTitle.Font = Enum.Font.Gotham
 heightTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -339,10 +338,11 @@ heightTitle.Parent = heightCard
 local heightInput = Instance.new("TextBox")
 heightInput.Size = UDim2.new(0, 60, 0, 30)
 heightInput.Position = UDim2.new(1, -70, 0.5, -15)
-heightInput.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-heightInput.BorderColor3 = Color3.fromRGB(0, 150, 255)
+heightInput.BackgroundColor3 = Color3.fromRGB(25, 10, 12)
+heightInput.BorderColor3 = Color3.fromRGB(200, 50, 50)
 heightInput.BorderSizePixel = 1
 heightInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+heightInput.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
 heightInput.PlaceholderText = "50"
 heightInput.Text = tostring(jumpHeight)
 heightInput.Font = Enum.Font.GothamBold
@@ -363,7 +363,7 @@ local function toggleInfiniteJump()
     statusValue.Text = infiniteJumpEnabled and "ON" or "OFF"
     statusValue.TextColor3 = infiniteJumpEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
     toggleBtn.Text = infiniteJumpEnabled and "ON" or "OFF"
-    toggleBtn.BackgroundColor3 = infiniteJumpEnabled and Color3.fromRGB(0, 150, 0) or Color3.fromRGB(50, 50, 60)
+    toggleBtn.BackgroundColor3 = infiniteJumpEnabled and Color3.fromRGB(150, 0, 0) or Color3.fromRGB(40, 20, 22)
     
     if infiniteJumpEnabled then
         jumpConnection = UserInputService.JumpRequest:Connect(function()
@@ -423,7 +423,7 @@ minimizeBtn.MouseButton1Click:Connect(function()
     if uiVisible then
         contentFrame.Visible = false
         main.BorderSizePixel = 0
-        main.Size = UDim2.new(0, 300, 0, 80)
+        main.Size = UDim2.new(0, 300, 0, 55)  -- Adjusted (title bar 35px + padding)
         minimizeBtn.Text = "+"
         uiVisible = false
     else
@@ -453,5 +453,6 @@ if humanoid then
     humanoid.JumpPower = 50
 end
 
-print("✅ FIQQZR7 INFINITE JUMP - GLOW TEPI SAHAJA")
-print("🦘 Glow hanya di border, bukan fill area besar")
+print("✅ FIQQZR7 INFINITE JUMP - RED EDITION")
+print("🦘 Glow merah tepi sahaja, bukan fill area besar")
+print("📌 Title bar 35px - tak menghalang")
