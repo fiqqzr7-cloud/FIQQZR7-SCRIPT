@@ -12,7 +12,7 @@ local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
--- ===== STATE VARIABEL =====
+-- ===== STATE VARIABEL ZERO SCRIPT =====
 local NoclipEnabled = false
 local InfiniteJumpEnabled = false
 local GodModeEnabled = false
@@ -133,6 +133,7 @@ local function playAnimation(emote, button)
 end
 
 -- ===== FUNGSI INTI =====
+
 local function makeUI(parent, class, props)
     local obj = Instance.new(class)
     for k, v in pairs(props) do obj[k] = v end
@@ -1152,7 +1153,7 @@ local UIState = { Toggles = {}, Sliders = {}, Dropdowns = {}, Texts = {} }
 local uiBlur = makeUI(Lighting, "BlurEffect", {Size = 20, Enabled = false})
 
 local screenGui = makeUI(LocalPlayer:WaitForChild("PlayerGui"), "ScreenGui", {
-    Name = "FIQQZR7Hub",
+    Name = "ModernAdminUI",
     ResetOnSpawn = false,
     IgnoreGuiInset = true,
     AutoLocalize = false
@@ -1221,6 +1222,7 @@ local function animateGlowingBorder()
         end
     end)
     rotateTween:Play()
+    -- DIHAPUS: animasi Thickness pada glowStroke agar tidak bentrok dengan stroke minimize
 end
 animateGlowingBorder()
 
@@ -1235,9 +1237,9 @@ local header = makeUI(mainFrame, "Frame", {
 })
 makeUI(header, "UICorner", {CornerRadius = UDim.new(0, 12)})
 
--- Title label
+-- Title label (dynamically updated per page)
 local titleLabel = makeUI(header, "TextLabel", {
-    Text = "FIQQZR7 EXPLOITERS",
+    Text = "Fiqqzr7 Exploiters",
     Font = Enum.Font.GothamSemibold,
     TextColor3 = Color3.fromRGB(255, 255, 255),
     TextSize = 12,
@@ -1248,7 +1250,7 @@ local titleLabel = makeUI(header, "TextLabel", {
     ZIndex = 6
 })
 
--- Minimize Button
+-- Minimize Button (pojok kanan)
 local minimizeButton = makeUI(header, "TextButton", {
     Text = "+",
     Font = Enum.Font.GothamBold,
@@ -1263,7 +1265,7 @@ local minimizeButton = makeUI(header, "TextButton", {
 })
 makeUI(minimizeButton, "UICorner", {CornerRadius = UDim.new(1, 0)})
 
--- Page indicator dots
+-- ===== PAGE INDICATOR DOTS (3 dots) - tepat di sebelah kiri tombol minimize =====
 local dotsFrame = makeUI(header, "Frame", {
     Size = UDim2.new(0, 44, 0, 10),
     Position = UDim2.new(1, -30, 0.5, 0),
@@ -1296,7 +1298,7 @@ local dot3 = makeUI(dotsFrame, "Frame", {
 })
 makeUI(dot3, "UICorner", {CornerRadius = UDim.new(1, 0)})
 
--- Viewport
+-- ===== VIEWPORT (Clip frame untuk swipe) =====
 local viewport = makeUI(mainFrame, "Frame", {
     Position = UDim2.new(0, 0, 0, 28),
     Size = UDim2.new(1, 0, 1, -28),
@@ -1304,7 +1306,7 @@ local viewport = makeUI(mainFrame, "Frame", {
     ClipsDescendants = true
 })
 
--- Swipe container
+-- ===== SWIPE CONTAINER (lebar 3x = 265*3) =====
 local PAGE_W = 265
 local pageContainer = makeUI(viewport, "Frame", {
     Position = UDim2.new(0, 0, 0, 0),
@@ -1312,7 +1314,7 @@ local pageContainer = makeUI(viewport, "Frame", {
     BackgroundTransparency = 1
 })
 
--- Page 1 - Main Script
+-- ===== PAGE 1 - Zero Script =====
 local page1 = makeUI(pageContainer, "Frame", {
     Position = UDim2.new(0, 0, 0, 0),
     Size = UDim2.new(0, PAGE_W, 1, 0),
@@ -1338,7 +1340,7 @@ layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     optionsFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 8)
 end)
 
--- Page 2 - Avatar Changer
+-- ===== PAGE 2 - Avatar Changer =====
 local page2 = makeUI(pageContainer, "Frame", {
     Position = UDim2.new(0, PAGE_W, 0, 0),
     Size = UDim2.new(0, PAGE_W, 1, 0),
@@ -1365,7 +1367,7 @@ layout2:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     optionsFrame2.CanvasSize = UDim2.new(0, 0, 0, layout2.AbsoluteContentSize.Y + 8)
 end)
 
--- Page 3 - Music Player
+-- ===== PAGE 3 - Music Player =====
 local page3 = makeUI(pageContainer, "Frame", {
     Position = UDim2.new(0, PAGE_W * 2, 0, 0),
     Size = UDim2.new(0, PAGE_W, 1, 0),
@@ -1392,10 +1394,10 @@ layout3:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     optionsFrame3.CanvasSize = UDim2.new(0, 0, 0, layout3.AbsoluteContentSize.Y + 8)
 end)
 
--- Page management
+-- ===== PAGE MANAGEMENT =====
 local currentPage = 1
 local totalPages = 3
-local pageNames = {"FIQQZR7 SCRIPT", "AVATAR CHANGER", "MUSIC PLAYER"}
+local pageNames = {"Fiqqzr7 Exploiters", "Fiqqzr7 Exploiters", "Fiqqzr7 Exploiters"}
 local isMinimized = false
 local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 local minimizedSize = UDim2.new(0, 265, 0, 40)
@@ -1419,7 +1421,7 @@ local function goToPage(pageNum)
     }):Play()
 end
 
--- Swipe & drag system
+-- ===== SWIPE & DRAG SYSTEM =====
 local touchStartX = nil
 local touchStartY = nil
 local touchStartFramePos = nil
@@ -1845,6 +1847,332 @@ local function createDropdown(name, options, callback)
 end
 
 -- ============================================================
+-- ===== PLAYLIST DROPDOWN (sama polanya dengan Emote Dropdown) =====
+-- ============================================================
+--[[
+    createPlaylistDropdown(songs, DEFAULT_COUNT, callbacks)
+    Dipanggil dari createMusicPlayerPage().
+    Struktur UI identik dengan createDropdown (Emotes):
+      - Container frame di optionsFrame3
+      - Label judul di atas
+      - Tombol dropdown + arrow ▼
+      - ScrollingFrame list (di bawah container, ZIndex tinggi)
+      - Animasi buka/tutup via Tween sama persis
+    callbacks = {
+        onSelect  = function(idx, song) end,   -- dipanggil saat user klik item
+        getIcon   = function(idx) return songs[idx].Icon end,
+        getLabel  = function(idx) return songs[idx].Name end,
+    }
+    Mengembalikan:
+    {
+        container, button, list, arrow,
+        setCurrentSong = function(idx),         -- update tampilan label+icon
+        rebuild        = function(songs, DEFAULT_COUNT, callbacks), -- rebuild items
+    }
+]]
+local function createPlaylistDropdown(songs, DEFAULT_COUNT, callbacks)
+    -- ─── Container (sama ukuran dengan createDropdown) ───────────────────────
+    local dropdownContainer = makeUI(optionsFrame3, "Frame", {
+        Size = UDim2.new(0.95, 0, 0, 62),
+        BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+        BackgroundTransparency = 0.2,
+        BorderSizePixel = 0, ClipsDescendants = false
+    })
+    makeUI(dropdownContainer, "UICorner", {CornerRadius = UDim.new(0, 8)})
+
+    -- Judul section
+    makeUI(dropdownContainer, "TextLabel", {
+        Text = "Playlist", Font = Enum.Font.GothamBold,
+        TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 11,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, -12, 0, 18),
+        Position = UDim2.new(0, 8, 0, 4),
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd
+    })
+
+    -- ─── Tombol dropdown (sama posisi dengan emote dropdown button) ───────────
+    local dropdownButton = makeUI(dropdownContainer, "TextButton", {
+        Size = UDim2.new(1, -12, 0, 26),
+        Position = UDim2.new(0, 6, 0, 28),
+        BackgroundColor3 = Color3.fromRGB(50, 50, 50),
+        Text = "",
+        TextColor3 = Color3.fromRGB(200, 200, 200),
+        Font = Enum.Font.Gotham, TextSize = 10,
+        BorderSizePixel = 0,
+        ClipsDescendants = false
+    })
+    makeUI(dropdownButton, "UICorner", {CornerRadius = UDim.new(0, 6)})
+
+    -- Icon lagu saat ini (sama dengan Music Player sebelumnya)
+    local dropIconImg = makeUI(dropdownButton, "ImageLabel", {
+        Size = UDim2.new(0, 16, 0, 16),
+        Position = UDim2.new(0, 7, 0.5, -8),
+        BackgroundTransparency = 1,
+        Image = songs[1] and songs[1].Icon or "",
+        ZIndex = 6
+    })
+
+    -- Label nama lagu saat ini
+    local dropLabel = makeUI(dropdownButton, "TextLabel", {
+        Size = UDim2.new(1, -50, 1, 0),
+        Position = UDim2.new(0, 30, 0, 0),
+        BackgroundTransparency = 1,
+        Text = songs[1] and songs[1].Name or "No songs",
+        Font = Enum.Font.Gotham,
+        TextColor3 = Color3.fromRGB(220, 220, 220),
+        TextSize = 10,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        ZIndex = 6
+    })
+
+    -- Arrow dihapus — dummy frame agar tween lama tidak error
+    local arrow = makeUI(dropdownButton, "Frame", {
+        Size = UDim2.new(0, 0, 0, 0),
+        BackgroundTransparency = 1, BorderSizePixel = 0, Visible = false
+    })
+
+    -- ─── Options list — di-parent ke screenGui agar tidak terpotong ClipsDescendants ──
+    local itemHeight = 26
+    local itemPadding = 2
+    local maxVisibleItems = 5
+
+    local optionsList = makeUI(screenGui, "ScrollingFrame", {
+        Size = UDim2.new(0, 200, 0, 0),
+        Position = UDim2.new(0, 0, 0, 0),
+        BackgroundColor3 = Color3.fromRGB(32, 32, 32),
+        BorderSizePixel = 0,
+        ScrollBarThickness = 3,
+        ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100),
+        Visible = false, ZIndex = 20,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
+        ClipsDescendants = true
+    })
+    makeUI(optionsList, "UICorner", {CornerRadius = UDim.new(0, 6)})
+    makeUI(optionsList, "UIStroke", {Color = Color3.fromRGB(70, 70, 70), Thickness = 1, Transparency = 0.5})
+    local optionsListLayout = makeUI(optionsList, "UIListLayout", {
+        Padding = UDim.new(0, 2),
+        HorizontalAlignment = Enum.HorizontalAlignment.Center,
+        SortOrder = Enum.SortOrder.LayoutOrder
+    })
+    optionsListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        optionsList.CanvasSize = UDim2.new(0, 0, 0, optionsListLayout.AbsoluteContentSize.Y + 4)
+    end)
+
+    local isOpen = false
+
+    -- Hitung posisi & ukuran list secara absolut saat dibuka
+    local function updateListPosition()
+        local absPos  = dropdownContainer.AbsolutePosition
+        local absSize = dropdownContainer.AbsoluteSize
+        local count   = math.min(#optionsList:GetChildren() - 2, maxVisibleItems) -- -2: layout+stroke
+        if count < 1 then count = maxVisibleItems end
+        local listH = count * itemHeight + (count - 1) * itemPadding + 6
+        optionsList.Size     = UDim2.new(0, absSize.X, 0, listH)
+        optionsList.Position = UDim2.new(0, absPos.X, 0, absPos.Y + absSize.Y + 3)
+    end
+
+    -- ─── Fungsi rebuild items ───────────────────────────────────────────────────
+    -- Custom songs ditampilkan PALING ATAS (terbaru di atas), lalu default songs di bawah.
+    local function rebuildItems(songsList, defCount, cbs)
+        -- hapus item lama
+        for _, child in ipairs(optionsList:GetChildren()) do
+            if child:IsA("TextButton") or (child:IsA("Frame") and child.Name ~= "") then
+                child:Destroy()
+            end
+        end
+
+        local visibleCount = math.min(#songsList, maxVisibleItems)
+        local targetH = visibleCount * itemHeight + (visibleCount - 1) * itemPadding + 6
+
+        -- Buat urutan render: custom songs (terbaru dulu = dari akhir ke defCount+1), lalu default songs
+        local renderOrder = {}
+        -- Custom songs: dari index #songsList sampai defCount+1 (terbaru di atas)
+        for i = #songsList, defCount + 1, -1 do
+            table.insert(renderOrder, i)
+        end
+        -- Default songs: dari index 1 sampai defCount
+        for i = 1, defCount do
+            table.insert(renderOrder, i)
+        end
+
+        for order, i in ipairs(renderOrder) do
+            local song = songsList[i]
+            if not song then continue end
+            local isCustom = (i > defCount)
+            local optionButton = makeUI(optionsList, "TextButton", {
+                Size = UDim2.new(0.96, 0, 0, itemHeight),
+                BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+                Text = "",
+                TextColor3 = Color3.fromRGB(200, 200, 200),
+                Font = Enum.Font.Gotham, TextSize = 10,
+                BorderSizePixel = 0,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                LayoutOrder = order,
+                ZIndex = 21
+            })
+            makeUI(optionButton, "UICorner", {CornerRadius = UDim.new(0, 4)})
+
+            -- icon
+            makeUI(optionButton, "ImageLabel", {
+                Size = UDim2.new(0, 14, 0, 14),
+                Position = UDim2.new(0, 7, 0.5, -7),
+                BackgroundTransparency = 1, Image = song.Icon, ZIndex = 23
+            })
+
+            -- label nama lagu
+            local labelRightPad = isCustom and 28 or 6
+            makeUI(optionButton, "TextLabel", {
+                Size = UDim2.new(1, -(28 + labelRightPad), 1, 0),
+                Position = UDim2.new(0, 28, 0, 0),
+                BackgroundTransparency = 1, Text = song.Name,
+                Font = Enum.Font.Gotham,
+                TextColor3 = Color3.fromRGB(210, 210, 210),
+                TextSize = 10,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextTruncate = Enum.TextTruncate.AtEnd, ZIndex = 22
+            })
+
+            -- tombol hapus untuk lagu custom
+            local delBtn = nil
+            if isCustom then
+                delBtn = makeUI(optionButton, "TextButton", {
+                    Size = UDim2.new(0, 16, 0, 16),
+                    Position = UDim2.new(1, -20, 0.5, -8),
+                    BackgroundColor3 = Color3.fromRGB(160, 50, 50),
+                    BackgroundTransparency = 0.3, BorderSizePixel = 0,
+                    Text = "x", Font = Enum.Font.GothamBold,
+                    TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 9, ZIndex = 25,
+                    Active = true, AutoButtonColor = false
+                })
+                makeUI(delBtn, "UICorner", {CornerRadius = UDim.new(1, 0)})
+                delBtn.MouseEnter:Connect(function()
+                    TweenService:Create(delBtn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(200, 60, 60)}):Play()
+                end)
+                delBtn.MouseLeave:Connect(function()
+                    TweenService:Create(delBtn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(160, 50, 50)}):Play()
+                end)
+                local idx = i
+                delBtn.MouseButton1Click:Connect(function()
+                    if cbs and cbs.onDelete then cbs.onDelete(idx) end
+                end)
+            end
+
+            -- hover effect
+            optionButton.MouseEnter:Connect(function()
+                TweenService:Create(optionButton, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(62, 62, 62)}):Play()
+            end)
+            optionButton.MouseLeave:Connect(function()
+                TweenService:Create(optionButton, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(45, 45, 45)}):Play()
+            end)
+
+            -- klik pilih lagu (skip jika klik di area tombol delete)
+            local idx = i
+            optionButton.MouseButton1Click:Connect(function()
+                if delBtn then
+                    local mouse = UserInputService:GetMouseLocation()
+                    local abs = delBtn.AbsolutePosition
+                    local sz = delBtn.AbsoluteSize
+                    if mouse.X >= abs.X and mouse.X <= abs.X + sz.X and
+                       mouse.Y >= abs.Y and mouse.Y <= abs.Y + sz.Y then
+                        return
+                    end
+                end
+                dropIconImg.Image = song.Icon
+                dropLabel.Text = song.Name
+                isOpen = false
+                optionsList.Visible = false
+                TweenService:Create(arrow, TweenInfo.new(0.2), {Rotation = 0}):Play()
+                if cbs and cbs.onSelect then cbs.onSelect(idx, song) end
+            end)
+        end
+
+        return targetH
+    end
+
+    -- build pertama kali
+    rebuildItems(songs, DEFAULT_COUNT, callbacks)
+
+    -- ─── Tombol buka/tutup (posisi absolut, tidak terpotong scroll) ─────────
+    local function getTargetHeight()
+        local count = math.min(#songs, maxVisibleItems)
+        return count * itemHeight + (count - 1) * itemPadding + 6
+    end
+
+    dropdownButton.MouseButton1Click:Connect(function()
+        isOpen = not isOpen
+        if isOpen then
+            updateListPosition()
+            optionsList.Visible = true
+            TweenService:Create(arrow, TweenInfo.new(0.2), {Rotation = 180}):Play()
+        else
+            optionsList.Visible = false
+            TweenService:Create(arrow, TweenInfo.new(0.2), {Rotation = 0}):Play()
+        end
+    end)
+
+    -- Tutup jika klik di luar list
+    UserInputService.InputBegan:Connect(function(input)
+        if isOpen and (input.UserInputType == Enum.UserInputType.MouseButton1
+                    or input.UserInputType == Enum.UserInputType.Touch) then
+            local mousePos = UserInputService:GetMouseLocation()
+            local listPos  = optionsList.AbsolutePosition
+            local listSize = optionsList.AbsoluteSize
+            local inList = mousePos.X >= listPos.X and mousePos.X <= listPos.X + listSize.X
+                       and mousePos.Y >= listPos.Y and mousePos.Y <= listPos.Y + listSize.Y
+            local btnPos  = dropdownButton.AbsolutePosition
+            local btnSize = dropdownButton.AbsoluteSize
+            local inBtn = mousePos.X >= btnPos.X and mousePos.X <= btnPos.X + btnSize.X
+                      and mousePos.Y >= btnPos.Y and mousePos.Y <= btnPos.Y + btnSize.Y
+            if not inList and not inBtn then
+                isOpen = false
+                optionsList.Visible = false
+                TweenService:Create(arrow, TweenInfo.new(0.2), {Rotation = 0}):Play()
+            end
+        end
+    end)
+
+    -- ─── API publik ──────────────────────────────────────────────────────────
+    local api = {}
+
+    -- Update tampilan label+icon tanpa membuka dropdown
+    function api.setCurrentSong(idx, songsList)
+        local s = (songsList or songs)[idx]
+        if s then
+            dropIconImg.Image = s.Icon
+            dropLabel.Text = s.Name
+        end
+    end
+
+    -- Rebuild total (dipanggil setelah add/delete song)
+    function api.rebuild(newSongs, newDefaultCount, newCallbacks)
+        songs = newSongs
+        DEFAULT_COUNT = newDefaultCount
+        callbacks = newCallbacks
+        rebuildItems(newSongs, newDefaultCount, newCallbacks)
+    end
+
+    -- Paksa tutup dropdown dari luar (misal saat swipe page)
+    function api.close()
+        if isOpen then
+            isOpen = false
+            optionsList.Visible = false
+            TweenService:Create(arrow, TweenInfo.new(0.2), {Rotation = 0}):Play()
+        end
+    end
+
+    api.container      = dropdownContainer
+    api.button         = dropdownButton
+    api.list           = optionsList
+    api.arrow          = arrow
+    api.iconImg        = dropIconImg
+    api.nameLabel      = dropLabel
+
+    return api
+end
+
+-- ============================================================
 -- ===== PAGE 2 - AVATAR CHANGER =====
 -- ============================================================
 
@@ -1863,7 +2191,7 @@ local ac_favDropOpen     = false
 local ac_statusLabel     = nil
 
 local AC_UPDATEFAVBTN, AC_UPDATEFAVLIST, AC_SAVEFAVORITES, AC_APPLYAVATAR, AC_MORPHCHAR
-local AC_TARGET_BOX = nil
+local AC_TARGET_BOX = nil  -- textbox untuk target player
 
 if LocalPlayer.Character then
     local HUM = LocalPlayer.Character:FindFirstChild("Humanoid")
@@ -2190,13 +2518,21 @@ function createAvatarChangerPage()
         Size = UDim2.new(1, 0, 1, 0),
         TextXAlignment = Enum.TextXAlignment.Center
     })
-    AC_INPUT_BOX = ac_makeTextBox(optionsFrame2, "User", "User ID / Username", function(txt) end, false)
-    AC_TARGET_BOX = ac_makeTextBox(optionsFrame2, "Target", "Username / Display Name", function(txt) end, false)
+    -- TextBox User (avatar source) - tidak auto-apply saat enter, hanya simpan teks
+    AC_INPUT_BOX = ac_makeTextBox(optionsFrame2, "User", "User ID / Username", function(txt)
+        -- tidak auto apply, user harus klik tombol
+    end, false)
+    -- TextBox Target (player di server) - langsung di bawah textbox User
+    AC_TARGET_BOX = ac_makeTextBox(optionsFrame2, "Target", "Username / Display Name", function(txt)
+        -- tidak langsung apply, tunggu tombol
+    end, false)
+    -- Apply Avatar (ke diri sendiri) - tidak mengubah nama dari textbox target
     ac_makeBtn(optionsFrame2, "Apply Avatar", function()
         if AC_INPUT_BOX and AC_INPUT_BOX.Text ~= "" and AC_INPUT_BOX.Text ~= "User ID / Username" then
             AC_APPLYAVATAR(AC_INPUT_BOX.Text)
         end
     end)
+    -- Apply to Player (ke pemain lain) - sama style dengan Apply Avatar
     ac_makeBtn(optionsFrame2, "Apply to Player", function()
         local targetTxt = AC_TARGET_BOX and AC_TARGET_BOX.Text or ""
         if targetTxt == "" or targetTxt == "Username / Display Name" then
@@ -2335,14 +2671,13 @@ function createAvatarChangerPage()
 end
 
 -- ============================================================
--- ===== PAGE 3 - MUSIC PLAYER =====
+-- ===== PAGE 3 - MUSIC PLAYER (Logic dari Music_Player.txt, UI dari Zero Script) =====
 -- ============================================================
 
--- JSON encode/decode functions
+-- ── JSON encode/decode untuk simpan custom songs ──
 local function jsonEncodeString(s)
     return '"' .. s:gsub('\\','\\\\'):gsub('"','\\"'):gsub('\n','\\n'):gsub('\r','\\r'):gsub('\t','\\t') .. '"'
 end
-
 local function jsonEncodeSongs(tbl)
     local items = {}
     for _, song in ipairs(tbl) do
@@ -2352,7 +2687,6 @@ local function jsonEncodeSongs(tbl)
     end
     return "[" .. table.concat(items, ",") .. "]"
 end
-
 local function jsonDecodeSongs(str)
     local result = {}
     local pos = 1
@@ -2394,14 +2728,12 @@ local MP_SAVE_FILE = "Fiqqzr7Script_MusicPlayer.json"
 local function mp_canFileIO()
     return type(writefile) == "function" and type(readfile) == "function" and type(isfile) == "function"
 end
-
 local function mp_saveCustomSongs(songsTable, defaultCount)
     if not mp_canFileIO() then return end
     local custom = {}
     for i = defaultCount + 1, #songsTable do table.insert(custom, songsTable[i]) end
     pcall(writefile, MP_SAVE_FILE, jsonEncodeSongs(custom))
 end
-
 local function mp_loadCustomSongs()
     if not mp_canFileIO() then return {} end
     local existOk, exists = pcall(isfile, MP_SAVE_FILE)
@@ -2412,7 +2744,7 @@ local function mp_loadCustomSongs()
     return ok2 and decoded or {}
 end
 
--- Lucide-style icon builders
+-- ── Lucide-style icon builders ──
 local IC = Color3.fromRGB(215, 215, 215)
 local function rr(parent, x, y, w, h, col, rad, zi)
     local f = makeUI(parent, "Frame", {
@@ -2422,13 +2754,11 @@ local function rr(parent, x, y, w, h, col, rad, zi)
     makeUI(f, "UICorner", { CornerRadius = UDim.new(0, rad or 1) })
     return f
 end
-
 local function clickLayer(parent, zi)
     return makeUI(parent, "TextButton", {
         Size = UDim2.new(1,0,1,0), BackgroundTransparency = 1, Text = "", ZIndex = zi or 20
     })
 end
-
 local function iconSkipBack(parent, S, color)
     local bsz = parent.Size.X.Offset
     local pad = math.floor((bsz - S) / 2)
@@ -2445,7 +2775,6 @@ local function iconSkipBack(parent, S, color)
     makeUI(t2, "UICorner", { CornerRadius = UDim.new(0, 1) })
     rr(parent, pad+S-3, pad, 2, S, color, 1, 3)
 end
-
 local function iconSkipForward(parent, S, color)
     local bsz = parent.Size.X.Offset
     local pad = math.floor((bsz - S) / 2)
@@ -2462,7 +2791,6 @@ local function iconSkipForward(parent, S, color)
     makeUI(t2, "UICorner", { CornerRadius = UDim.new(0, 1) })
     rr(parent, pad, pad, 2, S, color, 1, 3)
 end
-
 local function iconPlay(parent, S, color, bsz)
     bsz = bsz or parent.Size.X.Offset
     local cx = math.floor(bsz/2) + 1
@@ -2480,7 +2808,6 @@ local function iconPlay(parent, S, color, bsz)
     })
     makeUI(t2, "UICorner", { CornerRadius = UDim.new(0, 1) })
 end
-
 local function iconPause(parent, S, color, bsz)
     bsz = bsz or parent.Size.X.Offset
     local barW = 3
@@ -2518,7 +2845,7 @@ function createMusicPlayerPage()
     local isMuted = false
     local savedVolume = 0.5
 
-    -- Header
+    -- Header label page 3
     local headerLbl = makeUI(optionsFrame3, "Frame", {
         Size = UDim2.new(0.95, 0, 0, 22),
         BackgroundTransparency = 1, BorderSizePixel = 0
@@ -2532,7 +2859,15 @@ function createMusicPlayerPage()
         TextXAlignment = Enum.TextXAlignment.Center
     })
 
-    -- Now playing
+    -- NOW PLAYING + VISUALIZER
+    local VIZ_COUNT  = 12
+    local VIZ_BAR_W  = 3
+    local VIZ_GAP    = 2
+    local VIZ_MAX_H  = 18
+    local VIZ_MIN_H  = 2
+    local VIZ_COL_ON  = Color3.fromRGB(210, 210, 210)
+    local VIZ_COL_OFF = Color3.fromRGB(60, 60, 60)
+
     local songInfoFrame = makeUI(optionsFrame3, "Frame", {
         Size = UDim2.new(0.95, 0, 0, 50),
         BackgroundColor3 = Color3.fromRGB(40, 40, 40),
@@ -2545,8 +2880,9 @@ function createMusicPlayerPage()
         TextColor3 = Color3.fromRGB(160, 160, 160), TextSize = 9,
         Font = Enum.Font.GothamBold, TextXAlignment = Enum.TextXAlignment.Left
     })
+    local vizTotalW = VIZ_COUNT * VIZ_BAR_W + (VIZ_COUNT - 1) * VIZ_GAP + 8
     local songNameLabel = makeUI(songInfoFrame, "TextLabel", {
-        Size = UDim2.new(1, -16, 0, 20),
+        Size = UDim2.new(1, -(vizTotalW + 16), 0, 20),
         Position = UDim2.new(0, 8, 0, 24),
         BackgroundTransparency = 1, Text = "Select a song",
         TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 12,
@@ -2554,7 +2890,53 @@ function createMusicPlayerPage()
         TextTruncate = Enum.TextTruncate.AtEnd
     })
 
-    -- Progress bar
+    local vizFrame = makeUI(songInfoFrame, "Frame", {
+        Size = UDim2.new(0, VIZ_COUNT * VIZ_BAR_W + (VIZ_COUNT - 1) * VIZ_GAP, 0, VIZ_MAX_H),
+        AnchorPoint = Vector2.new(1, 0.5),
+        Position = UDim2.new(1, -8, 0.5, 8),
+        BackgroundTransparency = 1, ClipsDescendants = false
+    })
+    local vizBars = {}
+    local vizTargetH = {}
+    local vizPhase = 0
+    for i = 1, VIZ_COUNT do
+        vizTargetH[i] = VIZ_MIN_H
+        local xPos = (i-1)*(VIZ_BAR_W+VIZ_GAP)
+        local bar = makeUI(vizFrame, "Frame", {
+            Size = UDim2.new(0, VIZ_BAR_W, 0, VIZ_MIN_H),
+            Position = UDim2.new(0, xPos, 1, -VIZ_MIN_H),
+            AnchorPoint = Vector2.new(0, 1),
+            BackgroundColor3 = VIZ_COL_OFF, BorderSizePixel = 0, ZIndex = 3
+        })
+        makeUI(bar, "UICorner", { CornerRadius = UDim.new(0, 1) })
+        vizBars[i] = bar
+    end
+    local function updateViz(playing, vol)
+        for i = 1, VIZ_COUNT do
+            local targetH, targetCol
+            if playing and vol > 0 then
+                local wave = math.sin(vizPhase + i * 0.7) * 0.5 + 0.5
+                targetH = math.max(VIZ_MIN_H, math.floor(VIZ_MIN_H + wave * (VIZ_MAX_H - VIZ_MIN_H) * vol))
+                targetCol = VIZ_COL_ON
+            else
+                targetH = VIZ_MIN_H
+                targetCol = VIZ_COL_OFF
+            end
+            vizTargetH[i] = targetH
+            local cur = vizBars[i].Size.Y.Offset
+            local new = cur + (targetH - cur) * 0.3
+            vizBars[i].Size = UDim2.new(0, VIZ_BAR_W, 0, math.max(VIZ_MIN_H, new))
+            vizBars[i].Position = UDim2.new(0, (i-1)*(VIZ_BAR_W+VIZ_GAP), 1, -math.max(VIZ_MIN_H, new))
+            vizBars[i].BackgroundColor3 = targetCol
+        end
+    end
+
+    local function formatTime(s)
+        if not s or s < 0 then return "0:00" end
+        return string.format("%d:%02d", math.floor(s/60), math.floor(s%60))
+    end
+
+    -- PROGRESS BAR
     local progressOuter = makeUI(optionsFrame3, "Frame", {
         Size = UDim2.new(0.95, 0, 0, 6),
         BackgroundColor3 = Color3.fromRGB(55, 55, 55), BorderSizePixel = 0, ZIndex = 2
@@ -2565,8 +2947,28 @@ function createMusicPlayerPage()
         BackgroundColor3 = Color3.fromRGB(130, 130, 130), BorderSizePixel = 0, ZIndex = 3
     })
     makeUI(progressBar, "UICorner", { CornerRadius = UDim.new(1, 0) })
+    local progressThumb = makeUI(progressOuter, "Frame", {
+        Size = UDim2.new(0, 10, 0, 10),
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0, 0, 0.5, 0),
+        BackgroundColor3 = Color3.fromRGB(220, 220, 220),
+        BorderSizePixel = 0, ZIndex = 5, Visible = false
+    })
+    makeUI(progressThumb, "UICorner", { CornerRadius = UDim.new(1, 0) })
+    local progressHit = makeUI(progressOuter, "TextButton", {
+        Size = UDim2.new(1, 0, 0, 20),
+        Position = UDim2.new(0, 0, 0.5, -10),
+        BackgroundTransparency = 1, Text = "", ZIndex = 10
+    })
+    local isScrubbing = false
+    local function getSeekRatio(inputPos)
+        local outerPos  = progressOuter.AbsolutePosition
+        local outerSize = progressOuter.AbsoluteSize
+        local ratio = (inputPos.X - outerPos.X) / outerSize.X
+        return math.clamp(ratio, 0, 1)
+    end
 
-    -- Time labels
+    -- TIME LABELS
     local timeRow = makeUI(optionsFrame3, "Frame", {
         Size = UDim2.new(0.95, 0, 0, 12), BackgroundTransparency = 1, BorderSizePixel = 0
     })
@@ -2582,34 +2984,30 @@ function createMusicPlayerPage()
         Font = Enum.Font.Gotham, TextXAlignment = Enum.TextXAlignment.Right
     })
 
-    local function formatTime(s)
-        if not s or s < 0 then return "0:00" end
-        return string.format("%d:%02d", math.floor(s/60), math.floor(s%60))
-    end
-
     local function seekTo(ratio)
         if sound.IsLoaded and sound.TimeLength and sound.TimeLength > 0 then
             sound.TimePosition = ratio * sound.TimeLength
             progressBar.Size = UDim2.new(ratio, 0, 1, 0)
+            progressThumb.Position = UDim2.new(ratio, 0, 0.5, 0)
             currentTimeLabel.Text = formatTime(ratio * sound.TimeLength)
         end
     end
 
-    local progressHit = makeUI(progressOuter, "TextButton", {
-        Size = UDim2.new(1, 0, 0, 20),
-        Position = UDim2.new(0, 0, 0.5, -10),
-        BackgroundTransparency = 1, Text = "", ZIndex = 10
-    })
-    local isScrubbing = false
-    local function getSeekRatio(inputPos)
-        local outerPos  = progressOuter.AbsolutePosition
-        local outerSize = progressOuter.AbsoluteSize
-        local ratio = (inputPos.X - outerPos.X) / outerSize.X
-        return math.clamp(ratio, 0, 1)
-    end
+    progressHit.MouseEnter:Connect(function()
+        progressThumb.Visible = true
+        TweenService:Create(progressOuter, TweenInfo.new(0.1), { Size = UDim2.new(0.95, 0, 0, 8) }):Play()
+        TweenService:Create(progressBar, TweenInfo.new(0.1), { BackgroundColor3 = Color3.fromRGB(180, 180, 180) }):Play()
+    end)
+    progressHit.MouseLeave:Connect(function()
+        if not isScrubbing then
+            progressThumb.Visible = false
+            TweenService:Create(progressOuter, TweenInfo.new(0.1), { Size = UDim2.new(0.95, 0, 0, 6) }):Play()
+            TweenService:Create(progressBar, TweenInfo.new(0.1), { BackgroundColor3 = Color3.fromRGB(130, 130, 130) }):Play()
+        end
+    end)
     progressHit.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isScrubbing = true; seekTo(getSeekRatio(input.Position))
+            isScrubbing = true; progressThumb.Visible = true; seekTo(getSeekRatio(input.Position))
         end
     end)
     UserInputService.InputChanged:Connect(function(input)
@@ -2621,11 +3019,15 @@ function createMusicPlayerPage()
         if isScrubbing and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
             isScrubbing = false
             seekTo(getSeekRatio(input.Position))
+            progressThumb.Visible = false
+            TweenService:Create(progressOuter, TweenInfo.new(0.1), { Size = UDim2.new(0.95, 0, 0, 6) }):Play()
+            TweenService:Create(progressBar, TweenInfo.new(0.1), { BackgroundColor3 = Color3.fromRGB(130, 130, 130) }):Play()
         end
     end)
 
-    -- Control buttons
+    -- CONTROL BUTTONS
     local BTN_SM = 34; local BTN_LG = 44
+    local ICON_SM = 14; local ICON_LG = 16
     local controlRow = makeUI(optionsFrame3, "Frame", {
         Size = UDim2.new(0.95, 0, 0, 52), BackgroundTransparency = 1, BorderSizePixel = 0
     })
@@ -2635,36 +3037,51 @@ function createMusicPlayerPage()
         BackgroundColor3 = Color3.fromRGB(48,48,48), BorderSizePixel = 0
     })
     makeUI(prevFrame, "UICorner", { CornerRadius = UDim.new(1,0) })
-    iconSkipBack(prevFrame, 14, Color3.fromRGB(215,215,215))
+    makeUI(prevFrame, "UIStroke", { Color = Color3.fromRGB(80,80,80), Thickness = 1, Transparency = 0.2 })
+    iconSkipBack(prevFrame, ICON_SM, IC)
     local prevClick = clickLayer(prevFrame, 20)
-
     local playFrame = makeUI(controlRow, "Frame", {
         Size = UDim2.new(0, BTN_LG, 0, BTN_LG),
         Position = UDim2.new(0.5, -BTN_LG/2, 0.5, -BTN_LG/2),
         BackgroundColor3 = Color3.fromRGB(55,55,55), BorderSizePixel = 0
     })
     makeUI(playFrame, "UICorner", { CornerRadius = UDim.new(1,0) })
+    makeUI(playFrame, "UIStroke", { Color = Color3.fromRGB(100,100,100), Thickness = 1.2, Transparency = 0.1 })
     local playIconHolder = makeUI(playFrame, "Frame", { Size = UDim2.new(1,0,1,0), BackgroundTransparency = 1, ZIndex = 2 })
-    iconPlay(playIconHolder, 16, Color3.fromRGB(215,215,215), BTN_LG)
+    iconPlay(playIconHolder, ICON_LG, IC, BTN_LG)
     local pauseIconHolder = makeUI(playFrame, "Frame", { Size = UDim2.new(1,0,1,0), BackgroundTransparency = 1, ZIndex = 2, Visible = false })
-    iconPause(pauseIconHolder, 16, Color3.fromRGB(215,215,215), BTN_LG)
+    iconPause(pauseIconHolder, ICON_LG, IC, BTN_LG)
     local playClick = clickLayer(playFrame, 20)
-
     local nextFrame = makeUI(controlRow, "Frame", {
         Size = UDim2.new(0, BTN_SM, 0, BTN_SM),
         Position = UDim2.new(0.5, BTN_LG/2+8, 0.5, -BTN_SM/2),
         BackgroundColor3 = Color3.fromRGB(48,48,48), BorderSizePixel = 0
     })
     makeUI(nextFrame, "UICorner", { CornerRadius = UDim.new(1,0) })
-    iconSkipForward(nextFrame, 14, Color3.fromRGB(215,215,215))
+    makeUI(nextFrame, "UIStroke", { Color = Color3.fromRGB(80,80,80), Thickness = 1, Transparency = 0.2 })
+    iconSkipForward(nextFrame, ICON_SM, IC)
     local nextClick = clickLayer(nextFrame, 20)
 
     local function setPlayState(playing)
         playIconHolder.Visible = not playing
         pauseIconHolder.Visible = playing
     end
+    local function hoverSM(f, e)
+        TweenService:Create(f, TweenInfo.new(0.12), { BackgroundColor3 = e and Color3.fromRGB(68,68,68) or Color3.fromRGB(48,48,48) }):Play()
+    end
+    local function hoverLG(e)
+        TweenService:Create(playFrame, TweenInfo.new(0.12), { BackgroundColor3 = e and Color3.fromRGB(75,75,75) or Color3.fromRGB(55,55,55) }):Play()
+    end
+    prevClick.MouseEnter:Connect(function() hoverSM(prevFrame, true) end)
+    prevClick.MouseLeave:Connect(function() hoverSM(prevFrame, false) end)
+    nextClick.MouseEnter:Connect(function() hoverSM(nextFrame, true) end)
+    nextClick.MouseLeave:Connect(function() hoverSM(nextFrame, false) end)
+    playClick.MouseEnter:Connect(function() hoverLG(true) end)
+    playClick.MouseLeave:Connect(function() hoverLG(false) end)
 
-    -- Volume control
+    -- VOLUME VISUALIZER
+    local BAR_W = 4; local BAR_GAP = 2; local BAR_MAX_H = 26; local BAR_MIN_H = 3; local BAR_COUNT = 31
+    local VOL_COL_ON = Color3.fromRGB(200, 200, 200); local VOL_COL_OFF = Color3.fromRGB(55, 55, 55)
     local volRow = makeUI(optionsFrame3, "Frame", {
         Size = UDim2.new(0.95, 0, 0, 38), BackgroundTransparency = 1, BorderSizePixel = 0
     })
@@ -2683,15 +3100,49 @@ function createMusicPlayerPage()
         Font = Enum.Font.Gotham, TextXAlignment = Enum.TextXAlignment.Right
     })
     local vizContainer = makeUI(volRow, "Frame", {
-        Size = UDim2.new(1, -60, 0, 20),
-        Position = UDim2.new(0, 26, 1, -20),
-        BackgroundTransparency = 1
+        Size = UDim2.new(1, -60, 0, BAR_MAX_H),
+        Position = UDim2.new(0, 26, 1, -BAR_MAX_H),
+        BackgroundTransparency = 1, BorderSizePixel = 0, ClipsDescendants = false
     })
+    local bars = {}
+    local barTargetH = {}
+    for i = 1, BAR_COUNT do
+        barTargetH[i] = BAR_MIN_H
+        local xPos = (i - 1) * (BAR_W + BAR_GAP)
+        local bar = makeUI(vizContainer, "Frame", {
+            Size = UDim2.new(0, BAR_W, 0, BAR_MIN_H),
+            Position = UDim2.new(0, xPos, 1, -BAR_MIN_H),
+            AnchorPoint = Vector2.new(0, 1),
+            BackgroundColor3 = VOL_COL_OFF, BorderSizePixel = 0, ZIndex = 2
+        })
+        makeUI(bar, "UICorner", { CornerRadius = UDim.new(0, 2) })
+        bars[i] = bar
+    end
     local volHit = makeUI(volRow, "TextButton", {
         Size = UDim2.new(1, -60, 1, 0),
         Position = UDim2.new(0, 26, 0, 0),
         BackgroundTransparency = 1, Text = "", ZIndex = 10
     })
+    local animPhase = 0
+    local function updateVolBars(vol, phase, animate)
+        local activeCount = math.floor(vol * BAR_COUNT + 0.5)
+        for i = 1, BAR_COUNT do
+            local active = (i <= activeCount)
+            local targetH
+            if active and animate then
+                local wave = math.sin(phase + i * 0.6) * 0.5 + 0.5
+                targetH = math.floor(BAR_MIN_H + wave * (BAR_MAX_H - BAR_MIN_H))
+            elseif active then
+                local t = (i / BAR_COUNT)
+                targetH = math.floor(BAR_MIN_H + t * (BAR_MAX_H - BAR_MIN_H - 4))
+            else
+                targetH = BAR_MIN_H
+            end
+            barTargetH[i] = targetH
+            bars[i].BackgroundColor3 = active and VOL_COL_ON or VOL_COL_OFF
+        end
+    end
+
     local volDragging = false
     local function setVolume(vol)
         vol = math.clamp(vol, 0, 1)
@@ -2731,22 +3182,10 @@ function createMusicPlayerPage()
         end
     end)
 
-    -- Song selection buttons
-    local yPos = 0
-    for i, song in ipairs(songs) do
-        local btn = makeUI(optionsFrame3, "TextButton", {
-            Size = UDim2.new(0.95, 0, 0, 30),
-            Position = UDim2.new(0.025, 0, 0, 290 + yPos),
-            BackgroundColor3 = Color3.fromRGB(35, 35, 35),
-            Text = song.Name,
-            TextColor3 = Color3.fromRGB(220, 220, 220),
-            Font = Enum.Font.Gotham,
-            TextSize = 11,
-            BorderSizePixel = 0
-        })
-        makeUI(btn, "UICorner", {CornerRadius = UDim.new(0, 6)})
-        btn.MouseButton1Click:Connect(function()
-            currentSongIndex = i
+    -- PLAYLIST DROPDOWN — menggunakan createPlaylistDropdown (sama sistem dengan Emote Dropdown)
+    local playlistDD = createPlaylistDropdown(songs, DEFAULT_COUNT, {
+        onSelect = function(idx, song)
+            currentSongIndex = idx
             songNameLabel.Text = song.Name
             sound:Stop()
             sound.SoundId = song.Id
@@ -2754,55 +3193,179 @@ function createMusicPlayerPage()
             sound:Play()
             isPlaying = true
             setPlayState(true)
-        end)
-        yPos = yPos + 34
-    end
-    optionsFrame3.CanvasSize = UDim2.new(0, 0, 0, 290 + yPos + 20)
+        end,
+        onDelete = function(idx)
+            table.remove(songs, idx)
+            if currentSongIndex >= idx and currentSongIndex > 1 then
+                currentSongIndex = currentSongIndex - 1
+            end
+            mp_saveCustomSongs(songs, DEFAULT_COUNT)
+            playlistDD.rebuild(songs, DEFAULT_COUNT, playlistDD._cbs)
+        end,
+    })
+    playlistDD._cbs = playlistDD._cbs or {}  -- simpan ref callback agar rebuild bisa reuse
 
-    -- Playback logic
+    -- Alias untuk kompatibilitas kode lama (playSong, addSong, dll masih bisa update UI)
+    local dropIconImg  = playlistDD.iconImg
+    local dropLabel    = playlistDD.nameLabel
+
+    -- Simpan referensi rebuild agar bisa dipanggil setelah addSong
+    local function rebuildDropdown()
+        playlistDD.rebuild(songs, DEFAULT_COUNT, {
+            onSelect = function(idx, song)
+                currentSongIndex = idx
+                songNameLabel.Text = song.Name
+                sound:Stop()
+                sound.SoundId = song.Id
+                task.wait(0.05)
+                sound:Play()
+                isPlaying = true
+                setPlayState(true)
+            end,
+            onDelete = function(idx)
+                table.remove(songs, idx)
+                if currentSongIndex >= idx and currentSongIndex > 1 then
+                    currentSongIndex = currentSongIndex - 1
+                end
+                mp_saveCustomSongs(songs, DEFAULT_COUNT)
+                rebuildDropdown()
+            end,
+        })
+    end
+
+    -- ADD SONG CUSTOM
+    local addLabelRow = makeUI(optionsFrame3, "Frame", {
+        Size = UDim2.new(0.95, 0, 0, 14), BackgroundTransparency = 1, BorderSizePixel = 0
+    })
+    makeUI(addLabelRow, "TextLabel", {
+        Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Text = "ADD SONG",
+        Font = Enum.Font.GothamBold, TextColor3 = Color3.fromRGB(150,150,150),
+        TextSize = 10, TextXAlignment = Enum.TextXAlignment.Left
+    })
+    local addFrame = makeUI(optionsFrame3, "Frame", {
+        Size = UDim2.new(0.95, 0, 0, 72),
+        BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+        BackgroundTransparency = 0.2, BorderSizePixel = 0
+    })
+    makeUI(addFrame, "UICorner", { CornerRadius = UDim.new(0, 8) })
+    makeUI(addFrame, "UIStroke", { Color = Color3.fromRGB(70, 70, 70), Thickness = 1, Transparency = 0.4 })
+    local nameBox = makeUI(addFrame, "TextBox", {
+        Size = UDim2.new(1, -12, 0, 22), Position = UDim2.new(0, 6, 0, 6),
+        BackgroundColor3 = Color3.fromRGB(28, 28, 28), BackgroundTransparency = 0.1,
+        BorderSizePixel = 0, Text = "",
+        PlaceholderText = "Nama lagu...", PlaceholderColor3 = Color3.fromRGB(100, 100, 100),
+        TextColor3 = Color3.fromRGB(220, 220, 220), Font = Enum.Font.Gotham, TextSize = 10,
+        TextXAlignment = Enum.TextXAlignment.Left, ClearTextOnFocus = false, ZIndex = 6
+    })
+    makeUI(nameBox, "UICorner", { CornerRadius = UDim.new(0, 5) })
+    makeUI(nameBox, "UIPadding", { PaddingLeft = UDim.new(0, 7) })
+    local idBox = makeUI(addFrame, "TextBox", {
+        Size = UDim2.new(1, -74, 0, 22), Position = UDim2.new(0, 6, 0, 34),
+        BackgroundColor3 = Color3.fromRGB(28, 28, 28), BackgroundTransparency = 0.1,
+        BorderSizePixel = 0, Text = "",
+        PlaceholderText = "Sound ID / rbxassetid://...", PlaceholderColor3 = Color3.fromRGB(100, 100, 100),
+        TextColor3 = Color3.fromRGB(220, 220, 220), Font = Enum.Font.Gotham, TextSize = 10,
+        TextXAlignment = Enum.TextXAlignment.Left, ClearTextOnFocus = false, ZIndex = 6
+    })
+    makeUI(idBox, "UICorner", { CornerRadius = UDim.new(0, 5) })
+    makeUI(idBox, "UIPadding", { PaddingLeft = UDim.new(0, 7) })
+    local addBtn = makeUI(addFrame, "TextButton", {
+        Size = UDim2.new(0, 60, 0, 22), Position = UDim2.new(1, -66, 0, 34),
+        BackgroundColor3 = Color3.fromRGB(70, 130, 90), BorderSizePixel = 0,
+        Text = "+ Add", Font = Enum.Font.GothamBold,
+        TextColor3 = Color3.fromRGB(255, 255, 255), TextSize = 10, ZIndex = 6
+    })
+    makeUI(addBtn, "UICorner", { CornerRadius = UDim.new(0, 5) })
+    local statusLabel = makeUI(addFrame, "TextLabel", {
+        Size = UDim2.new(1, -12, 0, 12), Position = UDim2.new(0, 6, 1, -14),
+        BackgroundTransparency = 1, Text = "",
+        Font = Enum.Font.Gotham, TextColor3 = Color3.fromRGB(100, 200, 120),
+        TextSize = 9, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 6
+    })
+    addBtn.MouseEnter:Connect(function()
+        TweenService:Create(addBtn, TweenInfo.new(0.1), { BackgroundColor3 = Color3.fromRGB(90, 160, 110) }):Play()
+    end)
+    addBtn.MouseLeave:Connect(function()
+        TweenService:Create(addBtn, TweenInfo.new(0.1), { BackgroundColor3 = Color3.fromRGB(70, 130, 90) }):Play()
+    end)
+    addBtn.MouseButton1Click:Connect(function()
+        local rawName = nameBox.Text:match("^%s*(.-)%s*$")
+        local rawId   = idBox.Text:match("^%s*(.-)%s*$")
+        if rawName == "" then
+            statusLabel.Text = "⚠ Nama lagu tidak boleh kosong!"
+            statusLabel.TextColor3 = Color3.fromRGB(220, 100, 80)
+            return
+        end
+        local finalId
+        if rawId:match("^rbxassetid://") then
+            finalId = rawId
+        elseif rawId:match("^%d+$") then
+            finalId = "rbxassetid://" .. rawId
+        else
+            statusLabel.Text = "⚠ ID tidak valid! Masukkan angka atau rbxassetid://..."
+            statusLabel.TextColor3 = Color3.fromRGB(220, 100, 80)
+            return
+        end
+        table.insert(songs, { Name = rawName, Id = finalId, Icon = "rbxthumb://type=Asset&id=13780950281&w=150&h=150" })
+        mp_saveCustomSongs(songs, DEFAULT_COUNT)
+        rebuildDropdown()
+        nameBox.Text = ""; idBox.Text = ""
+        statusLabel.Text = "✓ \"" .. rawName .. "\" ditambahkan" .. (mp_canFileIO() and " & disimpan!" or " (no file IO)")
+        statusLabel.TextColor3 = Color3.fromRGB(100, 200, 120)
+        task.delay(3, function() if statusLabel then statusLabel.Text = "" end end)
+    end)
+
+    -- PLAYBACK LOGIC
+    local function playSong(idx, autoPlay)
+        currentSongIndex = idx
+        sound:Stop()
+        sound.SoundId = songs[idx].Id
+        songNameLabel.Text = songs[idx].Name
+        -- sync dropdown UI (sama seperti sebelumnya, tapi via API)
+        dropIconImg.Image = songs[idx].Icon
+        dropLabel.Text = songs[idx].Name
+        if autoPlay then
+            if not sound.IsLoaded then sound.Loaded:Wait() end
+            sound:Play()
+            isPlaying = true
+            setPlayState(true)
+        end
+    end
+    playSong(1, false)
+
     playClick.MouseButton1Click:Connect(function()
         if not isPlaying then sound:Resume(); isPlaying = true; setPlayState(true)
         else sound:Pause(); isPlaying = false; setPlayState(false) end
     end)
-    nextClick.MouseButton1Click:Connect(function()
-        currentSongIndex = currentSongIndex % #songs + 1
-        songNameLabel.Text = songs[currentSongIndex].Name
-        sound:Stop()
-        sound.SoundId = songs[currentSongIndex].Id
-        task.wait(0.05)
-        sound:Play()
-        isPlaying = true
-        setPlayState(true)
-    end)
-    prevClick.MouseButton1Click:Connect(function()
-        currentSongIndex = ((currentSongIndex-2) % #songs) + 1
-        songNameLabel.Text = songs[currentSongIndex].Name
-        sound:Stop()
-        sound.SoundId = songs[currentSongIndex].Id
-        task.wait(0.05)
-        sound:Play()
-        isPlaying = true
-        setPlayState(true)
-    end)
+    nextClick.MouseButton1Click:Connect(function() playSong(currentSongIndex % #songs + 1, true) end)
+    prevClick.MouseButton1Click:Connect(function() playSong(((currentSongIndex-2) % #songs)+1, true) end)
     sound.Ended:Connect(function()
-        if isPlaying then
-            currentSongIndex = currentSongIndex % #songs + 1
-            songNameLabel.Text = songs[currentSongIndex].Name
-            sound.SoundId = songs[currentSongIndex].Id
-            task.wait(0.05)
-            sound:Play()
-        end
+        if isPlaying then playSong(currentSongIndex % #songs + 1, true) end
     end)
 
-    -- Progress update
-    RunService.Heartbeat:Connect(function()
+    -- PROGRESS + VIZ UPDATE via Heartbeat
+    RunService.Heartbeat:Connect(function(dt)
         if not isScrubbing and sound.IsLoaded and sound.TimeLength and sound.TimeLength > 0 then
             local pos = sound.TimePosition or 0
             local len = sound.TimeLength
             local ratio = pos / len
             progressBar.Size = UDim2.new(ratio, 0, 1, 0)
+            progressThumb.Position = UDim2.new(ratio, 0, 0.5, 0)
             currentTimeLabel.Text = formatTime(pos)
             totalTimeLabel.Text = formatTime(len)
+        end
+        if isPlaying then
+            vizPhase = vizPhase + dt * 5
+            animPhase = animPhase + dt * 4.5
+        end
+        updateViz(isPlaying, isMuted and 0 or savedVolume)
+        updateVolBars(isMuted and 0 or savedVolume, animPhase, isPlaying)
+        for i = 1, BAR_COUNT do
+            local cur = bars[i].Size.Y.Offset
+            local tgt = barTargetH[i]
+            local new = cur + (tgt - cur) * 0.25
+            bars[i].Size = UDim2.new(0, BAR_W, 0, new)
+            bars[i].Position = UDim2.new(0, (i-1)*(BAR_W+BAR_GAP), 1, -new)
         end
     end)
 end
@@ -2814,12 +3377,13 @@ end
 local optionsCreated = {false, false, false}
 
 local function createPage1Options()
+    -- ===== CREDITS HEADER =====
     local creditsHeader = makeUI(optionsFrame, "Frame", {
         Size = UDim2.new(0.95, 0, 0, 22),
         BackgroundTransparency = 1, BorderSizePixel = 0
     })
     makeUI(creditsHeader, "TextLabel", {
-        Text = "FIQQZR7 SCRIPT",
+        Text = "Scripter FIQQZR7",
         Font = Enum.Font.GothamBold,
         TextColor3 = Color3.fromRGB(200, 200, 200), TextSize = 12,
         BackgroundTransparency = 1,
@@ -2857,6 +3421,7 @@ local function toggleMinimize()
 
     if isMinimized then
         isMinimized = false
+        -- Tunda ganti icon sampai animasi selesai agar tidak berkedip
         minimizeButton.Text = "-"
         uiBlur.Enabled = true
 
@@ -2903,7 +3468,8 @@ local function toggleMinimize()
 end
 minimizeButton.MouseButton1Click:Connect(toggleMinimize)
 
--- Initialize
+-- ===== INIT =====
+-- Set state minimized DULU sebelum UI ditampilkan agar icon tidak berkedip
 isMinimized = true
 minimizeButton.Text = "+"
 uiBlur.Enabled = false
@@ -2918,13 +3484,14 @@ stroke.Thickness = 1.2
 
 updateDots()
 
+-- Baru tampilkan UI setelah state sudah benar
 task.wait(0.1)
 screenGui.Enabled = true
 mainFrame.Visible = true
 
-print("[FIQQZR7 Script] Main UI loaded! (minimized - press + to open)")
+print("[Fiqqzr7Script] Main UI loaded! (minimized - press + to open)")
 
--- Character event listeners
+-- ===== CHARACTER EVENT LISTENERS =====
 LocalPlayer.CharacterAdded:Connect(function(character)
     applyWalkSpeed(character, currentWalkSpeed)
     applyJumpPower(character, currentJumpPower)
@@ -2965,6 +3532,6 @@ LocalPlayer.CharacterRemoving:Connect(function(character)
 end)
 
 print("✅ FIQQZR7 Script Loaded!")
-print("✨ Swipe UI active — 3 pages (Main | Avatar Changer | Music Player)")
+print("✨ Swipe UI active — 3 pages (Zero Script | Avatar Changer | Music Player)")
 print("📋 " .. #EmoteList .. " emotes available")
 print("🎵 Music Player terintegrasi di halaman 3")
