@@ -1,4 +1,6 @@
--- FIQQZR7 ESP - MODERN HUB (BIRU UI + BOX PUTIH + LINE HIJAU)
+-- FIQQZR7 ESP - RED EDITION (MERAH GELAP + GLOW NIPIS)
+-- Title bar kecil (28px) - tak menghalang
+
 local player = game.Players.LocalPlayer
 
 repeat task.wait() until player and player:FindFirstChild("PlayerGui")
@@ -17,7 +19,7 @@ local HEALTHBAR_WIDTH = 3
 local uiVisible = true
 
 -- ==============================================
--- MODERN UI SETUP (GLASSMORPHISM + NEON BIRU)
+-- MODERN UI SETUP (MERAH GELAP)
 -- ==============================================
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "FIQQZR7_ESP"
@@ -34,151 +36,165 @@ Container.Active = true
 Container.Draggable = true
 Container.Parent = ScreenGui
 
--- Main Frame (Glass Effect)
+-- Main Frame (Hitam kemerahan)
 local Main = Instance.new("Frame")
 Main.Size = UDim2.new(1, 0, 1, 0)
 Main.Position = UDim2.new(0, 0, 0, 0)
-Main.BackgroundColor3 = Color3.fromRGB(8, 12, 20)
+Main.BackgroundColor3 = Color3.fromRGB(20, 8, 10)  -- Hitam kemerahan
 Main.BackgroundTransparency = 0.1
-Main.BorderColor3 = Color3.fromRGB(0, 150, 255)
+Main.BorderColor3 = Color3.fromRGB(200, 50, 50)    -- Merah
 Main.BorderSizePixel = 2
 Main.ClipsDescendants = true
 Main.Parent = Container
 
 local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 16)
+MainCorner.CornerRadius = UDim.new(0, 12)  -- Kurang bulat
 MainCorner.Parent = Main
 
 -- Glass Blur Effect
 local Blur = Instance.new("Frame")
 Blur.Size = UDim2.new(1, 0, 1, 0)
-Blur.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
+Blur.BackgroundColor3 = Color3.fromRGB(25, 10, 12)
 Blur.BackgroundTransparency = 0.6
 Blur.BorderSizePixel = 0
 Blur.ZIndex = 0
 Blur.Parent = Main
 
 local BlurCorner = Instance.new("UICorner")
-BlurCorner.CornerRadius = UDim.new(0, 16)
+BlurCorner.CornerRadius = UDim.new(0, 12)
 BlurCorner.Parent = Blur
 
--- Neon Glow Border (BIRU)
+-- Neon Glow Border (MERAH NIPIS)
 local Glow = Instance.new("Frame")
-Glow.Size = UDim2.new(1, 8, 1, 8)
-Glow.Position = UDim2.new(0, -4, 0, -4)
-Glow.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
+Glow.Size = UDim2.new(1, 6, 1, 6)  -- Lebih nipis dari 8 ke 6
+Glow.Position = UDim2.new(0, -3, 0, -3)
+Glow.BackgroundColor3 = Color3.fromRGB(150, 0, 0)  -- Merah gelap
 Glow.BackgroundTransparency = 0.8
 Glow.BorderSizePixel = 0
 Glow.ZIndex = 0
 Glow.Parent = Container
 
 local GlowCorner = Instance.new("UICorner")
-GlowCorner.CornerRadius = UDim.new(0, 18)
+GlowCorner.CornerRadius = UDim.new(0, 14)
 GlowCorner.Parent = Glow
 
--- Inner Glow
+-- Inner Glow (merah terang)
 local InnerGlow = Instance.new("Frame")
-InnerGlow.Size = UDim2.new(1, 4, 1, 4)
-InnerGlow.Position = UDim2.new(0, -2, 0, -2)
-InnerGlow.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
+InnerGlow.Size = UDim2.new(1, 3, 1, 3)  -- Lebih nipis
+InnerGlow.Position = UDim2.new(0, -1.5, 0, -1.5)
+InnerGlow.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
 InnerGlow.BackgroundTransparency = 0.7
 InnerGlow.BorderSizePixel = 0
 InnerGlow.ZIndex = 0
 InnerGlow.Parent = Container
 
 local InnerGlowCorner = Instance.new("UICorner")
-InnerGlowCorner.CornerRadius = UDim.new(0, 17)
+InnerGlowCorner.CornerRadius = UDim.new(0, 13)
 InnerGlowCorner.Parent = InnerGlow
 
--- Gradient Background
+-- Glow layer ke-3 (lebih nipis)
+local ExtraGlow = Instance.new("Frame")
+ExtraGlow.Size = UDim2.new(1, 2, 1, 2)
+ExtraGlow.Position = UDim2.new(0, -1, 0, -1)
+ExtraGlow.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+ExtraGlow.BackgroundTransparency = 0.6
+ExtraGlow.BorderSizePixel = 0
+ExtraGlow.ZIndex = 0
+ExtraGlow.Parent = Container
+
+local ExtraGlowCorner = Instance.new("UICorner")
+ExtraGlowCorner.CornerRadius = UDim.new(0, 12)
+ExtraGlowCorner.Parent = ExtraGlow
+
+-- Gradient Background (merah gelap)
 local Gradient = Instance.new("UIGradient")
 Gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 20, 40)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(5, 15, 35)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 10, 30))
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 10, 15)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(25, 8, 10)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 5, 8))
 })
 Gradient.Rotation = 45
 Gradient.Parent = Main
 
 -- ==============================================
--- TITLE BAR (BIRU)
+-- TITLE BAR KECIK (28px)
 -- ==============================================
 local TitleBar = Instance.new("Frame")
-TitleBar.Size = UDim2.new(1, -16, 0, 50)
-TitleBar.Position = UDim2.new(0, 8, 0, 8)
-TitleBar.BackgroundColor3 = Color3.fromRGB(10, 15, 30)
+TitleBar.Size = UDim2.new(1, -16, 0, 28)  -- Dikurangkan dari 50 ke 28
+TitleBar.Position = UDim2.new(0, 8, 0, 6)
+TitleBar.BackgroundColor3 = Color3.fromRGB(25, 10, 12)
 TitleBar.BackgroundTransparency = 0.3
-TitleBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
+TitleBar.BorderColor3 = Color3.fromRGB(200, 50, 50)
 TitleBar.BorderSizePixel = 1
 TitleBar.Parent = Main
 
 local TitleBarCorner = Instance.new("UICorner")
-TitleBarCorner.CornerRadius = UDim.new(0, 12)
+TitleBarCorner.CornerRadius = UDim.new(0, 6)  -- Kurang bulat
 TitleBarCorner.Parent = TitleBar
 
--- Icon
+-- Icon (lebih kecil)
 local Icon = Instance.new("TextLabel")
-Icon.Size = UDim2.new(0, 40, 1, 0)
-Icon.Position = UDim2.new(0, 8, 0, 0)
+Icon.Size = UDim2.new(0, 22, 1, 0)  -- Dikurangkan dari 40 ke 22
+Icon.Position = UDim2.new(0, 6, 0, 0)
 Icon.BackgroundTransparency = 1
 Icon.Text = "👁️"
-Icon.TextColor3 = Color3.fromRGB(0, 200, 255)
-Icon.TextSize = 22
+Icon.TextColor3 = Color3.fromRGB(255, 100, 100)  -- Merah
+Icon.TextSize = 14  -- Dikurangkan
 Icon.Font = Enum.Font.GothamBold
 Icon.Parent = TitleBar
 
--- Title
+-- Title (lebih kecil)
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0.6, 0, 1, 0)
-Title.Position = UDim2.new(0, 50, 0, 0)
+Title.Size = UDim2.new(0.5, 0, 1, 0)
+Title.Position = UDim2.new(0, 30, 0, 0)  -- Adjusted
 Title.BackgroundTransparency = 1
 Title.Text = "FIQQZR7 ESP"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 16
+Title.TextSize = 11  -- Dikurangkan
 Title.Font = Enum.Font.GothamBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TitleBar
 
--- Hide Button
+-- Hide Button (lebih kecil)
 local HideBtn = Instance.new("TextButton")
-HideBtn.Size = UDim2.new(0, 28, 0, 28)
-HideBtn.Position = UDim2.new(1, -65, 0.5, -14)
-HideBtn.BackgroundColor3 = Color3.fromRGB(10, 25, 45)
-HideBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+HideBtn.Size = UDim2.new(0, 18, 0, 18)  -- Dikurangkan dari 28 ke 18
+HideBtn.Position = UDim2.new(1, -48, 0.5, -9)
+HideBtn.BackgroundColor3 = Color3.fromRGB(40, 20, 22)
+HideBtn.BorderColor3 = Color3.fromRGB(200, 50, 50)
 HideBtn.BorderSizePixel = 1
-HideBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+HideBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
 HideBtn.Text = "−"
 HideBtn.Font = Enum.Font.GothamBold
-HideBtn.TextSize = 18
+HideBtn.TextSize = 12  -- Dikurangkan
 HideBtn.Parent = TitleBar
 
 local HideCorner = Instance.new("UICorner")
-HideCorner.CornerRadius = UDim.new(0, 8)
+HideCorner.CornerRadius = UDim.new(0, 4)
 HideCorner.Parent = HideBtn
 
--- Close Button
+-- Close Button (lebih kecil)
 local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 28, 0, 28)
-CloseBtn.Position = UDim2.new(1, -32, 0.5, -14)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 20, 45)
-CloseBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+CloseBtn.Size = UDim2.new(0, 18, 0, 18)  -- Dikurangkan dari 28 ke 18
+CloseBtn.Position = UDim2.new(1, -26, 0.5, -9)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(100, 20, 22)
+CloseBtn.BorderColor3 = Color3.fromRGB(200, 50, 50)
 CloseBtn.BorderSizePixel = 1
-CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 CloseBtn.Text = "✕"
 CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 14
+CloseBtn.TextSize = 9  -- Dikurangkan
 CloseBtn.Parent = TitleBar
 
 local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.CornerRadius = UDim.new(0, 4)
 CloseCorner.Parent = CloseBtn
 
 -- ==============================================
--- CONTENT CONTAINER
+-- CONTENT CONTAINER (adjusted)
 -- ==============================================
 local ContentContainer = Instance.new("Frame")
-ContentContainer.Size = UDim2.new(1, -16, 1, -70)
-ContentContainer.Position = UDim2.new(0, 8, 0, 62)
+ContentContainer.Size = UDim2.new(1, -16, 1, -44)  -- Adjusted (title bar 28px + padding)
+ContentContainer.Position = UDim2.new(0, 8, 0, 38)  -- Adjusted
 ContentContainer.BackgroundTransparency = 1
 ContentContainer.Parent = Main
 
@@ -191,92 +207,92 @@ ScrollingFrame.BackgroundTransparency = 1
 ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 300)
 ScrollingFrame.ScrollBarThickness = 4
-ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
+ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(200, 50, 50)
 ScrollingFrame.Parent = ContentContainer
 
 -- ==============================================
--- MODERN TOGGLE CARD FUNCTION (UI BIRU)
+-- MODERN TOGGLE CARD FUNCTION (MERAH GELAP)
 -- ==============================================
 local function createModernToggle(y, icon, title, desc, stateRef, stateKey)
-    -- Main Card (BIRU)
+    -- Main Card (MERAH GELAP)
     local Card = Instance.new("Frame")
-    Card.Size = UDim2.new(0.95, 0, 0, 55)
+    Card.Size = UDim2.new(0.95, 0, 0, 50)  -- Lebih pendek sikit (55 -> 50)
     Card.Position = UDim2.new(0.025, 0, 0, y)
-    Card.BackgroundColor3 = Color3.fromRGB(10, 15, 30)
-    Card.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    Card.BackgroundColor3 = Color3.fromRGB(25, 10, 12)
+    Card.BorderColor3 = Color3.fromRGB(200, 50, 50)
     Card.BorderSizePixel = 1
     Card.Parent = ScrollingFrame
 
     local CardCorner = Instance.new("UICorner")
-    CardCorner.CornerRadius = UDim.new(0, 12)
+    CardCorner.CornerRadius = UDim.new(0, 8)  -- Kurang bulat
     CardCorner.Parent = Card
 
-    -- Inner gradient (BIRU)
+    -- Inner gradient (MERAH)
     local CardGradient = Instance.new("UIGradient")
     CardGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 20, 35)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 12, 25))
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 12, 15)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(22, 8, 10))
     })
     CardGradient.Rotation = 90
     CardGradient.Parent = Card
 
-    -- Icon (BIRU)
+    -- Icon (MERAH)
     local IconLabel = Instance.new("TextLabel")
-    IconLabel.Size = UDim2.new(0, 40, 1, 0)
-    IconLabel.Position = UDim2.new(0, 8, 0, 0)
+    IconLabel.Size = UDim2.new(0, 30, 1, 0)  -- Lebih kecil (40 -> 30)
+    IconLabel.Position = UDim2.new(0, 6, 0, 0)
     IconLabel.BackgroundTransparency = 1
     IconLabel.Text = icon
-    IconLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
-    IconLabel.TextSize = 24
+    IconLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+    IconLabel.TextSize = 18  -- Lebih kecil
     IconLabel.Font = Enum.Font.GothamBold
     IconLabel.Parent = Card
 
     -- Title (PUTIH)
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Size = UDim2.new(0.5, 0, 0.5, 0)
-    TitleLabel.Position = UDim2.new(0, 55, 0, 8)
+    TitleLabel.Position = UDim2.new(0, 40, 0, 6)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = title
     TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TitleLabel.TextSize = 14
+    TitleLabel.TextSize = 11
     TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.Parent = Card
 
-    -- Description (BIRU MUDA)
+    -- Description (MERAH MUDA)
     local DescLabel = Instance.new("TextLabel")
     DescLabel.Size = UDim2.new(0.5, 0, 0.3, 0)
-    DescLabel.Position = UDim2.new(0, 55, 0, 30)
+    DescLabel.Position = UDim2.new(0, 40, 0, 24)
     DescLabel.BackgroundTransparency = 1
     DescLabel.Text = desc
-    DescLabel.TextColor3 = Color3.fromRGB(140, 180, 255)
-    DescLabel.TextSize = 10
+    DescLabel.TextColor3 = Color3.fromRGB(255, 150, 150)
+    DescLabel.TextSize = 8
     DescLabel.Font = Enum.Font.Gotham
     DescLabel.TextXAlignment = Enum.TextXAlignment.Left
     DescLabel.Parent = Card
 
-    -- Toggle Switch (BIRU)
+    -- Toggle Switch (MERAH)
     local ToggleBg = Instance.new("Frame")
-    ToggleBg.Size = UDim2.new(0, 50, 0, 24)
-    ToggleBg.Position = UDim2.new(1, -60, 0.5, -12)
-    ToggleBg.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
-    ToggleBg.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    ToggleBg.Size = UDim2.new(0, 44, 0, 22)  -- Lebih kecil (50x24 -> 44x22)
+    ToggleBg.Position = UDim2.new(1, -54, 0.5, -11)
+    ToggleBg.BackgroundColor3 = Color3.fromRGB(40, 20, 22)
+    ToggleBg.BorderColor3 = Color3.fromRGB(200, 50, 50)
     ToggleBg.BorderSizePixel = 1
     ToggleBg.Parent = Card
 
     local ToggleCorner = Instance.new("UICorner")
-    ToggleCorner.CornerRadius = UDim.new(0, 12)
+    ToggleCorner.CornerRadius = UDim.new(0, 10)
     ToggleCorner.Parent = ToggleBg
 
-    -- Toggle Indicator (BIRU)
+    -- Toggle Indicator (MERAH)
     local ToggleIndicator = Instance.new("Frame")
-    ToggleIndicator.Size = UDim2.new(0, 20, 0, 20)
-    ToggleIndicator.Position = UDim2.new(0, 2, 0.5, -10)
+    ToggleIndicator.Size = UDim2.new(0, 18, 0, 18)  -- Lebih kecil (20x20 -> 18x18)
+    ToggleIndicator.Position = UDim2.new(0, 2, 0.5, -9)
     ToggleIndicator.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
     ToggleIndicator.Parent = ToggleBg
 
     local IndicatorCorner = Instance.new("UICorner")
-    IndicatorCorner.CornerRadius = UDim.new(0, 10)
+    IndicatorCorner.CornerRadius = UDim.new(0, 9)
     IndicatorCorner.Parent = ToggleIndicator
 
     -- Click Button
@@ -290,13 +306,13 @@ local function createModernToggle(y, icon, title, desc, stateRef, stateKey)
     local function updateToggle()
         local state = stateRef[stateKey]
         if state then
-            ToggleIndicator.BackgroundColor3 = Color3.fromRGB(0, 200, 255) -- BIRU terang
-            TweenService:Create(ToggleIndicator, TweenInfo.new(0.2), {Position = UDim2.new(1, -22, 0.5, -10)}):Play()
-            ToggleBg.BackgroundColor3 = Color3.fromRGB(0, 40, 70)
+            ToggleIndicator.BackgroundColor3 = Color3.fromRGB(255, 80, 80)  -- MERAH terang
+            TweenService:Create(ToggleIndicator, TweenInfo.new(0.2), {Position = UDim2.new(1, -20, 0.5, -9)}):Play()
+            ToggleBg.BackgroundColor3 = Color3.fromRGB(60, 20, 22)
         else
             ToggleIndicator.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
-            TweenService:Create(ToggleIndicator, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -10)}):Play()
-            ToggleBg.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+            TweenService:Create(ToggleIndicator, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -9)}):Play()
+            ToggleBg.BackgroundColor3 = Color3.fromRGB(40, 20, 22)
         end
     end
 
@@ -310,64 +326,64 @@ local function createModernToggle(y, icon, title, desc, stateRef, stateKey)
     return Card
 end
 
--- Create all toggle options (UI BIRU)
-createModernToggle(5, "📦", "BOX ESP", "MASIH ERROR GES", ESP, "Box")
-createModernToggle(65, "❤️", "HEALTH BAR", "Show health", ESP, "Health")
-createModernToggle(125, "🏷️", "NAME TAG", "Show player names", ESP, "Name")
-createModernToggle(185, "⭕", "HEAD CIRCLE", "Show head indicator", ESP, "HeadCircle")
-createModernToggle(245, "📏", "LINE ESP", "Draw line to target", ESP, "Line")
+-- Create all toggle options (MERAH GELAP)
+createModernToggle(5, "📦", "BOX ESP", "Putih + outline hitam", ESP, "Box")
+createModernToggle(60, "❤️", "HEALTH BAR", "Show health", ESP, "Health")
+createModernToggle(115, "🏷️", "NAME TAG", "Show player names", ESP, "Name")
+createModernToggle(170, "⭕", "HEAD CIRCLE", "Show head indicator", ESP, "HeadCircle")
+createModernToggle(225, "📏", "LINE ESP", "Draw line to target", ESP, "Line")
 
 -- ==============================================
--- STATUS CARD (BIRU)
+-- STATUS CARD (MERAH)
 -- ==============================================
 local StatusCard = Instance.new("Frame")
-StatusCard.Size = UDim2.new(0.95, 0, 0, 45)
-StatusCard.Position = UDim2.new(0.025, 0, 0, 310)
-StatusCard.BackgroundColor3 = Color3.fromRGB(10, 15, 30)
-StatusCard.BorderColor3 = Color3.fromRGB(0, 150, 255)
+StatusCard.Size = UDim2.new(0.95, 0, 0, 40)  -- Lebih kecil (45 -> 40)
+StatusCard.Position = UDim2.new(0.025, 0, 0, 285)
+StatusCard.BackgroundColor3 = Color3.fromRGB(25, 10, 12)
+StatusCard.BorderColor3 = Color3.fromRGB(200, 50, 50)
 StatusCard.BorderSizePixel = 1
 StatusCard.Parent = ScrollingFrame
 
 local StatusCorner = Instance.new("UICorner")
-StatusCorner.CornerRadius = UDim.new(0, 12)
+StatusCorner.CornerRadius = UDim.new(0, 8)
 StatusCorner.Parent = StatusCard
 
 local StatusGradient = Instance.new("UIGradient")
 StatusGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 20, 35)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 12, 25))
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 12, 15)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(22, 8, 10))
 })
 StatusGradient.Rotation = 90
 StatusGradient.Parent = StatusCard
 
 local StatusIcon = Instance.new("TextLabel")
-StatusIcon.Size = UDim2.new(0, 35, 1, 0)
-StatusIcon.Position = UDim2.new(0, 8, 0, 0)
+StatusIcon.Size = UDim2.new(0, 24, 1, 0)  -- Lebih kecil (35 -> 24)
+StatusIcon.Position = UDim2.new(0, 6, 0, 0)
 StatusIcon.BackgroundTransparency = 1
 StatusIcon.Text = "👥"
-StatusIcon.TextColor3 = Color3.fromRGB(0, 200, 255) -- BIRU
-StatusIcon.TextSize = 20
+StatusIcon.TextColor3 = Color3.fromRGB(255, 100, 100)  -- MERAH
+StatusIcon.TextSize = 14  -- Lebih kecil
 StatusIcon.Font = Enum.Font.GothamBold
 StatusIcon.Parent = StatusCard
 
 local StatusTitle = Instance.new("TextLabel")
 StatusTitle.Size = UDim2.new(0.4, 0, 0.5, 0)
-StatusTitle.Position = UDim2.new(0, 50, 0, 6)
+StatusTitle.Position = UDim2.new(0, 32, 0, 6)
 StatusTitle.BackgroundTransparency = 1
 StatusTitle.Text = "PLAYERS"
 StatusTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
-StatusTitle.TextSize = 12
+StatusTitle.TextSize = 10
 StatusTitle.Font = Enum.Font.GothamBold
 StatusTitle.TextXAlignment = Enum.TextXAlignment.Left
 StatusTitle.Parent = StatusCard
 
 local PlayerCount = Instance.new("TextLabel")
 PlayerCount.Size = UDim2.new(0.4, 0, 0.5, 0)
-PlayerCount.Position = UDim2.new(0.6, 0, 0, 12)
+PlayerCount.Position = UDim2.new(0.6, 0, 0, 10)
 PlayerCount.BackgroundTransparency = 1
 PlayerCount.Text = tostring(#Players:GetPlayers() - 1)
-PlayerCount.TextColor3 = Color3.fromRGB(0, 200, 255) -- BIRU
-PlayerCount.TextSize = 18
+PlayerCount.TextColor3 = Color3.fromRGB(255, 100, 100)  -- MERAH
+PlayerCount.TextSize = 14
 PlayerCount.Font = Enum.Font.GothamBold
 PlayerCount.TextXAlignment = Enum.TextXAlignment.Right
 PlayerCount.Parent = StatusCard
@@ -386,9 +402,9 @@ HideBtn.MouseButton1Click:Connect(function()
         HideBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     else
         ContentContainer.Visible = false
-        TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 50)}):Play()
+        TweenService:Create(Container, TweenInfo.new(0.3), {Size = UDim2.new(0, 280, 0, 28)}):Play()
         HideBtn.Text = "+"
-        HideBtn.TextColor3 = Color3.fromRGB(0, 200, 255)
+        HideBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
     end
 end)
 
@@ -410,7 +426,7 @@ UserInputService.InputBegan:Connect(function(input)
 end)
 
 -- ==============================================
--- RAINBOW WATERMARK (MODERN)
+-- RAINBOW WATERMARK (TETAP)
 -- ==============================================
 local Watermark = Drawing.new("Text")
 Watermark.Visible = true
@@ -418,7 +434,7 @@ Watermark.Center = true
 Watermark.Outline = true
 Watermark.Size = 14
 Watermark.Font = 3
-Watermark.Text = "FIQQZR7 ESP • MODERN"
+Watermark.Text = "FIQQZR7 ESP • RED EDITION"
 
 local hue = 0
 RunService.RenderStepped:Connect(function()
@@ -430,7 +446,7 @@ RunService.RenderStepped:Connect(function()
 end)
 
 -- ==============================================
--- ESP DRAWING ENGINE (BOX PUTIH + SEMUA HIJAU)
+-- ESP DRAWING ENGINE (BOX PUTIH + SEMUA HIJAU) - TETAP
 -- ==============================================
 local function createESP(targetPlayer)
     if targetPlayer == LocalPlayer then return end
@@ -623,8 +639,10 @@ Players.PlayerRemoving:Connect(function()
     PlayerCount.Text = tostring(#Players:GetPlayers() - 1)
 end)
 
-print("✅ FIQQZR7 ESP - MODERN HUB (BIRU UI + BOX PUTIH + SEMUA HIJAU)")
-print("📌 UI: Glass morphism + neon blue theme")
+print("✅ FIQQZR7 ESP - RED EDITION (MERAH GELAP)")
+print("📌 Title bar 28px - tak menghalang")
+print("📌 Glow merah nipis 3 layer")
+print("📌 UI: Merah gelap + glass morphism")
 print("📌 BOX: Putih dengan outline hitam")
 print("📌 NAME: Hijau terang")
 print("📌 HEALTH: Hijau terang")
