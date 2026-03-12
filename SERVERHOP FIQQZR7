@@ -2,6 +2,7 @@
 -- Dengan glow effect pada title bar (3 lapis + pulsing)
 -- Glass morphism yang lebih smooth
 -- DRAG HANYA BOLEH PADA TITLE BAR, BUKAN PADA ICON ATAU SUBTITLE
+-- TITLE BAR DIPERKECILKAN (40px)
 
 local player = game.Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
@@ -123,26 +124,26 @@ gradient.Parent = main
 -- CONTENT FRAME
 -- ==============================================
 local contentFrame = Instance.new("Frame")
-contentFrame.Size = UDim2.new(1, 0, 1, -75)
-contentFrame.Position = UDim2.new(0, 0, 0, 75)
+contentFrame.Size = UDim2.new(1, 0, 1, -55)  -- Adjusted from -75 to -55 (title bar smaller)
+contentFrame.Position = UDim2.new(0, 0, 0, 55)  -- Adjusted from 75 to 55
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = main
 
 -- ==============================================
--- TITLE BAR DENGAN GLOW EFFECT (BOLEH DRAG)
+-- TITLE BAR DENGAN GLOW EFFECT (BOLEH DRAG) - DIPERKECILKAN
 -- ==============================================
 -- Title Bar Container (untuk glow)
 local titleBarContainer = Instance.new("Frame")
-titleBarContainer.Size = UDim2.new(1, -20, 0, 60)
+titleBarContainer.Size = UDim2.new(1, -20, 0, 40)  -- Reduced from 60 to 40
 titleBarContainer.Position = UDim2.new(0, 10, 0, 7)
 titleBarContainer.BackgroundTransparency = 1
 titleBarContainer.Active = false
 titleBarContainer.Parent = main
 
--- Glow untuk title bar (Layer 1 - biru gelap)
+-- Glow untuk title bar (Layer 1 - biru gelap) - DIPERKECILKAN
 local titleGlow1 = Instance.new("Frame")
-titleGlow1.Size = UDim2.new(1, 8, 1, 8)
-titleGlow1.Position = UDim2.new(0, -4, 0, -4)
+titleGlow1.Size = UDim2.new(1, 6, 1, 6)  -- Reduced from 8 to 6
+titleGlow1.Position = UDim2.new(0, -3, 0, -3)  -- Adjusted from -4 to -3
 titleGlow1.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
 titleGlow1.BackgroundTransparency = 0.6
 titleGlow1.BorderSizePixel = 0
@@ -150,13 +151,13 @@ titleGlow1.ZIndex = 5
 titleGlow1.Parent = titleBarContainer
 
 local titleGlowCorner1 = Instance.new("UICorner")
-titleGlowCorner1.CornerRadius = UDim.new(0, 14)
+titleGlowCorner1.CornerRadius = UDim.new(0, 10)  -- Reduced from 14 to 10
 titleGlowCorner1.Parent = titleGlow1
 
--- Glow untuk title bar (Layer 2 - biru terang)
+-- Glow untuk title bar (Layer 2 - biru terang) - DIPERKECILKAN
 local titleGlow2 = Instance.new("Frame")
-titleGlow2.Size = UDim2.new(1, 4, 1, 4)
-titleGlow2.Position = UDim2.new(0, -2, 0, -2)
+titleGlow2.Size = UDim2.new(1, 3, 1, 3)  -- Reduced from 4 to 3
+titleGlow2.Position = UDim2.new(0, -1.5, 0, -1.5)  -- Adjusted from -2 to -1.5
 titleGlow2.BackgroundColor3 = Color3.fromRGB(50, 180, 255)
 titleGlow2.BackgroundTransparency = 0.5
 titleGlow2.BorderSizePixel = 0
@@ -164,10 +165,10 @@ titleGlow2.ZIndex = 6
 titleGlow2.Parent = titleBarContainer
 
 local titleGlowCorner2 = Instance.new("UICorner")
-titleGlowCorner2.CornerRadius = UDim.new(0, 13)
+titleGlowCorner2.CornerRadius = UDim.new(0, 9)  -- Reduced from 13 to 9
 titleGlowCorner2.Parent = titleGlow2
 
--- Glow untuk title bar (Layer 3 - putih/biru muda)
+-- Glow untuk title bar (Layer 3 - putih/biru muda) - DIPERKECILKAN
 local titleGlow3 = Instance.new("Frame")
 titleGlow3.Size = UDim2.new(1, 2, 1, 2)
 titleGlow3.Position = UDim2.new(0, -1, 0, -1)
@@ -178,7 +179,7 @@ titleGlow3.ZIndex = 7
 titleGlow3.Parent = titleBarContainer
 
 local titleGlowCorner3 = Instance.new("UICorner")
-titleGlowCorner3.CornerRadius = UDim.new(0, 12)
+titleGlowCorner3.CornerRadius = UDim.new(0, 8)  -- Reduced from 12 to 8
 titleGlowCorner3.Parent = titleGlow3
 
 -- Animasi pulsing untuk glow title bar
@@ -195,7 +196,7 @@ spawn(function()
     end
 end)
 
--- Title Bar (utama) - INI YANG BOLEH DRAG
+-- Title Bar (utama) - INI YANG BOLEH DRAG - DIPERKECILKAN
 local titleBar = Instance.new("Frame")
 titleBar.Size = UDim2.new(1, 0, 1, 0)
 titleBar.Position = UDim2.new(0, 0, 0, 0)
@@ -208,7 +209,7 @@ titleBar.Active = true  -- BOLEH DRAG
 titleBar.Parent = titleBarContainer
 
 local titleBarCorner = Instance.new("UICorner")
-titleBarCorner.CornerRadius = UDim.new(0, 12)
+titleBarCorner.CornerRadius = UDim.new(0, 8)  -- Reduced from 12 to 8
 titleBarCorner.Parent = titleBar
 
 -- DRAG FUNCTIONALITY untuk title bar (bukan icon atau button)
@@ -248,10 +249,10 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- Icon Container (tak boleh drag)
+-- Icon Container (tak boleh drag) - DIPERKECILKAN
 local iconContainer = Instance.new("Frame")
-iconContainer.Size = UDim2.new(0, 38, 0, 38)
-iconContainer.Position = UDim2.new(0, 6, 0.5, -19)
+iconContainer.Size = UDim2.new(0, 28, 0, 28)  -- Reduced from 38 to 28
+iconContainer.Position = UDim2.new(0, 4, 0.5, -14)  -- Adjusted
 iconContainer.BackgroundColor3 = Color3.fromRGB(20, 30, 45)
 iconContainer.BorderColor3 = Color3.fromRGB(0, 150, 255)
 iconContainer.BorderSizePixel = 1
@@ -260,84 +261,84 @@ iconContainer.Active = false  -- Tak boleh drag
 iconContainer.Parent = titleBar
 
 local iconCorner = Instance.new("UICorner")
-iconCorner.CornerRadius = UDim.new(0, 8)
+iconCorner.CornerRadius = UDim.new(0, 6)  -- Reduced from 8 to 6
 iconCorner.Parent = iconContainer
 
--- Icon
+-- Icon - DIPERKECILKAN
 local icon = Instance.new("TextLabel")
 icon.Size = UDim2.new(1, 0, 1, 0)
 icon.BackgroundTransparency = 1
 icon.Text = "🌐"
 icon.TextColor3 = Color3.fromRGB(0, 220, 255)
-icon.TextSize = 22
+icon.TextSize = 16  -- Reduced from 22 to 16
 icon.Font = Enum.Font.GothamBold
 icon.ZIndex = 10
 icon.Active = false  -- Tak boleh drag
 icon.Parent = iconContainer
 
--- Title
+-- Title - DIPERKECILKAN
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(0.6, 0, 0.5, 0)
-title.Position = UDim2.new(0, 50, 0, 8)
+title.Position = UDim2.new(0, 35, 0, 5)  -- Adjusted
 title.BackgroundTransparency = 1
-title.Text = "FIQQZR7SERVERHOP"
+title.Text = "SERVER SELECT"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 14
+title.TextSize = 11  -- Reduced from 14 to 11
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.ZIndex = 9
 title.Active = false  -- Tak boleh drag
 title.Parent = titleBar
 
--- Subtitle
+-- Subtitle - DIPERKECILKAN
 local subtitle = Instance.new("TextLabel")
 subtitle.Size = UDim2.new(0.6, 0, 0.3, 0)
-subtitle.Position = UDim2.new(0, 50, 0, 30)
+subtitle.Position = UDim2.new(0, 35, 0, 19)  -- Adjusted from 30 to 19
 subtitle.BackgroundTransparency = 1
-subtitle.Text = "Developer Fiqqzr7"
+subtitle.Text = "By Fiqzr7XCode"
 subtitle.TextColor3 = Color3.fromRGB(150, 220, 255)
-subtitle.TextSize = 9
+subtitle.TextSize = 8  -- Reduced from 9 to 8
 subtitle.Font = Enum.Font.Gotham
 subtitle.TextXAlignment = Enum.TextXAlignment.Left
 subtitle.ZIndex = 9
 subtitle.Active = false  -- Tak boleh drag
 subtitle.Parent = titleBar
 
--- Minimize Button
+-- Minimize Button - DIPERKECILKAN
 local uiVisible = true
 local minimizeBtn = Instance.new("TextButton")
-minimizeBtn.Size = UDim2.new(0, 24, 0, 24)
-minimizeBtn.Position = UDim2.new(1, -64, 0.5, -12)
+minimizeBtn.Size = UDim2.new(0, 20, 0, 20)  -- Reduced from 24 to 20
+minimizeBtn.Position = UDim2.new(1, -54, 0.5, -10)  -- Adjusted
 minimizeBtn.BackgroundColor3 = Color3.fromRGB(30, 40, 60)
 minimizeBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
 minimizeBtn.BorderSizePixel = 1
 minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 minimizeBtn.Text = "−"
 minimizeBtn.Font = Enum.Font.GothamBold
-minimizeBtn.TextSize = 18
+minimizeBtn.TextSize = 14  -- Reduced from 18 to 14
 minimizeBtn.ZIndex = 9
 minimizeBtn.Parent = titleBar
 
 local minCorner = Instance.new("UICorner")
-minCorner.CornerRadius = UDim.new(0, 6)
+minCorner.CornerRadius = UDim.new(0, 5)  -- Reduced from 6 to 5
 minCorner.Parent = minimizeBtn
 
--- Close Button
+-- Close Button - DIPERKECILKAN
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 24, 0, 24)
-closeBtn.Position = UDim2.new(1, -34, 0.5, -12)
+closeBtn.Size = UDim2.new(0, 20, 0, 20)  -- Reduced from 24 to 20
+closeBtn.Position = UDim2.new(1, -30, 0.5, -10)  -- Adjusted
 closeBtn.BackgroundColor3 = Color3.fromRGB(160, 50, 50)
 closeBtn.BorderColor3 = Color3.fromRGB(255, 100, 100)
 closeBtn.BorderSizePixel = 1
 closeBtn.Text = "✕"
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 14
+closeBtn.TextSize = 12  -- Reduced from 14 to 12
 closeBtn.ZIndex = 9
 closeBtn.Parent = titleBar
 
 local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 6)
+closeCorner.CornerRadius = UDim.new(0, 5)  -- Reduced from 6 to 5
 closeCorner.Parent = closeBtn
 
 -- ==============================================
@@ -750,7 +751,7 @@ minimizeBtn.MouseButton1Click:Connect(function()
         titleGlow3.Visible = false
         
         main.BorderSizePixel = 0
-        main.Size = UDim2.new(0, 360, 0, 80)
+        main.Size = UDim2.new(0, 360, 0, 55)  -- Adjusted from 80 to 55
         
         minimizeBtn.Text = "+"
         uiVisible = false
@@ -786,7 +787,7 @@ end)
 task.wait(0.5)
 scanServers()
 
-print("✅ FIQQZR7 MODERN HUB - DRAG HANYA TITLE BAR")
+print("✅ FIQQZR7 MODERN HUB - TITLE BAR 40px")
 print("🌐 3 lapis glow pada title bar + pulsing animation")
 print("📌 Sekarang hanya title bar box yang boleh drag")
-print("🎨 Icon, subtitle, dan button tak boleh drag")
+print("🎨 Title bar lebih kecil - tidak menghalang")
