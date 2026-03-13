@@ -1,0 +1,1788 @@
+local Env = getfenv()
+getgenv().RedExecutorKeySys = true
+
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
+
+local LocalPlayer = Players.LocalPlayer
+
+local Color3_FromRGB = Color3.fromRGB
+local UDim2_New = UDim2.new
+local UDim_New = UDim.new
+local Vector2_New = Vector2.new
+local CFrame_New = CFrame.new
+local ColorSequence_New = ColorSequence.new
+local ColorSequenceKeypoint_New = ColorSequenceKeypoint.new
+
+local ThemeColors = {
+    Background = Color3_FromRGB(15, 15, 20),
+    Title = Color3_FromRGB(70, 130, 255),
+    InputField = Color3_FromRGB(20, 20, 28),
+    InputFieldBorder = Color3_FromRGB(40, 40, 50),
+    Button = Color3_FromRGB(25, 25, 35),
+    ButtonHover = Color3_FromRGB(70, 130, 255),
+    Error = Color3_FromRGB(255, 70, 70),
+    Success = Color3_FromRGB(80, 220, 120),
+    Discord = Color3_FromRGB(88, 101, 242),
+    Stroke = Color3_FromRGB(70, 130, 255),
+    BlueGlow = Color3_FromRGB(70, 130, 255),
+    BgColor = Color3_FromRGB(25, 25, 35),
+    BgColorHover = Color3_FromRGB(35, 35, 45),
+    TextColor = Color3_FromRGB(255, 255, 255),
+    TextColorSecondary = Color3_FromRGB(200, 200, 200),
+    TextColorTertiary = Color3_FromRGB(150, 150, 160)
+}
+
+local Config = {
+    Name = "SIEXTHER",
+    WebsiteURL = "https://www.tiktok.com/@siexther",
+    TiktokInvite = "@SIEXTHER",
+    Service = "siexther",
+    SilentMode = false,
+    Colors = ThemeColors
+}
+
+local FeatureStates = {
+    INVISIBILITY = false,
+    WALKSPEED = false,
+    ["ANTIDC_And_PING_BOOSTER"] = false,
+    ["NO_CLIP"] = false,
+    ["TOUCH_FLING"] = false,
+    JERK = false,
+    ["ANTI_FLING"] = false,
+    ["INFINITE_JUMP"] = false,
+    ["GOD_MODE"] = false
+}
+
+local function CreateTweenInfo(duration, easingStyle, easingDirection)
+    return TweenInfo.new(
+        duration or 0.3,
+        easingStyle or Enum.EasingStyle.Quad,
+        easingDirection or Enum.EasingDirection.Out
+    )
+end
+
+local function CreateTween(instance, properties, duration, easingStyle, easingDirection)
+    local tweenInfo = CreateTweenInfo(duration, easingStyle, easingDirection)
+    local tween = TweenService:Create(instance, tweenInfo, properties)
+    tween:Play()
+    return tween
+end
+
+local function CreateCorner(parent, radius)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim_New(0, radius or 10)
+    corner.Parent = parent
+    return corner
+end
+
+local function CreateStroke(parent, color, thickness, transparency)
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = color or ThemeColors.Stroke
+    stroke.Thickness = thickness or 2
+    stroke.Transparency = transparency or 0
+    stroke.Parent = parent
+    return stroke
+end
+
+local function CreateGradient(parent, colorSequence, offset, rotation)
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = colorSequence
+    gradient.Offset = offset or Vector2_New(-1, 0)
+    gradient.Rotation = rotation or 0
+    gradient.Parent = parent
+    return gradient
+end
+
+local function AnimateGradient(gradient)
+    task.spawn(function()
+        while gradient and gradient.Parent do
+            CreateTween(gradient, {Offset = Vector2_New(1, 0)}, 2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+            task.wait(2)
+            CreateTween(gradient, {Offset = Vector2_New(-1, 0)}, 2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
+            task.wait(2)
+        end
+    end)
+end
+
+local NotificationArray = {}
+
+getgenv().Notify = function(options)
+    local title = options.Title or "Notification"
+    local content = options.Content or ""
+    local duration = options.Duration or 3
+    
+    task.spawn(function()
+        local notificationFrame = Instance.new("Frame")
+        notificationFrame.Name = "Notification"
+        notificationFrame.Size = UDim2_New(0, 280, 0, 75)
+        notificationFrame.BackgroundColor3 = Color3_FromRGB(15, 15, 20)
+        notificationFrame.BackgroundTransparency = 0.05
+        notificationFrame.BorderSizePixel = 0
+        
+        local screenGui = CoreGui:FindFirstChild("NotificationSystem")
+        if not screenGui then
+            screenGui = Instance.new("ScreenGui")
+            screenGui.Name = "NotificationSystem"
+            screenGui.ResetOnSpawn = false
+            screenGui.Parent = CoreGui
+        end
+        notificationFrame.Parent = screenGui
+        
+        CreateCorner(notificationFrame, 12)
+        CreateStroke(notificationFrame, Color3_FromRGB(70, 130, 255), 2, 0)
+        
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://18723584764"
+        sound.Parent = game:GetService("SoundService")
+        sound.Volume = 1.5
+        sound:Play()
+        sound.Ended:Connect(function() sound:Destroy() end)
+        
+        local titleLabel = Instance.new("TextLabel")
+        titleLabel.Name = "Title"
+        titleLabel.Size = UDim2_New(1, -50, 0, 24)
+        titleLabel.Position = UDim2_New(0, 12, 0, 8)
+        titleLabel.BackgroundTransparency = 1
+        titleLabel.Text = title
+        titleLabel.TextColor3 = Color3_FromRGB(255, 255, 255)
+        titleLabel.TextSize = 15
+        titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+        titleLabel.TextYAlignment = Enum.TextYAlignment.Center
+        titleLabel.Font = Enum.Font.GothamBold
+        titleLabel.TextTruncate = Enum.TextTruncate.AtEnd
+        titleLabel.Parent = notificationFrame
+        
+        local contentLabel = Instance.new("TextLabel")
+        contentLabel.Name = "Content"
+        contentLabel.Size = UDim2_New(1, -50, 0, 20)
+        contentLabel.Position = UDim2_New(0, 12, 0, 32)
+        contentLabel.BackgroundTransparency = 1
+        contentLabel.Text = content
+        contentLabel.TextColor3 = Color3_FromRGB(180, 180, 200)
+        contentLabel.TextSize = 12
+        contentLabel.TextXAlignment = Enum.TextXAlignment.Left
+        contentLabel.TextYAlignment = Enum.TextYAlignment.Top
+        contentLabel.Font = Enum.Font.Gotham
+        contentLabel.TextWrapped = true
+        contentLabel.Parent = notificationFrame
+        
+        local progressContainer = Instance.new("Frame")
+        progressContainer.Name = "ProgressContainer"
+        progressContainer.Size = UDim2_New(1, -24, 0, 3)
+        progressContainer.Position = UDim2_New(0, 12, 1, -10)
+        progressContainer.BackgroundColor3 = Color3_FromRGB(30, 30, 40)
+        progressContainer.BackgroundTransparency = 0.3
+        progressContainer.BorderSizePixel = 0
+        progressContainer.Parent = notificationFrame
+        CreateCorner(progressContainer, UDim_New(1, 0).Offset)
+        
+        local progressBar = Instance.new("Frame")
+        progressBar.Name = "ProgressBar"
+        progressBar.Size = UDim2_New(1, 0, 1, 0)
+        progressBar.BackgroundColor3 = Color3_FromRGB(70, 130, 255)
+        progressBar.BorderSizePixel = 0
+        progressBar.Parent = progressContainer
+        CreateCorner(progressBar, UDim_New(1, 0).Offset)
+        
+        local closeButton = Instance.new("TextButton")
+        closeButton.Size = UDim2_New(0, 30, 0, 30)
+        closeButton.Position = UDim2_New(1, -38, 0, 8)
+        closeButton.BackgroundTransparency = 1
+        closeButton.Text = "×"
+        closeButton.TextColor3 = Color3_FromRGB(180, 180, 200)
+        closeButton.TextSize = 24
+        closeButton.Font = Enum.Font.GothamBold
+        closeButton.Parent = notificationFrame
+        
+        closeButton.MouseEnter:Connect(function()
+            CreateTween(closeButton, {TextColor3 = Color3_FromRGB(255, 80, 80)}, 0.2)
+        end)
+        
+        closeButton.MouseLeave:Connect(function()
+            CreateTween(closeButton, {TextColor3 = Color3_FromRGB(180, 180, 200)}, 0.2)
+        end)
+        
+        local yOffset = #NotificationArray * 85 + 50
+        notificationFrame.Position = UDim2_New(1, 400, 0, yOffset)
+        table.insert(NotificationArray, notificationFrame)
+        
+        CreateTween(notificationFrame, {Position = UDim2_New(1, -300, 0, yOffset)}, 0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+        
+        local function closeNotification()
+            CreateTween(notificationFrame, {BackgroundTransparency = 1}, 0.35)
+            CreateTween(notificationFrame:FindFirstChild("UIStroke"), {Transparency = 1}, 0.35)
+            CreateTween(notificationFrame, {Position = UDim2_New(1, 400, 0, yOffset)}, 0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.In).Completed:Connect(function()
+                notificationFrame:Destroy()
+            end)
+        end
+        
+        closeButton.MouseButton1Click:Connect(closeNotification)
+        
+        if duration > 0 then
+            CreateTween(progressBar, {Size = UDim2_New(0, 0, 1, 0)}, duration, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut).Completed:Connect(function()
+                if notificationFrame.Parent then
+                    closeNotification()
+                end
+            end)
+        end
+    end)
+end
+
+local MainScreenGui = Instance.new("ScreenGui")
+MainScreenGui.Name = "SiextherVIPByHann.Sxthr"
+MainScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+MainScreenGui.DisplayOrder = 999
+MainScreenGui.ResetOnSpawn = false
+MainScreenGui.Parent = CoreGui
+
+local BackgroundBlur = Instance.new("BlurEffect")
+BackgroundBlur.Name = "BackgroundBlur"
+BackgroundBlur.Size = 0
+BackgroundBlur.Parent = Lighting
+
+task.spawn(function()
+    CreateTween(BackgroundBlur, {Size = 24}, 0.5)
+end)
+
+local GlowFrame = Instance.new("Frame")
+GlowFrame.Name = "GlowFrame"
+GlowFrame.AnchorPoint = Vector2_New(0.5, 0.5)
+GlowFrame.Size = UDim2_New(0, 360, 0, 260)
+GlowFrame.Position = UDim2_New(0.5, 0, 0.4, 0)
+GlowFrame.ZIndex = 2
+GlowFrame.BackgroundTransparency = 0.7
+GlowFrame.BackgroundColor3 = ThemeColors.BlueGlow
+GlowFrame.Parent = MainScreenGui
+CreateCorner(GlowFrame, 12)
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.ClipsDescendants = true
+MainFrame.AnchorPoint = Vector2_New(0.5, 0.5)
+MainFrame.Position = UDim2_New(0.5, 0, 0.4, 0)
+MainFrame.Size = UDim2_New(0, 350, 0, 250)
+MainFrame.ZIndex = 3
+MainFrame.BorderSizePixel = 0
+MainFrame.BackgroundColor3 = ThemeColors.Background
+MainFrame.Parent = MainScreenGui
+CreateCorner(MainFrame, 10)
+CreateStroke(MainFrame, ThemeColors.Stroke, 2, 0)
+
+local TitleBar = Instance.new("Frame")
+TitleBar.Name = "TitleBar"
+TitleBar.Position = UDim2_New(0, 0, 0, 0)
+TitleBar.Size = UDim2_New(1, 0, 0, 40)
+TitleBar.BorderSizePixel = 0
+TitleBar.BackgroundColor3 = ThemeColors.Background
+TitleBar.Parent = MainFrame
+CreateCorner(TitleBar, 10)
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Name = "Title"
+TitleLabel.AnchorPoint = Vector2_New(0.5, 0.5)
+TitleLabel.Position = UDim2_New(0.5, 0, 0.5, 18)
+TitleLabel.Size = UDim2_New(0, 300, 0, 20)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "SIEXTHER"
+TitleLabel.TextColor3 = ThemeColors.Title
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextSize = 68
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Center
+TitleLabel.ZIndex = 5
+TitleLabel.Parent = TitleBar
+
+local titleGradient = CreateGradient(
+    TitleLabel,
+    ColorSequence_New({
+        ColorSequenceKeypoint_New(0, Color3_FromRGB(255, 255, 255)),
+        ColorSequenceKeypoint_New(0.3, Color3_FromRGB(70, 130, 255)),
+        ColorSequenceKeypoint_New(0.6, Color3_FromRGB(70, 130, 255)),
+        ColorSequenceKeypoint_New(1, Color3_FromRGB(255, 255, 255))
+    }),
+    Vector2_New(-1, 0),
+    0
+)
+
+AnimateGradient(titleGradient)
+
+local StatusLabel = Instance.new("TextLabel")
+StatusLabel.Name = "StatusLabel"
+StatusLabel.TextWrapped = true
+StatusLabel.AnchorPoint = Vector2_New(0.5, 0.5)
+StatusLabel.Position = UDim2_New(0.5, 0, 0.5, 13)
+StatusLabel.Size = UDim2_New(0, 300, 0, 60)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Text = "Memvalidasi username..."
+StatusLabel.TextColor3 = Color3_FromRGB(70, 130, 255)
+StatusLabel.Font = Enum.Font.GothamBold
+StatusLabel.TextSize = 13
+StatusLabel.TextXAlignment = Enum.TextXAlignment.Center
+StatusLabel.TextYAlignment = Enum.TextYAlignment.Center
+StatusLabel.Parent = MainFrame
+
+local UsernameLabel = Instance.new("TextLabel")
+UsernameLabel.Name = "UsernameLabel"
+UsernameLabel.AnchorPoint = Vector2_New(0.5, 0.5)
+UsernameLabel.Position = UDim2_New(0.5, 0, 0.35, 0)
+UsernameLabel.Size = UDim2_New(0, 300, 0, 30)
+UsernameLabel.BackgroundTransparency = 1
+UsernameLabel.Text = "PLEASE WAIT DATABASE DETECTING"
+UsernameLabel.TextColor3 = Color3_FromRGB(200, 200, 200)
+UsernameLabel.Font = Enum.Font.GothamBold
+UsernameLabel.TextSize = 13
+UsernameLabel.TextXAlignment = Enum.TextXAlignment.Center
+UsernameLabel.Parent = MainFrame
+
+local DiscordButton = Instance.new("TextButton")
+DiscordButton.Name = "DiscordButton"
+DiscordButton.AnchorPoint = Vector2_New(0.5, 0)
+DiscordButton.Position = UDim2_New(0.5, 0, 0.78, 0)
+DiscordButton.Size = UDim2_New(0, 300, 0, 38)
+DiscordButton.BackgroundColor3 = Color3_FromRGB(70, 130, 255)
+DiscordButton.Text = "THANK YOU FOR PURCHASING VIP"
+DiscordButton.TextColor3 = Color3_FromRGB(255, 255, 255)
+DiscordButton.Font = Enum.Font.GothamBold
+DiscordButton.TextSize = 16
+DiscordButton.BorderSizePixel = 0
+DiscordButton.AutoButtonColor = false
+DiscordButton.Parent = MainFrame
+CreateCorner(DiscordButton, 8)
+
+DiscordButton.MouseEnter:Connect(function()
+    CreateTween(DiscordButton, {BackgroundColor3 = Color3_FromRGB(100, 120, 255)}, 0.2)
+end)
+
+DiscordButton.MouseLeave:Connect(function()
+    CreateTween(DiscordButton, {BackgroundColor3 = Color3_FromRGB(70, 130, 255)}, 0.2)
+end)
+
+DiscordButton.MouseButton1Click:Connect(function()
+    if setclipboard then
+        setclipboard("https://www.tiktok.com/@siexther")
+    end
+    StatusLabel.Text = "THANKS YOOW!"
+    StatusLabel.TextColor3 = Color3_FromRGB(123, 48, 220)
+end)
+
+local isDragging = false
+local dragInput, dragStart, startPos
+
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        isDragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+    end
+end)
+
+TitleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and isDragging then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2_New(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        isDragging = false
+    end
+end)
+
+MainFrame.Position = UDim2_New(0.5, 0, 0.3, 0)
+MainFrame.Size = UDim2_New(0, 0, 0, 0)
+MainFrame.BackgroundTransparency = 1
+GlowFrame.Size = UDim2_New(0, 0, 0, 0)
+GlowFrame.BackgroundTransparency = 1
+
+CreateTween(GlowFrame, {
+    BackgroundTransparency = 0.7,
+    Size = UDim2_New(0, 360, 0, 260)
+}, 0.5)
+
+CreateTween(MainFrame, {
+    Position = UDim2_New(0.5, 0, 0.4, 0),
+    BackgroundTransparency = 0,
+    Size = UDim2_New(0, 350, 0, 250)
+}, 0.5)
+
+task.spawn(function()
+    task.wait(2)
+    
+    local username = LocalPlayer.Name
+    print("[SIEXTHER] Checking username: " .. username)
+    
+    local validUsername = string.lower(username) == "akuramaa_xd"
+    
+    if validUsername then
+        print("[SIEXTHER] Valid username detected! Loading script...")
+        StatusLabel.Text = "Username valid!\nMemuat Siexther VIP..."
+        StatusLabel.TextColor3 = ThemeColors.Success
+        
+        task.wait(2)
+        
+        CreateTween(BackgroundBlur, {Size = 0}, 0.5)
+        CreateTween(MainFrame, {
+            BackgroundTransparency = 1,
+            Position = UDim2_New(0.5, 0, -0.5, 0)
+        }, 0.5)
+        
+        task.wait(0.5)
+        BackgroundBlur:Destroy()
+        MainScreenGui:Destroy()
+        
+        _G.a = LocalPlayer
+        
+        InitializeMenu()
+        
+    else
+        StatusLabel.Text = "USERNAME TIDAK VALID!\nSILAKAN REPORT KE WHATSAPP!\n"
+        StatusLabel.TextColor3 = ThemeColors.Error
+        
+        task.wait(3)
+        
+        LocalPlayer:Kick("\nBUY SCRIPT VIP DM TIKTOK" .. Config.TiktokInvite)
+    end
+end)
+
+local function CreateMainMenu()
+    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+    
+    local MenuScreenGui = Instance.new("ScreenGui")
+    MenuScreenGui.Name = "SiextherIlhan"
+    MenuScreenGui.DisplayOrder = 999
+    MenuScreenGui.ResetOnSpawn = false
+    MenuScreenGui.Parent = PlayerGui
+    
+    local MenuBlur = Instance.new("BlurEffect")
+    MenuBlur.Name = "Ilhan"
+    MenuBlur.Size = 0
+    MenuBlur.Parent = Lighting
+    
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Name = "ToggleButton"
+    ToggleButton.Size = UDim2_New(0, 44, 0, 44)
+    ToggleButton.Position = UDim2_New(0, 15, 0.5, -22)
+    ToggleButton.BackgroundColor3 = Color3_FromRGB(70, 130, 255)
+    ToggleButton.Text = "SIEXTHER"
+    ToggleButton.TextColor3 = Color3_FromRGB(255, 255, 255)
+    ToggleButton.TextSize = 24
+    ToggleButton.Font = Enum.Font.GothamBold
+    ToggleButton.BorderSizePixel = 0
+    ToggleButton.Draggable = true
+    ToggleButton.Parent = MenuScreenGui
+    CreateCorner(ToggleButton, 10)
+    CreateStroke(ToggleButton, Color3_FromRGB(60, 60, 70), 2, 0)
+    
+    local MainMenuFrame = Instance.new("Frame")
+    MainMenuFrame.Name = "siexther"
+    MainMenuFrame.Size = UDim2_New(0, 400, 0, 300)
+    MainMenuFrame.Position = UDim2_New(0.5, -200, 0.5, -180)
+    MainMenuFrame.BackgroundColor3 = ThemeColors.BgColor
+    MainMenuFrame.BorderSizePixel = 0
+    MainMenuFrame.Active = true
+    MainMenuFrame.Visible = true
+    MainMenuFrame.Parent = MenuScreenGui
+    CreateCorner(MainMenuFrame, 12)
+    CreateStroke(MainMenuFrame, ThemeColors.Stroke, 2, 0)
+    
+    local SearchContainer = Instance.new("Frame")
+    SearchContainer.Name = "SearchContainer"
+    SearchContainer.Size = UDim2_New(1, -130, 0, 28)
+    SearchContainer.Position = UDim2_New(0, 108, 0, 8)
+    SearchContainer.BackgroundColor3 = Color3_FromRGB(30, 30, 40)
+    SearchContainer.BorderSizePixel = 0
+    SearchContainer.Parent = MainMenuFrame
+    CreateCorner(SearchContainer, 6)
+    
+    local SearchIcon = Instance.new("ImageLabel")
+    SearchIcon.Size = UDim2_New(0, 22, 0, 22)
+    SearchIcon.Position = UDim2_New(0, 4, 0.5, -11)
+    SearchIcon.BackgroundTransparency = 1
+    SearchIcon.Image = "rbxassetid://118685771787843"
+    SearchIcon.ImageColor3 = Color3_FromRGB(150, 150, 160)
+    SearchIcon.Parent = SearchContainer
+    
+    local SearchBox = Instance.new("TextBox")
+    SearchBox.Name = "SearchBox"
+    SearchBox.Size = UDim2_New(1, -56, 1, 0)
+    SearchBox.Position = UDim2_New(0, 26, 0, 0)
+    SearchBox.BackgroundTransparency = 1
+    SearchBox.Text = ""
+    SearchBox.PlaceholderText = "Search features..."
+    SearchBox.Font = Enum.Font.Gotham
+    SearchBox.TextColor3 = Color3_FromRGB(255, 255, 255)
+    SearchBox.PlaceholderColor3 = Color3_FromRGB(120, 120, 130)
+    SearchBox.TextSize = 10
+    SearchBox.TextXAlignment = Enum.TextXAlignment.Left
+    SearchBox.ClearTextOnFocus = false
+    SearchBox.Parent = SearchContainer
+    
+    local ClearButton = Instance.new("TextButton")
+    ClearButton.Size = UDim2_New(0, 24, 0, 24)
+    ClearButton.Position = UDim2_New(1, -26, 0.5, -12)
+    ClearButton.BackgroundTransparency = 1
+    ClearButton.Text = "X"
+    ClearButton.TextSize = 12
+    ClearButton.TextColor3 = Color3_FromRGB(150, 150, 160)
+    ClearButton.Font = Enum.Font.GothamBold
+    ClearButton.Visible = false
+    ClearButton.Parent = SearchContainer
+    
+    local SidebarToggle = Instance.new("TextButton")
+    SidebarToggle.Name = "SidebarToggle"
+    SidebarToggle.Size = UDim2_New(0, 30, 0, 30)
+    SidebarToggle.Position = UDim2_New(0, 8, 0, 8)
+    SidebarToggle.BackgroundColor3 = Color3_FromRGB(30, 30, 40)
+    SidebarToggle.BorderSizePixel = 0
+    SidebarToggle.Text = "≡"
+    SidebarToggle.TextColor3 = Color3_FromRGB(255, 255, 255)
+    SidebarToggle.TextSize = 18
+    SidebarToggle.Font = Enum.Font.GothamBold
+    SidebarToggle.Parent = MainMenuFrame
+    CreateCorner(SidebarToggle, 6)
+    
+    local isDraggingMenu = false
+    local menuDragInput, menuDragStart, menuStartPos
+    
+    MainMenuFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            isDraggingMenu = true
+            menuDragStart = input.Position
+            menuStartPos = MainMenuFrame.Position
+        end
+    end)
+    
+    MainMenuFrame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            menuDragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == menuDragInput and isDraggingMenu then
+            local delta = input.Position - menuDragStart
+            MainMenuFrame.Position = UDim2_New(
+                menuStartPos.X.Scale,
+                menuStartPos.X.Offset + delta.X,
+                menuStartPos.Y.Scale,
+                menuStartPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            isDraggingMenu = false
+        end
+    end)
+    
+    ToggleButton.MouseButton1Click:Connect(function()
+        MainMenuFrame.Visible = not MainMenuFrame.Visible
+        
+        if MainMenuFrame.Visible then
+            ToggleButton.BackgroundColor3 = Color3_FromRGB(70, 130, 255)
+            CreateTween(MenuBlur, {Size = 15}, 0.3)
+        else
+            ToggleButton.BackgroundColor3 = Color3_FromRGB(35, 35, 45)
+            CreateTween(MenuBlur, {Size = 0}, 0.3)
+        end
+    end)
+    
+    return MenuScreenGui, MainMenuFrame, SearchBox, ClearButton, SidebarToggle, MenuBlur
+end
+
+local function CreateSidebar(parent, toggleButton)
+    local Sidebar = Instance.new("Frame")
+    Sidebar.Name = "SXTHR"
+    Sidebar.Size = UDim2_New(0, 100, 1, 0)
+    Sidebar.Position = UDim2_New(0, 0, 0, 0)
+    Sidebar.BackgroundColor3 = Color3_FromRGB(20, 20, 30)
+    Sidebar.BorderSizePixel = 0
+    Sidebar.Parent = parent
+    CreateCorner(Sidebar, 12)
+    
+    local SidebarEdge = Instance.new("Frame")
+    SidebarEdge.Size = UDim2_New(0, 15, 1, 0)
+    SidebarEdge.Position = UDim2_New(1, -15, 0, 0)
+    SidebarEdge.BackgroundColor3 = Color3_FromRGB(20, 20, 30)
+    SidebarEdge.BorderSizePixel = 0
+    SidebarEdge.Parent = Sidebar
+    
+    local SidebarTitle = Instance.new("TextLabel")
+    SidebarTitle.Name = "Title"
+    SidebarTitle.Size = UDim2_New(1, -15, 0, 30)
+    SidebarTitle.Position = UDim2_New(0, 8, 0, 8)
+    SidebarTitle.BackgroundTransparency = 1
+    SidebarTitle.Text = "SIEXTHER 8.5"
+    SidebarTitle.Font = Enum.Font.GothamBold
+    SidebarTitle.TextColor3 = Color3_FromRGB(70, 130, 255)
+    SidebarTitle.TextSize = 15
+    SidebarTitle.TextXAlignment = Enum.TextXAlignment.Left
+    SidebarTitle.Parent = Sidebar
+    
+    local titleGradient = CreateGradient(
+        SidebarTitle,
+        ColorSequence_New({
+            ColorSequenceKeypoint_New(0, Color3_FromRGB(255, 255, 255)),
+            ColorSequenceKeypoint_New(0.3, Color3_FromRGB(70, 130, 255)),
+            ColorSequenceKeypoint_New(0.6, Color3_FromRGB(70, 130, 255)),
+            ColorSequenceKeypoint_New(1, Color3_FromRGB(255, 255, 255))
+        }),
+        Vector2_New(-1, 0),
+        0
+    )
+    
+    AnimateGradient(titleGradient)
+    
+    local ButtonContainer = Instance.new("ScrollingFrame")
+    ButtonContainer.Name = "ButtonContainer"
+    ButtonContainer.Size = UDim2_New(1, -8, 1, -90)
+    ButtonContainer.Position = UDim2_New(0, 4, 0, 45)
+    ButtonContainer.BackgroundTransparency = 1
+    ButtonContainer.BorderSizePixel = 0
+    ButtonContainer.ScrollBarThickness = 3
+    ButtonContainer.ScrollBarImageColor3 = ThemeColors.Stroke
+    ButtonContainer.CanvasSize = UDim2_New(0, 0, 0, 0)
+    ButtonContainer.Parent = Sidebar
+    
+    local ButtonLayout = Instance.new("UIListLayout")
+    ButtonLayout.Padding = UDim_New(0, 5)
+    ButtonLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ButtonLayout.Parent = ButtonContainer
+    
+    ButtonLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        ButtonContainer.CanvasSize = UDim2_New(0, 0, 0, ButtonLayout.AbsoluteContentSize.Y + 10)
+    end)
+    
+    local sidebarVisible = true
+    
+    toggleButton.MouseButton1Click:Connect(function()
+        sidebarVisible = not sidebarVisible
+        
+        if sidebarVisible then
+            CreateTween(Sidebar, {Size = UDim2_New(0, 100, 1, 0)}, 0.3)
+            toggleButton.Text = "≡"
+        else
+            CreateTween(Sidebar, {Size = UDim2_New(0, 0, 1, 0)}, 0.3)
+            toggleButton.Text = "→"
+        end
+    end)
+    
+    return Sidebar, ButtonContainer
+end
+
+local function CreateTabButton(parent, tabName, contentFrame, allContentFrames)
+    local TabButton = Instance.new("TextButton")
+    TabButton.Name = tabName
+    TabButton.Size = UDim2_New(1, -8, 0, 32)
+    TabButton.BackgroundColor3 = Color3_FromRGB(30, 30, 40)
+    TabButton.BorderSizePixel = 0
+    TabButton.AutoButtonColor = false
+    TabButton.Text = " " .. tabName
+    TabButton.Font = Enum.Font.GothamBold
+    TabButton.TextColor3 = Color3_FromRGB(200, 200, 200)
+    TabButton.TextSize = 11
+    TabButton.TextXAlignment = Enum.TextXAlignment.Left
+    TabButton.Parent = parent
+    
+    local padding = Instance.new("UIPadding")
+    padding.PaddingLeft = UDim_New(0, 6)
+    padding.Parent = TabButton
+    
+    CreateCorner(TabButton, 6)
+    
+    TabButton.MouseButton1Click:Connect(function()
+        for _, btn in pairs(parent:GetChildren()) do
+            if btn:IsA("TextButton") then
+                btn.BackgroundColor3 = Color3_FromRGB(30, 30, 40)
+                btn.TextColor3 = Color3_FromRGB(200, 200, 200)
+            end
+        end
+        
+        TabButton.BackgroundColor3 = ThemeColors.Stroke
+        TabButton.TextColor3 = Color3_FromRGB(255, 255, 255)
+        
+        for _, frame in pairs(allContentFrames:GetChildren()) do
+            if frame:IsA("ScrollingFrame") then
+                frame.Visible = false
+            end
+        end
+        
+        if contentFrame then
+            contentFrame.Visible = true
+        end
+        
+        CreateTween(TabButton, {Size = UDim2_New(1, -5, 0, 34)}, 0.1)
+        task.wait(0.1)
+        CreateTween(TabButton, {Size = UDim2_New(1, -8, 0, 32)}, 0.1)
+    end)
+    
+    return TabButton
+end
+
+local function CreateContentArea(parent)
+    local ContentArea = Instance.new("Frame")
+    ContentArea.Name = "ContentArea"
+    ContentArea.Size = UDim2_New(1, -116, 1, -55)
+    ContentArea.Position = UDim2_New(0, 108, 0, 47)
+    ContentArea.BackgroundTransparency = 1
+    ContentArea.Parent = parent
+    
+    return ContentArea
+end
+
+local function CreateScrollingPage(parent, pageName)
+    local ScrollingPage = Instance.new("ScrollingFrame")
+    ScrollingPage.Name = pageName
+    ScrollingPage.Size = UDim2_New(1, 0, 1, 0)
+    ScrollingPage.BackgroundTransparency = 1
+    ScrollingPage.BorderSizePixel = 0
+    ScrollingPage.ScrollBarThickness = 4
+    ScrollingPage.ScrollBarImageColor3 = ThemeColors.Stroke
+    ScrollingPage.CanvasSize = UDim2_New(0, 0, 0, 0)
+    ScrollingPage.Visible = false
+    ScrollingPage.Parent = parent
+    
+    local PageLayout = Instance.new("UIListLayout")
+    PageLayout.Padding = UDim_New(0, 6)
+    PageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    PageLayout.Parent = ScrollingPage
+    
+    PageLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        ScrollingPage.CanvasSize = UDim2_New(0, 0, 0, PageLayout.AbsoluteContentSize.Y + 10)
+    end)
+    
+    return ScrollingPage
+end
+
+local function CreateDivider(parent, title)
+    local DividerFrame = Instance.new("Frame")
+    DividerFrame.Name = "Divider_" .. title
+    DividerFrame.Size = UDim2_New(1, -15, 0, 25)
+    DividerFrame.BackgroundTransparency = 1
+    DividerFrame.BorderSizePixel = 0
+    DividerFrame.Parent = parent
+    
+    local LeftLine = Instance.new("Frame")
+    LeftLine.Size = UDim2_New(0.5, -70, 0, 1)
+    LeftLine.Position = UDim2_New(0, 0, 0.5, -1)
+    LeftLine.BackgroundColor3 = Color3_FromRGB(60, 60, 70)
+    LeftLine.BorderSizePixel = 0
+    LeftLine.Parent = DividerFrame
+    
+    local DividerLabel = Instance.new("TextLabel")
+    DividerLabel.Size = UDim2_New(0, 130, 1, 0)
+    DividerLabel.Position = UDim2_New(0.5, -65, 0, 0)
+    DividerLabel.BackgroundTransparency = 1
+    DividerLabel.Text = title
+    DividerLabel.Font = Enum.Font.GothamBold
+    DividerLabel.TextColor3 = Color3_FromRGB(150, 150, 160)
+    DividerLabel.TextSize = 10
+    DividerLabel.TextXAlignment = Enum.TextXAlignment.Center
+    DividerLabel.Parent = DividerFrame
+    
+    local RightLine = Instance.new("Frame")
+    RightLine.Size = UDim2_New(0.5, -70, 0, 1)
+    RightLine.Position = UDim2_New(0.5, 70, 0.5, -1)
+    RightLine.BackgroundColor3 = Color3_FromRGB(60, 60, 70)
+    RightLine.BorderSizePixel = 0
+    RightLine.Parent = DividerFrame
+    
+    return DividerFrame
+end
+
+local function CreateToggleSwitch(parent, featureName, onToggle)
+    local ToggleFrame = Instance.new("Frame")
+    ToggleFrame.Name = featureName
+    ToggleFrame.Size = UDim2_New(1, -15, 0, 35)
+    ToggleFrame.BackgroundColor3 = Color3_FromRGB(35, 35, 45)
+    ToggleFrame.BorderSizePixel = 0
+    ToggleFrame.Parent = parent
+    CreateCorner(ToggleFrame, 7)
+    
+    local FeatureLabel = Instance.new("TextLabel")
+    FeatureLabel.Size = UDim2_New(1, -60, 1, 0)
+    FeatureLabel.Position = UDim2_New(0, 10, 0, 0)
+    FeatureLabel.BackgroundTransparency = 1
+    FeatureLabel.Text = featureName
+    FeatureLabel.Font = Enum.Font.GothamBold
+    FeatureLabel.TextColor3 = ThemeColors.TextColor
+    FeatureLabel.TextSize = 11
+    FeatureLabel.TextXAlignment = Enum.TextXAlignment.Left
+    FeatureLabel.Parent = ToggleFrame
+    
+    local ToggleOuter = Instance.new("Frame")
+    ToggleOuter.Size = UDim2_New(0, 44, 0, 22)
+    ToggleOuter.Position = UDim2_New(1, -52, 0.5, -11)
+    ToggleOuter.BackgroundColor3 = Color3_FromRGB(60, 60, 70)
+    ToggleOuter.BorderSizePixel = 0
+    ToggleOuter.Parent = ToggleFrame
+    CreateCorner(ToggleOuter, 11)
+    
+    local ToggleInner = Instance.new("Frame")
+    ToggleInner.Size = UDim2_New(0, 18, 0, 18)
+    ToggleInner.Position = UDim2_New(0, 2, 0.5, -9)
+    ToggleInner.BackgroundColor3 = Color3_FromRGB(255, 255, 255)
+    ToggleInner.BorderSizePixel = 0
+    ToggleInner.Parent = ToggleOuter
+    CreateCorner(ToggleInner, 9)
+    
+    local isEnabled = false
+    
+    local ToggleButton = Instance.new("TextButton")
+    ToggleButton.Size = UDim2_New(1, 0, 1, 0)
+    ToggleButton.BackgroundTransparency = 1
+    ToggleButton.Text = ""
+    ToggleButton.Parent = ToggleOuter
+    
+    ToggleButton.MouseButton1Click:Connect(function()
+        isEnabled = not isEnabled
+        FeatureStates[featureName] = isEnabled
+        
+        if isEnabled then
+            CreateTween(ToggleOuter, {BackgroundColor3 = ThemeColors.Stroke}, 0.3)
+            CreateTween(ToggleInner, {Position = UDim2_New(0, 24, 0.5, -9)}, 0.3)
+        else
+            CreateTween(ToggleOuter, {BackgroundColor3 = Color3_FromRGB(60, 60, 70)}, 0.3)
+            CreateTween(ToggleInner, {Position = UDim2_New(0, 2, 0.5, -9)}, 0.3)
+        end
+        
+        if onToggle then
+            onToggle(isEnabled)
+        end
+        
+        local status = isEnabled and "AKTIF" or "DIMATIKAN"
+        getgenv().Notify({
+            Title = featureName,
+            Content = status,
+            Duration = 3
+        })
+    end)
+    
+    return ToggleFrame, ToggleButton
+end
+
+local function CreateActionButton(parent, buttonText, onClick)
+    local ActionButton = Instance.new("TextButton")
+    ActionButton.Name = buttonText
+    ActionButton.Size = UDim2_New(1, -15, 0, 35)
+    ActionButton.BackgroundColor3 = ThemeColors.BgColorHover
+    ActionButton.BorderSizePixel = 0
+    ActionButton.AutoButtonColor = false
+    ActionButton.Text = buttonText
+    ActionButton.Font = Enum.Font.GothamBold
+    ActionButton.TextColor3 = ThemeColors.TextColor
+    ActionButton.TextSize = 12
+    ActionButton.Parent = parent
+    CreateCorner(ActionButton, 7)
+    
+    ActionButton.MouseEnter:Connect(function()
+        CreateTween(ActionButton, {BackgroundColor3 = Color3_FromRGB(45, 45, 55)}, 0.2)
+    end)
+    
+    ActionButton.MouseLeave:Connect(function()
+        CreateTween(ActionButton, {BackgroundColor3 = ThemeColors.BgColorHover}, 0.2)
+    end)
+    
+    ActionButton.MouseButton1Click:Connect(function()
+        CreateTween(ActionButton, {Size = UDim2_New(1, -12, 0, 37)}, 0.1)
+        task.wait(0.1)
+        CreateTween(ActionButton, {Size = UDim2_New(1, -15, 0, 35)}, 0.1)
+        
+        if onClick then
+            onClick()
+        end
+    end)
+    
+    return ActionButton
+end
+
+local function CreateSlider(parent, sliderName, minValue, maxValue, defaultValue, onValueChanged)
+    local SliderFrame = Instance.new("Frame")
+    SliderFrame.Name = sliderName
+    SliderFrame.Size = UDim2_New(1, -15, 0, 45)
+    SliderFrame.BackgroundColor3 = Color3_FromRGB(35, 35, 45)
+    SliderFrame.BorderSizePixel = 0
+    SliderFrame.Parent = parent
+    CreateCorner(SliderFrame, 7)
+    
+    local SliderLabel = Instance.new("TextLabel")
+    SliderLabel.Size = UDim2_New(1, -60, 0, 16)
+    SliderLabel.Position = UDim2_New(0, 10, 0, 5)
+    SliderLabel.BackgroundTransparency = 1
+    SliderLabel.Text = sliderName
+    SliderLabel.Font = Enum.Font.GothamBold
+    SliderLabel.TextColor3 = ThemeColors.TextColor
+    SliderLabel.TextSize = 11
+    SliderLabel.TextXAlignment = Enum.TextXAlignment.Left
+    SliderLabel.Parent = SliderFrame
+    
+    local ValueLabel = Instance.new("TextLabel")
+    ValueLabel.Size = UDim2_New(0, 50, 0, 16)
+    ValueLabel.Position = UDim2_New(1, -55, 0, 5)
+    ValueLabel.BackgroundTransparency = 1
+    ValueLabel.Text = tostring(defaultValue)
+    ValueLabel.Font = Enum.Font.GothamBold
+    ValueLabel.TextColor3 = ThemeColors.Stroke
+    ValueLabel.TextSize = 11
+    ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    ValueLabel.Parent = SliderFrame
+    
+    local SliderTrack = Instance.new("Frame")
+    SliderTrack.Size = UDim2_New(1, -24, 0, 4)
+    SliderTrack.Position = UDim2_New(0, 12, 1, -12)
+    SliderTrack.BackgroundColor3 = Color3_FromRGB(50, 50, 60)
+    SliderTrack.BorderSizePixel = 0
+    SliderTrack.Parent = SliderFrame
+    CreateCorner(SliderTrack, UDim_New(1, 0).Offset)
+    
+    local SliderFill = Instance.new("Frame")
+    SliderFill.Size = UDim2_New((defaultValue - minValue) / (maxValue - minValue), 0, 1, 0)
+    SliderFill.BackgroundColor3 = ThemeColors.Stroke
+    SliderFill.BorderSizePixel = 0
+    SliderFill.Parent = SliderTrack
+    CreateCorner(SliderFill, UDim_New(1, 0).Offset)
+    
+    local SliderKnob = Instance.new("TextButton")
+    SliderKnob.Size = UDim2_New(0, 12, 0, 12)
+    SliderKnob.Position = UDim2_New((defaultValue - minValue) / (maxValue - minValue), -6, 0.5, -6)
+    SliderKnob.BackgroundColor3 = Color3_FromRGB(255, 255, 255)
+    SliderKnob.BorderSizePixel = 0
+    SliderKnob.Text = ""
+    SliderKnob.AutoButtonColor = false
+    SliderKnob.Parent = SliderTrack
+    CreateCorner(SliderKnob, UDim_New(1, 0).Offset)
+    
+    local dragging = false
+    
+    local function updateSlider(input)
+        local relativeX = math.clamp((input.Position.X - SliderTrack.AbsolutePosition.X) / SliderTrack.AbsoluteSize.X, 0, 1)
+        local value = math.floor(minValue + (maxValue - minValue) * relativeX)
+        
+        ValueLabel.Text = tostring(value)
+        SliderFill.Size = UDim2_New(relativeX, 0, 1, 0)
+        SliderKnob.Position = UDim2_New(relativeX, -6, 0.5, -6)
+        
+        if onValueChanged then
+            onValueChanged(value)
+        end
+    end
+    
+    SliderKnob.MouseButton1Down:Connect(function()
+        dragging = true
+    end)
+    
+    SliderTrack.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            updateSlider(input)
+        end
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            updateSlider(input)
+        end
+    end)
+    
+    return SliderFrame
+end
+
+local function SetupSearchSystem(searchBox, clearButton, contentArea)
+    searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+        local searchText = string.lower(searchBox.Text)
+        clearButton.Visible = searchText ~= ""
+        
+        if searchText == "" then
+            for _, page in pairs(contentArea:GetChildren()) do
+                if page:IsA("ScrollingFrame") then
+                    local isHomePage = page.Name == "Home"
+                    page.Visible = isHomePage
+                    
+                    for _, element in pairs(page:GetChildren()) do
+                        if element:IsA("Frame") or element:IsA("TextButton") then
+                            element.Visible = true
+                        end
+                    end
+                end
+            end
+        else
+            for _, page in pairs(contentArea:GetChildren()) do
+                if page:IsA("ScrollingFrame") then
+                    page.Visible = true
+                    
+                    for _, element in pairs(page:GetChildren()) do
+                        if element:IsA("Frame") or element:IsA("TextButton") then
+                            local elementName = string.lower(element.Name)
+                            local isMatch = string.find(elementName, searchText, 1, true) ~= nil
+                            element.Visible = isMatch
+                        end
+                    end
+                end
+            end
+        end
+    end)
+    
+    clearButton.MouseButton1Click:Connect(function()
+        searchBox.Text = ""
+    end)
+end
+
+local function SetupAntiFling()
+    local antiFlingEnabled = false
+    
+    return function(enabled)
+        antiFlingEnabled = enabled
+        
+        if enabled then
+            local character = LocalPlayer.Character
+            if not character then return end
+            
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if not humanoidRootPart then return end
+            
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CustomPhysicalProperties = PhysicalProperties.new(
+                        9e9, 
+                        0.3, 
+                        0.5
+                    )
+                end
+            end
+        else
+            local character = LocalPlayer.Character
+            if not character then return end
+            
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CustomPhysicalProperties = nil
+                end
+            end
+        end
+    end
+end
+
+local function SetupTouchFling()
+    local touchFlingEnabled = false
+    local touchFlingConnection
+    
+    return function(enabled)
+        touchFlingEnabled = enabled
+        
+        if enabled then
+            if touchFlingConnection then
+                touchFlingConnection:Disconnect()
+            end
+            
+            local character = LocalPlayer.Character
+            if not character then return end
+            
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if not humanoidRootPart then return end
+            
+            touchFlingConnection = humanoidRootPart.Touched:Connect(function(hit)
+                if not touchFlingEnabled then return end
+                
+                local hitHumanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
+                if hitHumanoid and hit.Parent ~= character then
+                    local bodyVelocity = Instance.new("BodyVelocity")
+                    bodyVelocity.Velocity = Vector3.new(math.random(-100, 100), 300, math.random(-100, 100))
+                    bodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                    bodyVelocity.Parent = hit
+                    
+                    game:GetService("Debris"):AddItem(bodyVelocity, 0.5)
+                end
+            end)
+        else
+            if touchFlingConnection then
+                touchFlingConnection:Disconnect()
+                touchFlingConnection = nil
+            end
+        end
+    end
+end
+
+local function SetupInvisibility()
+    local invisibilityEnabled = false
+    local originalTransparencies = {}
+    
+    return function(enabled)
+        invisibilityEnabled = enabled
+        
+        local character = LocalPlayer.Character
+        if not character then return end
+        
+        if enabled then
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") or part:IsA("Decal") then
+                    originalTransparencies[part] = part.Transparency
+                    part.Transparency = 1
+                end
+                
+                if part:IsA("Accessory") then
+                    local handle = part:FindFirstChild("Handle")
+                    if handle then
+                        originalTransparencies[handle] = handle.Transparency
+                        handle.Transparency = 1
+                    end
+                end
+            end
+            
+            local head = character:FindFirstChild("Head")
+            if head then
+                local face = head:FindFirstChild("face")
+                if face then
+                    originalTransparencies[face] = face.Transparency
+                    face.Transparency = 1
+                end
+            end
+        else
+            for part, transparency in pairs(originalTransparencies) do
+                if part and part.Parent then
+                    part.Transparency = transparency
+                end
+            end
+            originalTransparencies = {}
+        end
+    end
+end
+
+local function SetupGodMode()
+    local godModeEnabled = false
+    local godModeConnection
+    
+    return function(enabled)
+        godModeEnabled = enabled
+        
+        local character = LocalPlayer.Character
+        if not character then return end
+        
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if not humanoid then return end
+        
+        if enabled then
+            local success, err = pcall(function()
+                humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+                humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOn
+                humanoid.NameDisplayDistance = 100
+                humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
+                
+                humanoid.Health = humanoid.MaxHealth
+            end)
+            
+            if godModeConnection then
+                godModeConnection:Disconnect()
+            end
+            
+            godModeConnection = humanoid.HealthChanged:Connect(function(health)
+                if godModeEnabled and health < humanoid.MaxHealth then
+                    humanoid.Health = humanoid.MaxHealth
+                end
+            end)
+        else
+            if godModeConnection then
+                godModeConnection:Disconnect()
+                godModeConnection = nil
+            end
+            
+            local success, err = pcall(function()
+                humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+                humanoid.HealthDisplayType = Enum.HumanoidHealthDisplayType.DisplayWhenDamaged
+                humanoid.NameDisplayDistance = 100
+                humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
+            end)
+        end
+    end
+end
+
+local function SetupInfiniteJump()
+    local infiniteJumpEnabled = false
+    local infiniteJumpConnection
+    
+    return function(enabled)
+        infiniteJumpEnabled = enabled
+        
+        if enabled then
+            if infiniteJumpConnection then
+                infiniteJumpConnection:Disconnect()
+            end
+            
+            infiniteJumpConnection = UserInputService.JumpRequest:Connect(function()
+                if not infiniteJumpEnabled then return end
+                
+                local character = LocalPlayer.Character
+                if not character then return end
+                
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                end
+            end)
+        else
+            if infiniteJumpConnection then
+                infiniteJumpConnection:Disconnect()
+                infiniteJumpConnection = nil
+            end
+        end
+    end
+end
+
+local function SetupNoClip()
+    local noClipEnabled = false
+    local noClipConnection
+    
+    return function(enabled)
+        noClipEnabled = enabled
+        
+        if enabled then
+            if noClipConnection then
+                noClipConnection:Disconnect()
+            end
+            
+            noClipConnection = RunService.Stepped:Connect(function()
+                if not noClipEnabled then return end
+                
+                local character = LocalPlayer.Character
+                if not character then return end
+                
+                for _, part in pairs(character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end)
+        else
+            if noClipConnection then
+                noClipConnection:Disconnect()
+                noClipConnection = nil
+            end
+            
+            local character = LocalPlayer.Character
+            if character then
+                for _, part in pairs(character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = true
+                    end
+                end
+            end
+        end
+    end
+end
+
+local function SetupWalkSpeed()
+    local walkSpeedEnabled = false
+    local originalWalkSpeed = 16
+    local currentWalkSpeed = 16
+    
+    local function updateWalkSpeed(speed)
+        currentWalkSpeed = speed
+        
+        local character = LocalPlayer.Character
+        if not character then return end
+        
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            if walkSpeedEnabled then
+                humanoid.WalkSpeed = speed
+            end
+        end
+    end
+    
+    local toggleFunction = function(enabled)
+        walkSpeedEnabled = enabled
+        
+        local character = LocalPlayer.Character
+        if not character then return end
+        
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if not humanoid then return end
+        
+        if enabled then
+            originalWalkSpeed = humanoid.WalkSpeed
+            humanoid.WalkSpeed = currentWalkSpeed
+        else
+            humanoid.WalkSpeed = originalWalkSpeed
+        end
+    end
+    
+    return toggleFunction, updateWalkSpeed
+end
+
+local function SetupAntiDC()
+    local antiDCEnabled = false
+    local antiDCConnection
+    
+    return function(enabled)
+        antiDCEnabled = enabled
+        
+        if enabled then
+            if antiDCConnection then
+                antiDCConnection:Disconnect()
+            end
+            
+            antiDCConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                if not antiDCEnabled then return end
+                
+                local success, err = pcall(function()
+                    local virtualUser = game:GetService("VirtualUser")
+                    virtualUser:CaptureController()
+                    virtualUser:ClickButton2(Vector2.new())
+                end)
+            end)
+            
+            local success, err = pcall(function()
+                settings().Network.IncomingReplicationLag = 0
+            end)
+        else
+            if antiDCConnection then
+                antiDCConnection:Disconnect()
+                antiDCConnection = nil
+            end
+            
+            local success, err = pcall(function()
+                settings().Network.IncomingReplicationLag = nil
+            end)
+        end
+    end
+end
+
+local function SetupJerk()
+    local jerkEnabled = false
+    local jerkConnection
+    
+    return function(enabled)
+        jerkEnabled = enabled
+        
+        if enabled then
+            if jerkConnection then
+                jerkConnection:Disconnect()
+            end
+            
+            local character = LocalPlayer.Character
+            if not character then return end
+            
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if not humanoidRootPart then return end
+            
+            jerkConnection = RunService.Heartbeat:Connect(function()
+                if not jerkEnabled then return end
+                
+                local character = LocalPlayer.Character
+                if not character then return end
+                
+                local hrp = character:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+                
+                hrp.CFrame = hrp.CFrame * CFrame.Angles(
+                    math.rad(math.random(-180, 180)),
+                    math.rad(math.random(-180, 180)),
+                    math.rad(math.random(-180, 180))
+                )
+            end)
+        else
+            if jerkConnection then
+                jerkConnection:Disconnect()
+                jerkConnection = nil
+            end
+        end
+    end
+end
+
+local ExternalScripts = {
+    ["SIEXTHER_AUTO_WALK"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/a",
+    ["SIEXTHER_AUTO_TELEPORT"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/8",
+    ["SIEXTHER_FLY"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/b",
+    ["SIEXTHER_FLY_V2"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/c",
+    ["SIEXTHER_GLITCH"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/d",
+    ["SIEXTHER_GLITCH_V2"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/e",
+    ["SIEXTHER_ANIMATED"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/f",
+    ["SIEXTHER_EMOTE"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/g",
+    ["SIEXTHER_INJECTION"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/h",
+    ["SIEXTHER_CHARME"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/i",
+    ["SIEXTHER_TALL_MAN"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/j",
+    ["SIEXTHER_FAKE_DONATE"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/k",
+    ["TROLL_PLAYER"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/L",
+    ["ESP_PLAYER"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/m",
+    ["SIEXTHER_KIMCOHI"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/n",
+    ["TRANSLATE"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/o",
+    ["SIEXTHER_AURA"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/p",
+    ["SIEXTHER_AURA_FAST"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/q",
+    ["SIEXTHER_FLING"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/r",
+    ["SIEXTHER_CHAOTIC"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/s",
+    ["SIEXTHER_PART_CONTROLLER"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/t",
+    ["SIEXTHER_BRING"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/u",
+    ["SIEXTHER_BRING_V2"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/v",
+    ["SIEXTHER_TORNADO"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/w",
+    ["SIEXTHER_SPAM"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/aa",
+    ["SIEXTHER_LAG_SERVER"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/bb",
+    ["SIEXTHER_BROKEN"] = "https://raw.githubusercontent.com/nxveez/56/refs/heads/main/9"
+}
+
+local function LoadExternalScript(scriptName)
+    local url = ExternalScripts[scriptName]
+    if not url then
+        warn("Script not found: " .. scriptName)
+        return
+    end
+    
+    local success, result = pcall(function()
+        local scriptContent = game:HttpGet(url)
+        return loadstring(scriptContent)
+    end)
+    
+    if success and result then
+        local executeSuccess, executeError = pcall(result)
+        if executeSuccess then
+            getgenv().Notify({
+                Title = scriptName,
+                Content = "LOADED SUCCESSFULLY",
+                Duration = 3
+            })
+        else
+            getgenv().Notify({
+                Title = scriptName,
+                Content = "EXECUTION ERROR",
+                Duration = 3
+            })
+            warn("Execute error:", executeError)
+        end
+    else
+        getgenv().Notify({
+            Title = scriptName,
+            Content = "LOAD ERROR",
+            Duration = 3
+        })
+        warn("Load error:", result)
+    end
+end
+
+local function BuildMainMenu()
+    local MenuScreenGui, MainMenuFrame, SearchBox, ClearButton, SidebarToggle, MenuBlur = CreateMainMenu()
+    local Sidebar, ButtonContainer = CreateSidebar(MainMenuFrame, SidebarToggle)
+    local ContentArea = CreateContentArea(MainMenuFrame)
+    
+    local HomePage = CreateScrollingPage(ContentArea, "Home")
+    local FeaturesPage = CreateScrollingPage(ContentArea, "Features")
+    local ChaoticPage = CreateScrollingPage(ContentArea, "Chaotic")
+    local ServerPage = CreateScrollingPage(ContentArea, "Server")
+    local SettingsPage = CreateScrollingPage(ContentArea, "Settings")
+    
+    HomePage.Visible = true
+    
+    SetupSearchSystem(SearchBox, ClearButton, ContentArea)
+    
+    CreateTabButton(ButtonContainer, "SXTHR", HomePage, ContentArea)
+    CreateTabButton(ButtonContainer, "UNIVERSAL", FeaturesPage, ContentArea)
+    CreateTabButton(ButtonContainer, "CHAOTIC", ChaoticPage, ContentArea)
+    CreateTabButton(ButtonContainer, "SERVER", ServerPage, ContentArea)
+    CreateTabButton(ButtonContainer, "SETTINGS", SettingsPage, ContentArea)
+    
+    return {
+        ScreenGui = MenuScreenGui,
+        MainFrame = MainMenuFrame,
+        HomePage = HomePage,
+        FeaturesPage = FeaturesPage,
+        ChaoticPage = ChaoticPage,
+        ServerPage = ServerPage,
+        SettingsPage = SettingsPage,
+        MenuBlur = MenuBlur
+    }
+end
+
+local function PopulateHomePage(homePage)
+    CreateDivider(homePage, "S I E X T H E R")
+    
+    local antiFlingToggle = SetupAntiFling()
+    CreateToggleSwitch(homePage, "ANTI FLING", antiFlingToggle)
+    
+    local touchFlingToggle = SetupTouchFling()
+    CreateToggleSwitch(homePage, "TOUCH FLING", touchFlingToggle)
+    
+    local invisibilityToggle = SetupInvisibility()
+    CreateToggleSwitch(homePage, "INVISIBILITY", invisibilityToggle)
+    
+    local godModeToggle = SetupGodMode()
+    CreateToggleSwitch(homePage, "GOD MODE", godModeToggle)
+    
+    local infiniteJumpToggle = SetupInfiniteJump()
+    CreateToggleSwitch(homePage, "INFINITE JUMP", infiniteJumpToggle)
+    
+    local noClipToggle = SetupNoClip()
+    CreateToggleSwitch(homePage, "NO CLIP", noClipToggle)
+    
+    local jerkToggle = SetupJerk()
+    CreateToggleSwitch(homePage, "JERK", jerkToggle)
+    
+    CreateActionButton(homePage, "SIEXTHER AUTO WALK", function()
+        LoadExternalScript("SIEXTHER_AUTO_WALK")
+    end)
+    
+    CreateActionButton(homePage, "SIEXTHER AUTO TELEPORT", function()
+        LoadExternalScript("SIEXTHER_AUTO_TELEPORT")
+    end)
+    
+    CreateActionButton(homePage, "SIEXTHER FLY", function()
+        LoadExternalScript("SIEXTHER_FLY")
+    end)
+    
+    CreateActionButton(homePage, "SIEXTHER FLY V2", function()
+        LoadExternalScript("SIEXTHER_FLY_V2")
+    end)
+    
+    CreateActionButton(homePage, "SIEXTHER GLITCH", function()
+        LoadExternalScript("SIEXTHER_GLITCH")
+    end)
+    
+    CreateActionButton(homePage, "SIEXTHER GLITCH V2", function()
+        LoadExternalScript("SIEXTHER_GLITCH_V2")
+    end)
+    
+    CreateActionButton(homePage, "SIEXTHER ANIMATED", function()
+        LoadExternalScript("SIEXTHER_ANIMATED")
+    end)
+    
+    CreateActionButton(homePage, "SIEXTHER EMOTE", function()
+        LoadExternalScript("SIEXTHER_EMOTE")
+    end)
+end
+
+local function PopulateFeaturesPage(featuresPage)
+    CreateDivider(featuresPage, "F E A T U R E S")
+    
+    local antiDCToggle = SetupAntiDC()
+    CreateToggleSwitch(featuresPage, "ANTI-DC & PING BOOSTER", antiDCToggle)
+    
+    local walkSpeedToggle, walkSpeedUpdate = SetupWalkSpeed()
+    CreateToggleSwitch(featuresPage, "WALKSPEED", walkSpeedToggle)
+    
+    CreateSlider(featuresPage, "SPEED", 16, 200, 16, function(value)
+        walkSpeedUpdate(value)
+    end)
+    
+    CreateDivider(featuresPage, "U N I V E R S A L")
+    
+    CreateActionButton(featuresPage, "SIEXTHER INJECTION", function()
+        LoadExternalScript("SIEXTHER_INJECTION")
+    end)
+    
+    CreateActionButton(featuresPage, "SIEXTHER KIMCOHI", function()
+        LoadExternalScript("SIEXTHER_KIMCOHI")
+    end)
+    
+    CreateActionButton(featuresPage, "SIEXTHER LAG SERVER", function()
+        LoadExternalScript("SIEXTHER_LAG_SERVER")
+    end)
+    
+    CreateActionButton(featuresPage, "SIEXTHER SPAM", function()
+        LoadExternalScript("SIEXTHER_SPAM")
+    end)
+    
+    CreateActionButton(featuresPage, "SIEXTHER CHARME", function()
+        LoadExternalScript("SIEXTHER_CHARME")
+    end)
+    
+    CreateActionButton(featuresPage, "SIEXTHER TALL MAN", function()
+        LoadExternalScript("SIEXTHER_TALL_MAN")
+    end)
+    
+    CreateActionButton(featuresPage, "TROLL PLAYER", function()
+        LoadExternalScript("TROLL_PLAYER")
+    end)
+    
+    CreateActionButton(featuresPage, "ESP PLAYER", function()
+        LoadExternalScript("ESP_PLAYER")
+    end)
+    
+    CreateActionButton(featuresPage, "FAKE DONATE", function()
+        LoadExternalScript("SIEXTHER_FAKE_DONATE")
+    end)
+    
+    CreateActionButton(featuresPage, "TRANSLATE", function()
+        LoadExternalScript("TRANSLATE")
+    end)
+    
+    CreateDivider(featuresPage, "S I E X T H E R  A U R A")
+    
+    CreateActionButton(featuresPage, "SIEXTHER AURA", function()
+        LoadExternalScript("SIEXTHER_AURA")
+    end)
+    
+    CreateActionButton(featuresPage, "SIEXTHER AURA FAST", function()
+        LoadExternalScript("SIEXTHER_AURA_FAST")
+    end)
+end
+
+local function PopulateChaoticPage(chaoticPage)
+    CreateDivider(chaoticPage, "C H A O T I C")
+    
+    CreateActionButton(chaoticPage, "SIEXTHER FLING", function()
+        LoadExternalScript("SIEXTHER_FLING")
+    end)
+    
+    CreateActionButton(chaoticPage, "SIEXTHER BROKEN", function()
+        LoadExternalScript("SIEXTHER_BROKEN")
+    end)
+    
+    CreateActionButton(chaoticPage, "SIEXTHER CHAOTIC", function()
+        LoadExternalScript("SIEXTHER_CHAOTIC")
+    end)
+    
+    CreateActionButton(chaoticPage, "SIEXTHER PART CONTROLLER", function()
+        LoadExternalScript("SIEXTHER_PART_CONTROLLER")
+    end)
+    
+    CreateActionButton(chaoticPage, "SIEXTHER BRING", function()
+        LoadExternalScript("SIEXTHER_BRING")
+    end)
+    
+    CreateActionButton(chaoticPage, "SIEXTHER BRING V2", function()
+        LoadExternalScript("SIEXTHER_BRING_V2")
+    end)
+    
+    CreateActionButton(chaoticPage, "SIEXTHER TORNADO", function()
+        LoadExternalScript("SIEXTHER_TORNADO")
+    end)
+end
+
+local function PopulateServerPage(serverPage)
+    CreateDivider(serverPage, "S E R V E R")
+    
+    CreateActionButton(serverPage, "SERVER HOP", function()
+        local success, err = pcall(function()
+            local HttpService = game:GetService("HttpService")
+            local TeleportService = game:GetService("TeleportService")
+            local PlaceId = game.PlaceId
+            
+            local url = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+            local servers = HttpService:JSONDecode(game:HttpGet(url))
+            
+            if servers and servers.data then
+                for _, server in pairs(servers.data) do
+                    if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                        TeleportService:TeleportToPlaceInstance(PlaceId, server.id, LocalPlayer)
+                        break
+                    end
+                end
+            end
+        end)
+        
+        if success then
+            getgenv().Notify({
+                Title = "SERVER HOP",
+                Content = "TELEPORTING...",
+                Duration = 3
+            })
+        else
+            getgenv().Notify({
+                Title = "SERVER HOP",
+                Content = "ERROR",
+                Duration = 3
+            })
+        end
+    end)
+    
+    CreateActionButton(serverPage, "REJOIN SERVER", function()
+        local success, err = pcall(function()
+            local TeleportService = game:GetService("TeleportService")
+            TeleportService:Teleport(game.PlaceId, LocalPlayer)
+        end)
+        
+        if success then
+            getgenv().Notify({
+                Title = "REJOIN",
+                Content = "REJOINING...",
+                Duration = 3
+            })
+        else
+            getgenv().Notify({
+                Title = "REJOIN",
+                Content = "ERROR",
+                Duration = 3
+            })
+        end
+    end)
+end
+
+local function PopulateSettingsPage(settingsPage)
+    CreateDivider(settingsPage, "S E T T I N G S")
+    
+    CreateActionButton(settingsPage, "DESTROY GUI", function()
+        local MenuGui = LocalPlayer.PlayerGui:FindFirstChild("SiextherIlhan")
+        if MenuGui then
+            MenuGui:Destroy()
+        end
+        
+        getgenv().Notify({
+            Title = "DESTROY GUI",
+            Content = "GUI REMOVED",
+            Duration = 3
+        })
+    end)
+    
+    CreateActionButton(settingsPage, "RESET CHARACTER", function()
+        if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.Health = 0
+            end
+        end
+    end)
+end
+
+function InitializeMenu()
+    local menu = BuildMainMenu()
+    
+    PopulateHomePage(menu.HomePage)
+    PopulateFeaturesPage(menu.FeaturesPage)
+    PopulateChaoticPage(menu.ChaoticPage)
+    PopulateServerPage(menu.ServerPage)
+    PopulateSettingsPage(menu.SettingsPage)
+    
+    menu.MainFrame.Visible = true
+    
+    CreateTween(menu.MenuBlur, {Size = 15}, 0.5)
+    
+    getgenv().Notify({
+        Title = "SIEXTHER VIP",
+        Content = "SUCCESSFULLY LOADED",
+        Duration = 5
+    })
+end
+
+LocalPlayer.CharacterAdded:Connect(function(character)
+    task.wait(1)
+    
+    for featureName, isEnabled in pairs(FeatureStates) do
+        if isEnabled then
+            getgenv().Notify({
+                Title = featureName,
+                Content = "REACTIVATED",
+                Duration = 2
+            })
+        end
+    end
+end)
