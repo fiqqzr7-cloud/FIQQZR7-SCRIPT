@@ -428,7 +428,7 @@ task.spawn(function()
     local username = LocalPlayer.Name
     print("[SIEXTHER] Checking username: " .. username)
     
-    local validUsername = string.lower(username) == "akuramaa_xd"
+    local validUsername = string.lower(username) == "hxzriqqq"
     
     if validUsername then
         print("[SIEXTHER] Valid username detected! Loading script...")
