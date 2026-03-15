@@ -1,872 +1,876 @@
--- FIQQZR7 COPYMAP - VERSION KECIK (360x550)
--- Dengan progress bar & instance save
+-- Instances: 50 | Scripts: 2 | Modules: 0 | Tags: 0
+local G2L = {}
 
-local player = game.Players.LocalPlayer
-local HttpService = game:GetService("HttpService")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+-- CoreGui.FIQQZR7_CopyMap
+G2L['1'] = Instance.new('ScreenGui', game:GetService('CoreGui'))
+G2L['1']['Name'] = [[FIQQZR7_CopyMap]]
+G2L['1']['ZIndexBehavior'] = Enum.ZIndexBehavior.Sibling
+G2L['1']['ResetOnSpawn'] = false
 
-repeat task.wait() until player and player:FindFirstChild("PlayerGui")
+-- CoreGui.FIQQZR7_CopyMap.SaveClient
+G2L['2'] = Instance.new('LocalScript', G2L['1'])
+G2L['2']['Name'] = [[SaveClient]]
 
-local isMobile = not UserInputService.KeyboardEnabled
-local hasClipboard = pcall(function() return setclipboard end)
+-- CoreGui.FIQQZR7_CopyMap.SaveClient.Template
+G2L['3'] = Instance.new('Frame', G2L['2'])
+G2L['3']['BorderSizePixel'] = 0
+G2L['3']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['3']['Size'] = UDim2.new(0, 110, 0, 23)
+G2L['3']['Position'] = UDim2.new(0.38043, 0, 0.03125, 0)
+G2L['3']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['3']['Name'] = [[Template]]
+G2L['3']['BackgroundTransparency'] = 0.8
 
-local gui = Instance.new("ScreenGui")
-gui.Name = "FIQQZR7COPYMAP"
-gui.Parent = player.PlayerGui
-gui.ResetOnSpawn = false
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.DisplayOrder = 999
+-- CoreGui.FIQQZR7_CopyMap.SaveClient.Template.Saved
+G2L['4'] = Instance.new('BoolValue', G2L['3'])
+G2L['4']['Name'] = [[Saved]]
 
--- Main Container (kecik)
-local container = Instance.new("Frame")
-container.Size = UDim2.new(0, 380, 0, 570)  -- Dulu 420x650
-container.Position = UDim2.new(0.5, -190, 0.5, -285)
-container.BackgroundTransparency = 1
-container.Active = true
-container.Draggable = true
-container.Parent = gui
+-- CoreGui.FIQQZR7_CopyMap.SaveClient.Template.UICorner
+G2L['5'] = Instance.new('UICorner', G2L['3'])
+G2L['5']['CornerRadius'] = UDim.new(0, 50)
 
--- Main Frame (kecik)
-local main = Instance.new("Frame")
-main.Size = UDim2.new(1, 0, 1, 0)
-main.Position = UDim2.new(0, 0, 0, 0)
-main.BackgroundColor3 = Color3.fromRGB(8, 12, 25)
-main.BackgroundTransparency = 0.1
-main.BorderColor3 = Color3.fromRGB(0, 150, 255)
-main.BorderSizePixel = 2
-main.ClipsDescendants = true
-main.Parent = container
-
-local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0, 20)  -- Dulu 24
-mainCorner.Parent = main
-
--- Glass Blur Effect
-local blur = Instance.new("Frame")
-blur.Size = UDim2.new(1, 0, 1, 0)
-blur.BackgroundColor3 = Color3.fromRGB(10, 15, 30)
-blur.BackgroundTransparency = 0.7
-blur.BorderSizePixel = 0
-blur.ZIndex = 0
-blur.Parent = main
-
-local blurCorner = Instance.new("UICorner")
-blurCorner.CornerRadius = UDim.new(0, 20)
-blurCorner.Parent = blur
-
--- Neon Glow Border (adjusted)
-local glow = Instance.new("Frame")
-glow.Size = UDim2.new(1, 8, 1, 8)  -- Dulu 10
-glow.Position = UDim2.new(0, -4, 0, -4)
-glow.BackgroundColor3 = Color3.fromRGB(0, 100, 255)
-glow.BackgroundTransparency = 0.8
-glow.BorderSizePixel = 0
-glow.ZIndex = 0
-glow.Parent = container
-
-local glowCorner = Instance.new("UICorner")
-glowCorner.CornerRadius = UDim.new(0, 22)
-glowCorner.Parent = glow
-
--- Inner Glow (adjusted)
-local innerGlow = Instance.new("Frame")
-innerGlow.Size = UDim2.new(1, 4, 1, 4)  -- Dulu 6
-innerGlow.Position = UDim2.new(0, -2, 0, -2)
-innerGlow.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-innerGlow.BackgroundTransparency = 0.7
-innerGlow.BorderSizePixel = 0
-innerGlow.ZIndex = 0
-innerGlow.Parent = container
-
-local innerGlowCorner = Instance.new("UICorner")
-innerGlowCorner.CornerRadius = UDim.new(0, 21)
-innerGlowCorner.Parent = innerGlow
-
--- Gradient Background
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 25, 45)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(10, 20, 40)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(5, 15, 35))
+-- CoreGui.FIQQZR7_CopyMap.SaveClient.Template.UIGradient
+G2L['6'] = Instance.new('UIGradient', G2L['3'])
+G2L['6']['Rotation'] = 21
+G2L['6']['Color'] = ColorSequence.new({
+	ColorSequenceKeypoint.new(0.000, Color3.fromRGB(0, 0, 0)),
+	ColorSequenceKeypoint.new(1.000, Color3.fromRGB(49, 49, 49)),
 })
-gradient.Rotation = 45
-gradient.Parent = main
 
--- ==============================================
--- TITLE BAR (sama)
--- ==============================================
-local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, -20, 0, 60)  -- Dulu 70, sekarang 60
-titleBar.Position = UDim2.new(0, 10, 0, 10)
-titleBar.BackgroundColor3 = Color3.fromRGB(15, 20, 35)
-titleBar.BackgroundTransparency = 0.2
-titleBar.BorderColor3 = Color3.fromRGB(0, 150, 255)
-titleBar.BorderSizePixel = 1
-titleBar.Parent = main
+-- CoreGui.FIQQZR7_CopyMap.SaveClient.Template.UIStroke
+G2L['7'] = Instance.new('UIStroke', G2L['3'])
+G2L['7']['Thickness'] = 0.5
+G2L['7']['Color'] = Color3.fromRGB(91, 91, 91)
 
-local titleBarCorner = Instance.new("UICorner")
-titleBarCorner.CornerRadius = UDim.new(0, 14)
-titleBarCorner.Parent = titleBar
+-- CoreGui.FIQQZR7_CopyMap.SaveClient.Template.info
+G2L['8'] = Instance.new('TextLabel', G2L['3'])
+G2L['8']['TextWrapped'] = true
+G2L['8']['BorderSizePixel'] = 0
+G2L['8']['TextXAlignment'] = Enum.TextXAlignment.Left
+G2L['8']['TextScaled'] = true
+G2L['8']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['8']['TextSize'] = 14
+G2L['8']['FontFace'] = Font.new(
+	[[rbxasset://fonts/families/GothamSSm.json]],
+	Enum.FontWeight.SemiBold,
+	Enum.FontStyle.Normal
+)
+G2L['8']['TextColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['8']['BackgroundTransparency'] = 1
+G2L['8']['Size'] = UDim2.new(0, 92, 0, 23)
+G2L['8']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['8']['Text'] = [[FIQQZR7 CopyMap]]
+G2L['8']['Name'] = [[info]]
+G2L['8']['Position'] = UDim2.new(0.16114, -25, 0.482, -11)
 
--- Icon
-local icon = Instance.new("TextLabel")
-icon.Size = UDim2.new(0, 40, 1, 0)  -- Dulu 45
-icon.Position = UDim2.new(0, 8, 0, 0)  -- Dulu 10
-icon.BackgroundTransparency = 1
-icon.Text = "🗺️"
-icon.TextColor3 = Color3.fromRGB(0, 200, 255)
-icon.TextSize = 24  -- Dulu 28
-icon.Font = Enum.Font.GothamBold
-icon.Parent = titleBar
+-- CoreGui.FIQQZR7_CopyMap.SaveClient.Template.Toggle
+G2L['9'] = Instance.new('Frame', G2L['3'])
+G2L['9']['ZIndex'] = 10
+G2L['9']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['9']['Size'] = UDim2.new(0, 40, 0, 20)
+G2L['9']['Position'] = UDim2.new(1, -50, 0.5, -10)
+G2L['9']['BorderColor3'] = Color3.fromRGB(28, 43, 54)
+G2L['9']['Name'] = [[Toggle]]
+G2L['9']['BackgroundTransparency'] = 1
 
--- Title
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(0.5, 0, 0.5, 0)
-title.Position = UDim2.new(0, 55, 0, 8)  -- Adjusted
-title.BackgroundTransparency = 1
-title.Text = "FIQQZR7 COPYMAP"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 14  -- Dulu 16
-title.Font = Enum.Font.GothamBold
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = titleBar
+-- CoreGui.FIQQZR7_CopyMap.SaveClient.Template.Toggle.UICorner
+G2L['a'] = Instance.new('UICorner', G2L['9'])
+G2L['a']['CornerRadius'] = UDim.new(1, 8)
 
--- Subtitle
-local subtitle = Instance.new("TextLabel")
-subtitle.Size = UDim2.new(0.5, 0, 0.3, 0)
-subtitle.Position = UDim2.new(0, 55, 0, 32)  -- Adjusted
-subtitle.BackgroundTransparency = 1
-subtitle.Text = "DEVELOPER FIQQZR7"
-subtitle.TextColor3 = Color3.fromRGB(150, 200, 255)
-subtitle.TextSize = 10  -- Dulu 11
-subtitle.Font = Enum.Font.Gotham
-subtitle.TextXAlignment = Enum.TextXAlignment.Left
-subtitle.Parent = titleBar
+-- CoreGui.FIQQZR7_CopyMap.SaveClient.Template.Toggle.Click
+G2L['b'] = Instance.new('TextButton', G2L['9'])
+G2L['b']['TextTransparency'] = 1
+G2L['b']['TextSize'] = 14
+G2L['b']['TextColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['b']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['b']['FontFace'] = Font.new(
+	[[rbxasset://fonts/families/SourceSansPro.json]],
+	Enum.FontWeight.Regular,
+	Enum.FontStyle.Normal
+)
+G2L['b']['ZIndex'] = 12
+G2L['b']['Size'] = UDim2.new(1, 0, 1.05263, 0)
+G2L['b']['BackgroundTransparency'] = 1
+G2L['b']['Name'] = [[Click]]
+G2L['b']['BorderColor3'] = Color3.fromRGB(28, 43, 54)
+G2L['b']['Text'] = [[]]
+G2L['b']['Position'] = UDim2.new(0, 0, -0.05263, 0)
 
--- Status indicator
-local statusIndicator = Instance.new("Frame")
-statusIndicator.Size = UDim2.new(0, 8, 0, 8)
-statusIndicator.Position = UDim2.new(1, -25, 0.5, -4)
-statusIndicator.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-statusIndicator.BorderSizePixel = 0
-statusIndicator.Parent = titleBar
+-- CoreGui.FIQQZR7_CopyMap.SaveClient.Template.Toggle.Ball
+G2L['c'] = Instance.new('Frame', G2L['9'])
+G2L['c']['ZIndex'] = 11
+G2L['c']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['c']['Size'] = UDim2.new(0, 17, 0, 18)
+G2L['c']['Position'] = UDim2.new(-0.05, 2, 0.00912, 1)
+G2L['c']['BorderColor3'] = Color3.fromRGB(28, 43, 54)
+G2L['c']['Name'] = [[Ball]]
 
-local statusCorner = Instance.new("UICorner")
-statusCorner.CornerRadius = UDim.new(0, 4)
-statusCorner.Parent = statusIndicator
+-- CoreGui.FIQQZR7_CopyMap.SaveClient.Template.Toggle.Ball.UICorner
+G2L['d'] = Instance.new('UICorner', G2L['c'])
+G2L['d']['CornerRadius'] = UDim.new(1, 8)
 
--- ON/OFF Toggle
-local toggleBtn = Instance.new("TextButton")
-toggleBtn.Size = UDim2.new(0, 45, 0, 25)  -- Dulu 50x28
-toggleBtn.Position = UDim2.new(1, -110, 0.5, -12)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-toggleBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
-toggleBtn.BorderSizePixel = 1
-toggleBtn.Text = "ON"
-toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-toggleBtn.Font = Enum.Font.GothamBold
-toggleBtn.TextSize = 11  -- Dulu 12
-toggleBtn.Parent = titleBar
+-- CoreGui.FIQQZR7_CopyMap.SaveClient.Template.Toggle.UIStroke
+G2L['e'] = Instance.new('UIStroke', G2L['9'])
+G2L['e']['Thickness'] = 0.85
+G2L['e']['Color'] = Color3.fromRGB(255, 255, 255)
 
-local toggleCorner = Instance.new("UICorner")
-toggleCorner.CornerRadius = UDim.new(0, 7)
-toggleCorner.Parent = toggleBtn
+-- CoreGui.FIQQZR7_CopyMap.SaveClient.Template.Toggle.Toggled
+G2L['f'] = Instance.new('BoolValue', G2L['9'])
+G2L['f']['Name'] = [[Toggled]]
 
--- Close Button
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 25, 0, 25)  -- Dulu 30
-closeBtn.Position = UDim2.new(1, -35, 0.5, -12)
-closeBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-closeBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.BorderSizePixel = 1
-closeBtn.Text = "✕"
-closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 14  -- Dulu 16
-closeBtn.Parent = titleBar
+-- CoreGui.FIQQZR7_CopyMap.Instance
+G2L['10'] = Instance.new('Frame', G2L['1'])
+G2L['10']['BorderSizePixel'] = 0
+G2L['10']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['10']['Size'] = UDim2.new(0, 620, 0, 341)
+G2L['10']['Position'] = UDim2.new(0.5, -380, 0.5, -170)
+G2L['10']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['10']['Name'] = [[Instance]]
+G2L['10']['BackgroundTransparency'] = 1
 
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 7)
-closeCorner.Parent = closeBtn
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main
+G2L['11'] = Instance.new('Frame', G2L['10'])
+G2L['11']['BorderSizePixel'] = 0
+G2L['11']['BackgroundColor3'] = Color3.fromRGB(52, 52, 52)
+G2L['11']['ClipsDescendants'] = true
+G2L['11']['Size'] = UDim2.new(0, 269, 0, 319)
+G2L['11']['Position'] = UDim2.new(0.5, -134, 0.5, -159)
+G2L['11']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['11']['Name'] = [[Main]]
+G2L['11']['BackgroundTransparency'] = 1
 
--- ==============================================
--- CONTENT CONTAINER
--- ==============================================
-local contentContainer = Instance.new("Frame")
-contentContainer.Size = UDim2.new(1, -20, 1, -80)  -- Adjusted
-contentContainer.Position = UDim2.new(0, 10, 0, 75)  -- Adjusted
-contentContainer.BackgroundTransparency = 1
-contentContainer.Parent = main
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Dragify
+G2L['12'] = Instance.new('LocalScript', G2L['11'])
+G2L['12']['Name'] = [[Dragify]]
 
--- ==============================================
--- SCROLLING FRAME
--- ==============================================
-local scrollingFrame = Instance.new("ScrollingFrame")
-scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
-scrollingFrame.BackgroundTransparency = 1
-scrollingFrame.BorderSizePixel = 0
-scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 680)  -- Dulu 800
-scrollingFrame.ScrollBarThickness = 4  -- Dulu 5
-scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 150, 255)
-scrollingFrame.Parent = contentContainer
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner
+G2L['13'] = Instance.new('Frame', G2L['11'])
+G2L['13']['BorderSizePixel'] = 0
+G2L['13']['BackgroundColor3'] = Color3.fromRGB(52, 52, 52)
+G2L['13']['ClipsDescendants'] = true
+G2L['13']['Size'] = UDim2.new(0, 248, 0, 311)
+G2L['13']['Position'] = UDim2.new(0.5, -124, 0.5, -155)
+G2L['13']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['13']['Name'] = [[Main_Inner]]
+G2L['13']['BackgroundTransparency'] = 0.05
 
--- ==============================================
--- CARD HELPER FUNCTION (adjusted sizes)
--- ==============================================
-local function createCard(title, icon, y, height)
-    local card = Instance.new("Frame")
-    card.Size = UDim2.new(0.95, 0, 0, height or 90)  -- Dulu 100
-    card.Position = UDim2.new(0.025, 0, 0, y)
-    card.BackgroundColor3 = Color3.fromRGB(12, 18, 30)
-    card.BorderColor3 = Color3.fromRGB(0, 150, 255)
-    card.BorderSizePixel = 1
-    card.Parent = scrollingFrame
-    
-    local cardCorner = Instance.new("UICorner")
-    cardCorner.CornerRadius = UDim.new(0, 14)  -- Dulu 16
-    cardCorner.Parent = card
-    
-    local cardGradient = Instance.new("UIGradient")
-    cardGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(15, 22, 38)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 15, 28))
-    })
-    cardGradient.Rotation = 90
-    cardGradient.Parent = card
-    
-    local cardIcon = Instance.new("TextLabel")
-    cardIcon.Size = UDim2.new(0, 25, 0, 25)  -- Dulu 30
-    cardIcon.Position = UDim2.new(0, 10, 0, 8)  -- Adjusted
-    cardIcon.BackgroundTransparency = 1
-    cardIcon.Text = icon
-    cardIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
-    cardIcon.TextSize = 18  -- Dulu 20
-    cardIcon.Font = Enum.Font.GothamBold
-    cardIcon.Parent = card
-    
-    local cardTitle = Instance.new("TextLabel")
-    cardTitle.Size = UDim2.new(1, -40, 0, 18)  -- Dulu 20
-    cardTitle.Position = UDim2.new(0, 45, 0, 10)  -- Adjusted
-    cardTitle.BackgroundTransparency = 1
-    cardTitle.Text = title
-    cardTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    cardTitle.TextSize = 12  -- Dulu 14
-    cardTitle.Font = Enum.Font.GothamBold
-    cardTitle.TextXAlignment = Enum.TextXAlignment.Left
-    cardTitle.Parent = card
-    
-    return card
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.UICorner
+G2L['14'] = Instance.new('UICorner', G2L['13'])
+G2L['14']['CornerRadius'] = UDim.new(0, 25)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Background
+G2L['15'] = Instance.new('ImageLabel', G2L['13'])
+G2L['15']['BorderSizePixel'] = 0
+G2L['15']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['15']['ScaleType'] = Enum.ScaleType.Fit
+G2L['15']['ImageTransparency'] = 0.66
+G2L['15']['AnchorPoint'] = Vector2.new(0.5, 0.5)
+G2L['15']['Image'] = [[rbxassetid://13736983594]]
+G2L['15']['Size'] = UDim2.new(0, 602, 0, 304)
+G2L['15']['BorderColor3'] = Color3.fromRGB(28, 43, 54)
+G2L['15']['BackgroundTransparency'] = 1
+G2L['15']['Name'] = [[Background]]
+G2L['15']['Position'] = UDim2.new(0.76727, 0, 0.68895, 0)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Template
+G2L['16'] = Instance.new('Frame', G2L['13'])
+G2L['16']['Visible'] = false
+G2L['16']['BorderSizePixel'] = 0
+G2L['16']['BackgroundColor3'] = Color3.fromRGB(41, 41, 41)
+G2L['16']['Size'] = UDim2.new(0, 120, 0, 10)
+G2L['16']['Position'] = UDim2.new(0.07746, 0, 0.0587, 0)
+G2L['16']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['16']['Name'] = [[Template]]
+G2L['16']['LayoutOrder'] = 1
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Template.UICorner
+G2L['17'] = Instance.new('UICorner', G2L['16'])
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Template.UIStroke
+G2L['18'] = Instance.new('UIStroke', G2L['16'])
+G2L['18']['Color'] = Color3.fromRGB(255, 255, 255)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Template.Icon
+G2L['19'] = Instance.new('ImageLabel', G2L['16'])
+G2L['19']['BorderSizePixel'] = 0
+G2L['19']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['19']['ScaleType'] = Enum.ScaleType.Fit
+G2L['19']['Image'] = [[rbxassetid://128571334219150]]
+G2L['19']['Size'] = UDim2.new(0, 24, 0, 19)
+G2L['19']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['19']['BackgroundTransparency'] = 1
+G2L['19']['Name'] = [[Icon]]
+G2L['19']['Position'] = UDim2.new(0.05793, 0, 0.12, 0)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Template.btn
+G2L['1a'] = Instance.new('TextButton', G2L['16'])
+G2L['1a']['BorderSizePixel'] = 0
+G2L['1a']['TextSize'] = 14
+G2L['1a']['TextColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['1a']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['1a']['FontFace'] = Font.new(
+	[[rbxasset://fonts/families/SourceSansPro.json]],
+	Enum.FontWeight.Regular,
+	Enum.FontStyle.Normal
+)
+G2L['1a']['Size'] = UDim2.new(0, 120, 0, 25)
+G2L['1a']['BackgroundTransparency'] = 1
+G2L['1a']['Name'] = [[btn]]
+G2L['1a']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['1a']['Text'] = [[]]
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Template.name
+G2L['1b'] = Instance.new('TextLabel', G2L['16'])
+G2L['1b']['TextWrapped'] = true
+G2L['1b']['BorderSizePixel'] = 0
+G2L['1b']['TextXAlignment'] = Enum.TextXAlignment.Left
+G2L['1b']['TextScaled'] = true
+G2L['1b']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['1b']['TextSize'] = 14
+G2L['1b']['FontFace'] = Font.new(
+	[[rbxasset://fonts/families/GothamSSm.json]],
+	Enum.FontWeight.Medium,
+	Enum.FontStyle.Normal
+)
+G2L['1b']['TextColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['1b']['BackgroundTransparency'] = 1
+G2L['1b']['Size'] = UDim2.new(0, 81, 0, 11)
+G2L['1b']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['1b']['Text'] = [[FIQQZR7 Option]]
+G2L['1b']['Name'] = [[name]]
+G2L['1b']['Position'] = UDim2.new(0.25793, 0, 0.25611, 0)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Background
+G2L['1c'] = Instance.new('ImageLabel', G2L['13'])
+G2L['1c']['ZIndex'] = -2
+G2L['1c']['BorderSizePixel'] = 0
+G2L['1c']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['1c']['ScaleType'] = Enum.ScaleType.Fit
+G2L['1c']['ImageTransparency'] = 0.66
+G2L['1c']['AnchorPoint'] = Vector2.new(0.5, 0.5)
+G2L['1c']['Image'] = [[rbxassetid://13736983594]]
+G2L['1c']['Size'] = UDim2.new(0, 602, 0, 304)
+G2L['1c']['BorderColor3'] = Color3.fromRGB(28, 43, 54)
+G2L['1c']['BackgroundTransparency'] = 1
+G2L['1c']['Name'] = [[Background]]
+G2L['1c']['Position'] = UDim2.new(0.24065, 0, 0.31918, 0)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.PlayerInfo
+G2L['1d'] = Instance.new('Frame', G2L['13'])
+G2L['1d']['ZIndex'] = 9
+G2L['1d']['BorderSizePixel'] = 0
+G2L['1d']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['1d']['ClipsDescendants'] = true
+G2L['1d']['Size'] = UDim2.new(0.92519, 0, 0.09414, 0)
+G2L['1d']['Position'] = UDim2.new(0.0374, 0, 0.01929, 0)
+G2L['1d']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['1d']['Name'] = [[PlayerInfo]]
+G2L['1d']['BackgroundTransparency'] = 0.4
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.PlayerInfo.UICorner
+G2L['1e'] = Instance.new('UICorner', G2L['1d'])
+G2L['1e']['CornerRadius'] = UDim.new(1, 10)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.PlayerInfo.Icon
+G2L['1f'] = Instance.new('ImageLabel', G2L['1d'])
+G2L['1f']['ZIndex'] = 10
+G2L['1f']['BackgroundColor3'] = Color3.fromRGB(60, 60, 60)
+G2L['1f']['ScaleType'] = Enum.ScaleType.Fit
+G2L['1f']['Size'] = UDim2.new(0.11493, 0, 0.91111, 0)
+G2L['1f']['Name'] = [[Icon]]
+G2L['1f']['Position'] = UDim2.new(0.85456, 0, 0.03416, 0)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.PlayerInfo.Icon.UICorner
+G2L['20'] = Instance.new('UICorner', G2L['1f'])
+G2L['20']['CornerRadius'] = UDim.new(1, 17)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.PlayerInfo.Icon.UIGradient
+G2L['21'] = Instance.new('UIGradient', G2L['1f'])
+G2L['21']['Rotation'] = -39
+G2L['21']['Color'] = ColorSequence.new({
+	ColorSequenceKeypoint.new(0.000, Color3.fromRGB(154, 136, 255)),
+	ColorSequenceKeypoint.new(1.000, Color3.fromRGB(255, 255, 255)),
+})
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.PlayerInfo.UIGradient
+G2L['22'] = Instance.new('UIGradient', G2L['1d'])
+G2L['22']['Color'] = ColorSequence.new({
+	ColorSequenceKeypoint.new(0.000, Color3.fromRGB(0, 0, 0)),
+	ColorSequenceKeypoint.new(1.000, Color3.fromRGB(60, 60, 60)),
+})
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.PlayerInfo.UIStroke
+G2L['23'] = Instance.new('UIStroke', G2L['1d'])
+G2L['23']['Thickness'] = 0.5
+G2L['23']['Color'] = Color3.fromRGB(81, 81, 81)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.PlayerInfo.btn
+G2L['24'] = Instance.new('TextButton', G2L['1d'])
+G2L['24']['BorderSizePixel'] = 0
+G2L['24']['TextSize'] = 14
+G2L['24']['TextColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['24']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['24']['FontFace'] = Font.new(
+	[[rbxasset://fonts/families/SourceSansPro.json]],
+	Enum.FontWeight.Regular,
+	Enum.FontStyle.Normal
+)
+G2L['24']['Size'] = UDim2.new(0, 20, 0, 23)
+G2L['24']['BackgroundTransparency'] = 1
+G2L['24']['Name'] = [[btn]]
+G2L['24']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['24']['Text'] = [[]]
+G2L['24']['Position'] = UDim2.new(0.48371, 0, 0.08022, 0)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.PlayerInfo.ttl
+G2L['25'] = Instance.new('TextLabel', G2L['1d'])
+G2L['25']['TextWrapped'] = true
+G2L['25']['BorderSizePixel'] = 0
+G2L['25']['TextXAlignment'] = Enum.TextXAlignment.Left
+G2L['25']['TextScaled'] = true
+G2L['25']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['25']['TextSize'] = 14
+G2L['25']['FontFace'] = Font.new(
+	[[rbxasset://fonts/families/GothamSSm.json]],
+	Enum.FontWeight.SemiBold,
+	Enum.FontStyle.Normal
+)
+G2L['25']['TextColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['25']['BackgroundTransparency'] = 1
+G2L['25']['Size'] = UDim2.new(0, 85, 0, 19)
+G2L['25']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['25']['Text'] = [[FIQQZR7 CopyMap]]
+G2L['25']['Name'] = [[ttl]]
+G2L['25']['Position'] = UDim2.new(0.28644, -35, 0.5, -9)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.PlayerInfo.ico
+G2L['26'] = Instance.new('ImageLabel', G2L['1d'])
+G2L['26']['BorderSizePixel'] = 0
+G2L['26']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['26']['ScaleType'] = Enum.ScaleType.Fit
+G2L['26']['AnchorPoint'] = Vector2.new(0.5, 0.5)
+G2L['26']['Image'] = [[rbxassetid://85977955810367]]
+G2L['26']['Size'] = UDim2.new(0, 23, 0, 18)
+G2L['26']['BorderColor3'] = Color3.fromRGB(28, 43, 54)
+G2L['26']['BackgroundTransparency'] = 1
+G2L['26']['Name'] = [[ico]]
+G2L['26']['Position'] = UDim2.new(0.08281, 0, 0.8074, -9)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Options
+G2L['27'] = Instance.new('Frame', G2L['13'])
+G2L['27']['ZIndex'] = 9
+G2L['27']['BorderSizePixel'] = 0
+G2L['27']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['27']['ClipsDescendants'] = true
+G2L['27']['Size'] = UDim2.new(0.89823, 0, 0.75929, 0)
+G2L['27']['Position'] = UDim2.new(0.05089, 0, 0.13965, 0)
+G2L['27']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['27']['Name'] = [[Options]]
+G2L['27']['BackgroundTransparency'] = 0.4
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Options.UICorner
+G2L['28'] = Instance.new('UICorner', G2L['27'])
+G2L['28']['CornerRadius'] = UDim.new(0, 25)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Options.UIGradient
+G2L['29'] = Instance.new('UIGradient', G2L['27'])
+G2L['29']['Color'] = ColorSequence.new({
+	ColorSequenceKeypoint.new(0.000, Color3.fromRGB(0, 0, 0)),
+	ColorSequenceKeypoint.new(1.000, Color3.fromRGB(60, 60, 60)),
+})
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Options.UIStroke
+G2L['2a'] = Instance.new('UIStroke', G2L['27'])
+G2L['2a']['Thickness'] = 0.5
+G2L['2a']['Color'] = Color3.fromRGB(81, 81, 81)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Options.List
+G2L['2b'] = Instance.new('ScrollingFrame', G2L['27'])
+G2L['2b']['Active'] = true
+G2L['2b']['ScrollingDirection'] = Enum.ScrollingDirection.Y
+G2L['2b']['BorderSizePixel'] = 0
+G2L['2b']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['2b']['Name'] = [[List]]
+G2L['2b']['ScrollBarImageTransparency'] = 1
+G2L['2b']['AutomaticCanvasSize'] = Enum.AutomaticSize.Y
+G2L['2b']['Size'] = UDim2.new(0, 214, 0, 221)
+G2L['2b']['ScrollBarImageColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['2b']['Position'] = UDim2.new(0.5, -107, 0.56411, -127)
+G2L['2b']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['2b']['ScrollBarThickness'] = 5
+G2L['2b']['BackgroundTransparency'] = 1
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Options.List.UIGridLayout
+G2L['2c'] = Instance.new('UIGridLayout', G2L['2b'])
+G2L['2c']['HorizontalAlignment'] = Enum.HorizontalAlignment.Center
+G2L['2c']['CellSize'] = UDim2.new(0, 200, 0, 30)
+G2L['2c']['SortOrder'] = Enum.SortOrder.LayoutOrder
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Options.List.UICorner
+G2L['2d'] = Instance.new('UICorner', G2L['2b'])
+G2L['2d']['CornerRadius'] = UDim.new(0, 25)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Options.Notice
+G2L['2e'] = Instance.new('TextLabel', G2L['27'])
+G2L['2e']['TextWrapped'] = true
+G2L['2e']['BorderSizePixel'] = 0
+G2L['2e']['TextXAlignment'] = Enum.TextXAlignment.Left
+G2L['2e']['TextScaled'] = true
+G2L['2e']['BackgroundColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['2e']['TextSize'] = 14
+G2L['2e']['FontFace'] = Font.new(
+	[[rbxasset://fonts/families/GothamSSm.json]],
+	Enum.FontWeight.Medium,
+	Enum.FontStyle.Normal
+)
+G2L['2e']['TextColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['2e']['BackgroundTransparency'] = 1
+G2L['2e']['Size'] = UDim2.new(0, 135, 0, 107)
+G2L['2e']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['2e']['Text'] =
+	[[FIQQZR7 CopyMap - Waiting for options to load...]]
+G2L['2e']['Name'] = [[Notice]]
+G2L['2e']['Position'] = UDim2.new(0.5, -67, 0.5, -53)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.UIStroke
+G2L['2f'] = Instance.new('UIStroke', G2L['13'])
+G2L['2f']['Thickness'] = 0.7
+G2L['2f']['Color'] = Color3.fromRGB(199, 199, 199)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Execute
+G2L['30'] = Instance.new('TextButton', G2L['13'])
+G2L['30']['BorderSizePixel'] = 0
+G2L['30']['TextSize'] = 14
+G2L['30']['TextColor3'] = Color3.fromRGB(255, 255, 255)
+G2L['30']['BackgroundColor3'] = Color3.fromRGB(23, 23, 23)
+G2L['30']['FontFace'] = Font.new(
+	[[rbxasset://fonts/families/GothamSSm.json]],
+	Enum.FontWeight.SemiBold,
+	Enum.FontStyle.Normal
+)
+G2L['30']['Size'] = UDim2.new(0, 158, 0, 19)
+G2L['30']['BackgroundTransparency'] = 0.5
+G2L['30']['Name'] = [[Execute]]
+G2L['30']['BorderColor3'] = Color3.fromRGB(0, 0, 0)
+G2L['30']['Text'] = [[Start CopyMap]]
+G2L['30']['Position'] = UDim2.new(0.5, -79, 0.98071, -19)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Execute.UIStroke
+G2L['31'] = Instance.new('UIStroke', G2L['30'])
+G2L['31']['Thickness'] = 0.5
+G2L['31']['Color'] = Color3.fromRGB(81, 81, 81)
+
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Main_Inner.Execute.UICorner
+G2L['32'] = Instance.new('UICorner', G2L['30'])
+G2L['32']['CornerRadius'] = UDim.new(1, 10)
+
+-- CoreGui.FIQQZR7_CopyMap.SaveClient
+local function C_2()
+	local script = G2L['2']
+
+	-- // FIQQZR7 CopyMap \\ --
+
+	--// Services
+	local Workspace = game:GetService('Workspace')
+	local Replicated = game:GetService('ReplicatedStorage')
+	local RunService = game:GetService('RunService')
+	local Players = game:GetService('Players')
+	local AvatarEditorService = game:GetService('AvatarEditorService')
+	local HttpService = game:GetService('HttpService')
+	local player = Players.LocalPlayer
+
+	--// GUI paths
+	local ui = script.Parent
+		:WaitForChild('Instance')
+		:WaitForChild('Main')
+		:WaitForChild('Main_Inner')
+	local List = ui:WaitForChild('Options'):WaitForChild('List')
+	local Spy = {}
+
+	local Params = {
+		RepoURL = 'https://raw.githubusercontent.com/luau/SynSaveInstance/main/',
+		SSI = 'saveinstance',
+	}
+	local synsaveinstance = (loadstring or load)(
+		game:HttpGet(Params.RepoURL .. Params.SSI .. '.luau', true),
+		Params.SSI
+	)()
+
+	local Options = {}
+
+	local AllOptions = {
+		__DEBUG_MODE = false,
+		ReadMe = true,
+		SafeMode = false,
+		ShutdownWhenDone = false,
+		AntiIdle = true,
+		Anonymous = false,
+		ShowStatus = true,
+		Callback = false,
+		mode = 'optimized',
+		noscripts = false,
+		scriptcache = true,
+		timeout = 10,
+		DecompileJobless = false,
+		SaveBytecode = false,
+		DecompileIgnore = { TextChatService = true },
+		IgnoreList = { CoreGui = true, CorePackages = true },
+		ExtraInstances = {},
+		IgnoreProperties = {},
+		SaveCacheInterval = 0x1600 * 10,
+		FilePath = false,
+		Object = false,
+		IsModel = false,
+		NilInstances = false,
+		NilInstancesFixes = {},
+		IgnoreDefaultProperties = true,
+		IgnoreNotArchivable = true,
+		IgnorePropertiesOfNotScriptsOnScriptsMode = false,
+		IgnoreSpecialProperties = false,
+		IsolateLocalPlayer = false,
+		IsolateStarterPlayer = false,
+		IsolateLocalPlayerCharacter = false,
+		RemovePlayerCharacters = true,
+		SaveNotCreatable = false,
+		NotCreatableFixes = {},
+		IsolatePlayers = false,
+		AlternativeWritefile = true,
+		IgnoreDefaultPlayerScripts = true,
+		IgnoreSharedStrings = true,
+		SharedStringOverwrite = false,
+		TreatUnionsAsParts = false,
+	}
+
+	--// SPRING MODULE (unchanged)
+	local STRICT_TYPES = true
+	local STRICT_API_ACCESS = false
+	local SLEEP_OFFSET_SQ_LIMIT = (1 / 3840) ^ 2
+	local SLEEP_VELOCITY_SQ_LIMIT = 1e-4
+	local EPS = 1e-5
+	local pi, exp, sin, cos, min, sqrt =
+		math.pi, math.exp, math.sin, math.cos, math.min, math.sqrt
+
+	local function magnitudeSq(vec)
+		local out = 0
+		for _, v in ipairs(vec) do
+			out += v ^ 2
+		end
+		return out
+	end
+
+	local function distanceSq(vec0, vec1)
+		local out = 0
+		for i0, v0 in ipairs(vec0) do
+			out += (vec1[i0] - v0) ^ 2
+		end
+		return out
+	end
+
+	local LinearSpring = {}
+	LinearSpring.__index = LinearSpring
+
+	function LinearSpring.new(dampingRatio, frequency, pos, typedat, rawTarget)
+		local linearPos = typedat.toIntermediate(pos)
+		return setmetatable({
+			d = dampingRatio,
+			f = frequency,
+			g = linearPos,
+			p = linearPos,
+			v = table.create(#linearPos, 0),
+			typedat = typedat,
+			rawTarget = rawTarget,
+		}, LinearSpring)
+	end
+
+	function LinearSpring:setGoal(goal)
+		self.rawTarget = goal
+		self.g = self.typedat.toIntermediate(goal)
+	end
+
+	function LinearSpring:canSleep()
+		return magnitudeSq(self.v) <= SLEEP_VELOCITY_SQ_LIMIT
+			and distanceSq(self.p, self.g) <= SLEEP_OFFSET_SQ_LIMIT
+	end
+
+	function LinearSpring:step(dt)
+		local d = self.d
+		local f = self.f * 2 * pi
+		local g, p, v = self.g, self.p, self.v
+
+		if d == 1 then
+			local q = exp(-f * dt)
+			local w = dt * q
+			local c0 = q + w * f
+			local c2 = q - w * f
+			local c3 = w * f * f
+			for i = 1, #p do
+				local o = p[i] - g[i]
+				p[i] = o * c0 + v[i] * w + g[i]
+				v[i] = v[i] * c2 - o * c3
+			end
+		elseif d < 1 then
+			local q = exp(-d * f * dt)
+			local c = sqrt(1 - d * d)
+			local i = cos(dt * f * c)
+			local j = sin(dt * f * c)
+			local z
+			if c > EPS then
+				z = j / c
+			else
+				z = dt * f
+			end
+			local y
+			if f * c > EPS then
+				y = j / (f * c)
+			else
+				y = dt
+			end
+			for k = 1, #p do
+				local o = p[k] - g[k]
+				p[k] = (o * (1 + z * d) + v[k] * y) * q + g[k]
+				v[k] = (v[k] * (1 - z * d) - o * (z * f)) * q
+			end
+		else
+			local c = sqrt(d * d - 1)
+			local r1 = -f * (d - c)
+			local r2 = -f * (d + c)
+			local ec1 = exp(r1 * dt)
+			local ec2 = exp(r2 * dt)
+			for i = 1, #p do
+				local o = p[i] - g[i]
+				local co2 = (v[i] - o * r1) / (2 * f * c)
+				local co1 = ec1 * (o - co2)
+				p[i] = co1 + co2 * ec2 + g[i]
+				v[i] = co1 * r1 + co2 * ec2 * r2
+			end
+		end
+
+		return self.typedat.fromIntermediate(self.p)
+	end
+
+	local typeMetadata = {
+		number = {
+			springType = LinearSpring.new,
+			toIntermediate = function(v)
+				return { v }
+			end,
+			fromIntermediate = function(v)
+				return v[1]
+			end,
+		},
+		UDim2 = {
+			springType = LinearSpring.new,
+			toIntermediate = function(v)
+				return { v.X.Scale, v.X.Offset, v.Y.Scale, v.Y.Offset }
+			end,
+			fromIntermediate = function(v)
+				return UDim2.new(v[1], v[2], v[3], v[4])
+			end,
+		},
+		Vector2 = {
+			springType = LinearSpring.new,
+			toIntermediate = function(v)
+				return { v.X, v.Y }
+			end,
+			fromIntermediate = function(v)
+				return Vector2.new(v[1], v[2])
+			end,
+		},
+		Vector3 = {
+			springType = LinearSpring.new,
+			toIntermediate = function(v)
+				return { v.X, v.Y, v.Z }
+			end,
+			fromIntermediate = function(v)
+				return Vector3.new(v[1], v[2], v[3])
+			end,
+		},
+		Color3 = {
+			springType = LinearSpring.new,
+			toIntermediate = function(v)
+				return { v.R, v.G, v.B }
+			end,
+			fromIntermediate = function(v)
+				return Color3.new(v[1], v[2], v[3])
+			end,
+		},
+	}
+
+	local springStates = {}
+	RunService.Stepped:Connect(function(_, dt)
+		for inst, state in pairs(springStates) do
+			for prop, spring in pairs(state) do
+				if spring:canSleep() then
+					state[prop] = nil
+					inst[prop] = spring.rawTarget
+				else
+					inst[prop] = spring:step(dt)
+				end
+			end
+			if not next(state) then
+				springStates[inst] = nil
+			end
+		end
+	end)
+
+	local spr = {}
+	function spr.target(inst, d, f, props)
+		local state = springStates[inst] or {}
+		springStates[inst] = state
+		for prop, target in pairs(props) do
+			local current = inst[prop]
+			local md = typeMetadata[typeof(target)]
+			if not md then
+				error('unsupported type: ' .. typeof(target), 2)
+			end
+			local spring = state[prop]
+				or md.springType(d, f, current, md, target)
+			state[prop] = spring
+			spring.d = d
+			spring.f = f
+			spring:setGoal(target)
+		end
+	end
+
+	ui:WaitForChild('PlayerInfo'):WaitForChild('Icon').Image =
+		Players:GetUserThumbnailAsync(
+			Players.LocalPlayer.UserId,
+			Enum.ThumbnailType.HeadShot,
+			Enum.ThumbnailSize.Size420x420
+		)
+	ui:WaitForChild('Options'):WaitForChild('Notice'):Destroy()
+
+	for optionName, optionValue in pairs(AllOptions) do
+		if typeof(optionValue) == 'boolean' then
+			local clone = script.Template:Clone()
+			clone.Parent = List
+			clone.Name = tostring(optionName)
+
+			local label = clone:FindFirstChild('Label')
+				or clone:FindFirstChildWhichIsA('TextLabel')
+			if label then
+				label.Text = tostring(optionName)
+			end
+
+			local toggle = clone:WaitForChild('Toggle')
+
+			Options[optionName] = optionValue
+
+			local function setToggleState(state: boolean)
+				print('✅ ' .. optionName .. ' set value: ' .. tostring(state))
+				Options[optionName] = state
+				if state then
+					spr.target(
+						toggle:WaitForChild('Ball'),
+						1,
+						2,
+						{ Position = UDim2.new(1, -18, 0.5, -9) }
+					)
+					spr.target(
+						toggle,
+						1,
+						2,
+						{
+							BackgroundColor3 = Color3.new(
+								0.0745098,
+								1,
+								0.0588235
+							),
+						}
+					)
+					toggle.BackgroundTransparency = 0
+				else
+					spr.target(
+						toggle.Ball,
+						1,
+						2,
+						{ Position = UDim2.new(-0.05, 2, 0.009, 1) }
+					)
+					toggle.BackgroundTransparency = 1
+				end
+			end
+
+			toggle.Click.MouseButton1Click:Connect(function()
+				local newState = not Options[optionName]
+				setToggleState(newState)
+			end)
+
+			setToggleState(optionValue)
+		end
+	end
+
+	ui:WaitForChild('Execute').MouseButton1Click:Connect(function()
+		pcall(function()
+			synsaveinstance(Options)
+			ui.Execute.Text = 'FIQQZR7 CopyMap Started!'
+			print('✅ FIQQZR7 CopyMap started with options:')
+		end)
+	end)
+
+	return Spy
 end
+task.spawn(C_2)
+-- CoreGui.FIQQZR7_CopyMap.Instance.Main.Dragify
+local function C_12()
+	local script = G2L['12']
 
--- ==============================================
--- INFO CARD (adjusted)
--- ==============================================
-local infoCard = createCard("DEVICE INFO", "📱", 5, 70)  -- Dulu 80
+	local UIS = game:GetService('UserInputService')
+	function dragify(Frame)
+		dragToggle = nil
+		dragSpeed = 0.25
+		dragInput = nil
+		dragStart = nil
+		dragPos = nil
+		function updateInput(input)
+			Delta = input.Position - dragStart
+			Position = UDim2.new(
+				startPos.X.Scale,
+				startPos.X.Offset + Delta.X,
+				startPos.Y.Scale,
+				startPos.Y.Offset + Delta.Y
+			)
+			game:GetService('TweenService')
+				:Create(
+					Frame,
+					TweenInfo.new(0.20, Enum.EasingStyle.Back),
+					{ Position = Position }
+				)
+				:Play()
+		end
+		Frame.InputBegan:Connect(function(input)
+			if
+				(
+					input.UserInputType == Enum.UserInputType.MouseButton1
+					or input.UserInputType == Enum.UserInputType.Touch
+				) and UIS:GetFocusedTextBox() == nil
+			then
+				dragToggle = true
+				dragStart = input.Position
+				startPos = Frame.Position
+				input.Changed:Connect(function()
+					if input.UserInputState == Enum.UserInputState.End then
+						dragToggle = false
+					end
+				end)
+			end
+		end)
+		Frame.InputChanged:Connect(function(input)
+			if
+				input.UserInputType == Enum.UserInputType.MouseMovement
+				or input.UserInputType == Enum.UserInputType.Touch
+			then
+				dragInput = input
+			end
+		end)
+		game:GetService('UserInputService').InputChanged:Connect(function(input)
+			if input == dragInput and dragToggle then
+				updateInput(input)
+			end
+		end)
+	end
 
-local deviceIcon = Instance.new("TextLabel")
-deviceIcon.Size = UDim2.new(0, 18, 0, 18)  -- Dulu 20
-deviceIcon.Position = UDim2.new(0, 50, 0, 35)  -- Adjusted
-deviceIcon.BackgroundTransparency = 1
-deviceIcon.Text = isMobile and "📱" or "💻"
-deviceIcon.TextColor3 = Color3.fromRGB(0, 200, 255)
-deviceIcon.TextSize = 12  -- Dulu 14
-deviceIcon.Font = Enum.Font.GothamBold
-deviceIcon.Parent = infoCard
-
-local deviceText = Instance.new("TextLabel")
-deviceText.Size = UDim2.new(0.5, 0, 0, 18)
-deviceText.Position = UDim2.new(0, 75, 0, 35)
-deviceText.BackgroundTransparency = 1
-deviceText.Text = isMobile and "MOBILE MODE" or "PC MODE"
-deviceText.TextColor3 = Color3.fromRGB(255, 255, 255)
-deviceText.TextSize = 10  -- Dulu 12
-deviceText.Font = Enum.Font.Gotham
-deviceText.TextXAlignment = Enum.TextXAlignment.Left
-deviceText.Parent = infoCard
-
-local clipboardIcon = Instance.new("TextLabel")
-clipboardIcon.Size = UDim2.new(0, 18, 0, 18)
-clipboardIcon.Position = UDim2.new(0.5, 15, 0, 35)  -- Adjusted
-clipboardIcon.BackgroundTransparency = 1
-clipboardIcon.Text = hasClipboard and "📋" or "💾"
-clipboardIcon.TextColor3 = hasClipboard and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 255, 0)
-clipboardIcon.TextSize = 12
-clipboardIcon.Font = Enum.Font.GothamBold
-clipboardIcon.Parent = infoCard
-
-local clipboardText = Instance.new("TextLabel")
-clipboardText.Size = UDim2.new(0.4, 0, 0, 18)
-clipboardText.Position = UDim2.new(0.5, 38, 0, 35)  -- Adjusted
-clipboardText.BackgroundTransparency = 1
-clipboardText.Text = hasClipboard and "Clipboard" or "Workspace"
-clipboardText.TextColor3 = Color3.fromRGB(200, 200, 200)
-clipboardText.TextSize = 10
-clipboardText.Font = Enum.Font.Gotham
-clipboardText.TextXAlignment = Enum.TextXAlignment.Left
-clipboardText.Parent = infoCard
-
--- ==============================================
--- OPTIONS CARD (adjusted)
--- ==============================================
-local optionsCard = createCard("SAVE OPTIONS", "⚙️", 80, 180)  -- Dulu 95,200
-
-local options = {
-    {name = "Terrain", icon = "🌍", default = true},
-    {name = "BaseParts", icon = "📦", default = true},
-    {name = "Models", icon = "🏗️", default = true},
-    {name = "Scripts", icon = "📜", default = true},
-    {name = "GUI", icon = "🖥️", default = true},
-    {name = "Tools", icon = "🔧", default = true},
-}
-
-local checkboxStates = {}
-
-local function createCheckbox(y, option)
-    local row = Instance.new("Frame")
-    row.Size = UDim2.new(1, -30, 0, 22)  -- Dulu 25
-    row.Position = UDim2.new(0, 15, 0, y)
-    row.BackgroundTransparency = 1
-    row.Parent = optionsCard
-    
-    local check = Instance.new("TextButton")
-    check.Size = UDim2.new(0, 16, 0, 16)  -- Dulu 18
-    check.Position = UDim2.new(0, 0, 0.5, -8)
-    check.BackgroundColor3 = option.default and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(50, 50, 50)
-    check.BorderColor3 = Color3.fromRGB(0, 150, 255)
-    check.BorderSizePixel = 1
-    check.Text = option.default and "✓" or ""
-    check.TextColor3 = Color3.fromRGB(255, 255, 255)
-    check.TextSize = 10  -- Dulu 12
-    check.Font = Enum.Font.GothamBold
-    check.Parent = row
-    
-    local checkCorner = Instance.new("UICorner")
-    checkCorner.CornerRadius = UDim.new(0, 3)
-    checkCorner.Parent = check
-    
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -20, 1, 0)
-    label.Position = UDim2.new(0, 20, 0, 0)
-    label.BackgroundTransparency = 1
-    label.Text = option.icon .. "  " .. option.name
-    label.TextColor3 = Color3.fromRGB(220, 220, 240)
-    label.TextSize = 11  -- Dulu 12
-    label.Font = Enum.Font.Gotham
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = row
-    
-    local state = option.default
-    check.MouseButton1Click:Connect(function()
-        state = not state
-        check.BackgroundColor3 = state and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(50, 50, 50)
-        check.Text = state and "✓" or ""
-    end)
-    
-    table.insert(checkboxStates, function() return state end)
+	dragify(script.Parent)
 end
+task.spawn(C_12)
 
-for i, opt in ipairs(options) do
-    createCheckbox(30 + (i-1) * 24, opt)  -- Adjusted spacing
-end
-
--- ==============================================
--- FILENAME CARD
--- ==============================================
-local nameCard = createCard("FILENAME", "📁", 265, 70)  -- Dulu 305,80
-
-local nameBg = Instance.new("Frame")
-nameBg.Size = UDim2.new(0.9, 0, 0, 30)  -- Dulu 35
-nameBg.Position = UDim2.new(0.05, 0, 0, 30)  -- Adjusted
-nameBg.BackgroundColor3 = Color3.fromRGB(20, 25, 38)
-nameBg.BorderColor3 = Color3.fromRGB(0, 150, 255)
-nameBg.BorderSizePixel = 1
-nameBg.Parent = nameCard
-
-local nameBgCorner = Instance.new("UICorner")
-nameBgCorner.CornerRadius = UDim.new(0, 7)
-nameBgCorner.Parent = nameBg
-
-local nameInput = Instance.new("TextBox")
-nameInput.Size = UDim2.new(1, -10, 1, 0)
-nameInput.Position = UDim2.new(0, 5, 0, 0)
-nameInput.BackgroundTransparency = 1
-nameInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-nameInput.PlaceholderColor3 = Color3.fromRGB(100, 120, 150)
-nameInput.PlaceholderText = "FIQQZR7MAP"
-nameInput.Text = "FIQQZR7MAP"
-nameInput.Font = Enum.Font.Gotham
-nameInput.TextSize = 12  -- Dulu 14
-nameInput.ClearTextOnFocus = false
-nameInput.Parent = nameBg
-
--- ==============================================
--- LOCATION CARD
--- ==============================================
-local locationCard = createCard("SAVE LOCATION", "📂", 340, 60)  -- Dulu 395,70
-
-local locationText = Instance.new("TextLabel")
-locationText.Size = UDim2.new(1, -30, 0, 18)
-locationText.Position = UDim2.new(0, 35, 0, 30)  -- Adjusted
-locationText.BackgroundTransparency = 1
-locationText.Text = "workspace.FIQQZR7_Saves"
-locationText.TextColor3 = Color3.fromRGB(0, 255, 200)
-locationText.TextSize = 10  -- Dulu 12
-locationText.Font = Enum.Font.Code
-locationText.TextXAlignment = Enum.TextXAlignment.Left
-locationText.Parent = locationCard
-
--- ==============================================
--- STATS CARD
--- ==============================================
-local statsCard = createCard("MAP STATS", "📊", 405, 80)  -- Dulu 475,90
-
-local partCount = Instance.new("TextLabel")
-partCount.Size = UDim2.new(0.5, 0, 0, 16)
-partCount.Position = UDim2.new(0, 35, 0, 30)  -- Adjusted
-partCount.BackgroundTransparency = 1
-partCount.Text = "📦 Parts: 0"
-partCount.TextColor3 = Color3.fromRGB(200, 200, 200)
-partCount.TextSize = 10  -- Dulu 11
-partCount.Font = Enum.Font.Gotham
-partCount.TextXAlignment = Enum.TextXAlignment.Left
-partCount.Parent = statsCard
-
-local scriptCount = Instance.new("TextLabel")
-scriptCount.Size = UDim2.new(0.5, 0, 0, 16)
-scriptCount.Position = UDim2.new(0.5, 0, 0, 30)
-scriptCount.BackgroundTransparency = 1
-scriptCount.Text = "📜 Scripts: 0"
-scriptCount.TextColor3 = Color3.fromRGB(200, 200, 200)
-scriptCount.TextSize = 10
-scriptCount.Font = Enum.Font.Gotham
-scriptCount.TextXAlignment = Enum.TextXAlignment.Left
-scriptCount.Parent = statsCard
-
-local terrainInfo = Instance.new("TextLabel")
-terrainInfo.Size = UDim2.new(0.5, 0, 0, 16)
-terrainInfo.Position = UDim2.new(0, 35, 0, 48)  -- Adjusted
-terrainInfo.BackgroundTransparency = 1
-terrainInfo.Text = "🌍 Terrain: Yes"
-terrainInfo.TextColor3 = Color3.fromRGB(200, 200, 200)
-terrainInfo.TextSize = 10
-terrainInfo.Font = Enum.Font.Gotham
-terrainInfo.TextXAlignment = Enum.TextXAlignment.Left
-terrainInfo.Parent = statsCard
-
-local guiCount = Instance.new("TextLabel")
-guiCount.Size = UDim2.new(0.5, 0, 0, 16)
-guiCount.Position = UDim2.new(0.5, 0, 0, 48)
-guiCount.BackgroundTransparency = 1
-guiCount.Text = "🖥️ GUI: 0"
-guiCount.TextColor3 = Color3.fromRGB(200, 200, 200)
-guiCount.TextSize = 10
-guiCount.Font = Enum.Font.Gotham
-guiCount.TextXAlignment = Enum.TextXAlignment.Left
-guiCount.Parent = statsCard
-
--- ==============================================
--- PROGRESS CARD
--- ==============================================
-local progressCard = createCard("SAVE PROGRESS", "⏳", 490, 60)  -- Dulu 575,70
-
-local progressText = Instance.new("TextLabel")
-progressText.Size = UDim2.new(0.7, 0, 0, 16)
-progressText.Position = UDim2.new(0, 35, 0, 18)  -- Adjusted
-progressText.BackgroundTransparency = 1
-progressText.Text = "Ready to save"
-progressText.TextColor3 = Color3.fromRGB(200, 200, 200)
-progressText.TextSize = 10
-progressText.Font = Enum.Font.Gotham
-progressText.TextXAlignment = Enum.TextXAlignment.Left
-progressText.Parent = progressCard
-
-local progressBarBg = Instance.new("Frame")
-progressBarBg.Size = UDim2.new(0.75, 0, 0, 8)  -- Dulu 0.8,10
-progressBarBg.Position = UDim2.new(0.1, 0, 0, 38)
-progressBarBg.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-progressBarBg.BorderColor3 = Color3.fromRGB(0, 150, 255)
-progressBarBg.BorderSizePixel = 1
-progressBarBg.Parent = progressCard
-
-local progressBarBgCorner = Instance.new("UICorner")
-progressBarBgCorner.CornerRadius = UDim.new(0, 4)
-progressBarBgCorner.Parent = progressBarBg
-
-local progressBar = Instance.new("Frame")
-progressBar.Size = UDim2.new(0, 0, 1, 0)
-progressBar.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-progressBar.BorderSizePixel = 0
-progressBar.Parent = progressBarBg
-
-local progressBarCorner = Instance.new("UICorner")
-progressBarCorner.CornerRadius = UDim.new(0, 4)
-progressBarCorner.Parent = progressBar
-
-local progressPercent = Instance.new("TextLabel")
-progressPercent.Size = UDim2.new(0.1, 0, 0, 16)
-progressPercent.Position = UDim2.new(0.85, 0, 0, 37)
-progressPercent.BackgroundTransparency = 1
-progressPercent.Text = "0%"
-progressPercent.TextColor3 = Color3.fromRGB(0, 200, 255)
-progressPercent.TextSize = 9
-progressPercent.Font = Enum.Font.GothamBold
-progressPercent.TextXAlignment = Enum.TextXAlignment.Right
-progressPercent.Parent = progressCard
-
--- ==============================================
--- STATUS CARD
--- ==============================================
-local statusCard = createCard("STATUS", "🟢", 555, 60)  -- Dulu 655,70
-
-local statusText = Instance.new("TextLabel")
-statusText.Size = UDim2.new(0.7, 0, 0, 18)
-statusText.Position = UDim2.new(0, 35, 0, 18)
-statusText.BackgroundTransparency = 1
-statusText.Text = "READY"
-statusText.TextColor3 = Color3.fromRGB(0, 255, 0)
-statusText.TextSize = 12  -- Dulu 14
-statusText.Font = Enum.Font.GothamBold
-statusText.TextXAlignment = Enum.TextXAlignment.Left
-statusText.Parent = statusCard
-
-local lastSave = Instance.new("TextLabel")
-lastSave.Size = UDim2.new(0.7, 0, 0, 14)
-lastSave.Position = UDim2.new(0, 35, 0, 38)
-lastSave.BackgroundTransparency = 1
-lastSave.Text = "Last save: -"
-lastSave.TextColor3 = Color3.fromRGB(150, 150, 150)
-lastSave.TextSize = 9  -- Dulu 10
-lastSave.Font = Enum.Font.Gotham
-lastSave.TextXAlignment = Enum.TextXAlignment.Left
-lastSave.Parent = statusCard
-
--- ==============================================
--- SAVE BUTTON
--- ==============================================
-local saveBtn = Instance.new("TextButton")
-saveBtn.Size = UDim2.new(0.9, 0, 0, 45)  -- Dulu 50
-saveBtn.Position = UDim2.new(0.05, 0, 0, 620)  -- Adjusted
-saveBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-saveBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
-saveBtn.BorderSizePixel = 2
-saveBtn.Text = "💾 SAVE MAP"
-saveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-saveBtn.Font = Enum.Font.GothamBold
-saveBtn.TextSize = 16  -- Dulu 18
-saveBtn.Parent = scrollingFrame
-
-local saveCorner = Instance.new("UICorner")
-saveCorner.CornerRadius = UDim.new(0, 10)  -- Dulu 12
-saveCorner.Parent = saveBtn
-
--- Update canvas size
-scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 680)
-
--- ==============================================
--- ON/OFF TOGGLE FUNCTION
--- ==============================================
-local uiVisible = true
-toggleBtn.MouseButton1Click:Connect(function()
-    uiVisible = not uiVisible
-    
-    if uiVisible then
-        TweenService:Create(container, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
-            Size = UDim2.new(0, 380, 0, 570)
-        }):Play()
-        task.wait(0.1)
-        contentContainer.Visible = true
-        toggleBtn.Text = "ON"
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
-        statusIndicator.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-    else
-        contentContainer.Visible = false
-        TweenService:Create(container, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
-            Size = UDim2.new(0, 380, 0, 70)
-        }):Play()
-        toggleBtn.Text = "OFF"
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-        statusIndicator.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    end
-end)
-
-closeBtn.MouseButton1Click:Connect(function()
-    gui:Destroy()
-end)
-
--- Insert key toggle
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.Insert then
-        container.Visible = not container.Visible
-    end
-end)
-
--- ==============================================
--- MAP SAVING FUNCTIONS (sama)
--- ==============================================
-
-local function countWorkspace()
-    local parts = 0
-    local scripts = 0
-    local guis = 0
-    
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") and not obj:IsA("Terrain") then
-            parts = parts + 1
-        elseif obj:IsA("LocalScript") or obj:IsA("Script") then
-            scripts = scripts + 1
-        elseif obj:IsA("ScreenGui") or obj:IsA("SurfaceGui") then
-            guis = guis + 1
-        end
-    end
-    
-    partCount.Text = "📦 Parts: " .. parts
-    scriptCount.Text = "📜 Scripts: " .. scripts
-    guiCount.Text = "🖥️ GUI: " .. guis
-end
-
--- Update progress function
-local function updateProgress(percent, message)
-    progressBar.Size = UDim2.new(percent/100, 0, 1, 0)
-    progressPercent.Text = math.floor(percent) .. "%"
-    
-    if message then
-        progressText.Text = message
-    end
-    
-    statusText.Text = "SAVING..."
-    statusText.TextColor3 = Color3.fromRGB(255, 255, 0)
-    
-    task.wait()
-end
-
--- Clone instance dengan semua properties
-local function cloneInstance(instance, parent)
-    local clone = instance:Clone()
-    clone.Parent = parent
-    return clone
-end
-
--- Save map dengan progress
-local function saveMap()
-    updateProgress(0, "Preparing to save...")
-    
-    -- Get selected options
-    local saveTerrain = checkboxStates[1]()
-    local saveParts = checkboxStates[2]()
-    local saveModels = checkboxStates[3]()
-    local saveScripts = checkboxStates[4]()
-    local saveGUI = checkboxStates[5]()
-    local saveTools = checkboxStates[6]()
-    
-    -- Create save folder in workspace
-    local saveFolder = workspace:FindFirstChild("FIQQZR7_Saves")
-    if not saveFolder then
-        saveFolder = Instance.new("Folder")
-        saveFolder.Name = "FIQQZR7_Saves"
-        saveFolder.Parent = workspace
-    end
-    
-    -- Create timestamp folder
-    local timestamp = os.date("%Y-%m-%d_%H-%M-%S")
-    local mapName = nameInput.Text ~= "" and nameInput.Text or "FIQQZR7_Map"
-    local saveName = mapName .. "_" .. timestamp
-    
-    local mapFolder = Instance.new("Folder")
-    mapFolder.Name = saveName
-    mapFolder.Parent = saveFolder
-    
-    updateProgress(5, "Created save folder")
-    
-    -- Count total items for progress
-    local totalItems = 0
-    local itemsToSave = {}
-    
-    -- Terrain (count as 1 item)
-    if saveTerrain then
-        totalItems = totalItems + 1
-    end
-    
-    -- Collect all items
-    if saveParts then
-        for _, obj in ipairs(workspace:GetDescendants()) do
-            if obj:IsA("BasePart") and not obj:IsA("Terrain") then
-                table.insert(itemsToSave, obj)
-                totalItems = totalItems + 1
-            end
-        end
-    end
-    
-    if saveModels then
-        for _, obj in ipairs(workspace:GetChildren()) do
-            if obj:IsA("Model") then
-                table.insert(itemsToSave, obj)
-                totalItems = totalItems + 1
-            end
-        end
-    end
-    
-    if saveScripts then
-        for _, obj in ipairs(workspace:GetDescendants()) do
-            if obj:IsA("LocalScript") or obj:IsA("Script") then
-                table.insert(itemsToSave, obj)
-                totalItems = totalItems + 1
-            end
-        end
-    end
-    
-    if saveGUI then
-        for _, obj in ipairs(player.PlayerGui:GetChildren()) do
-            if obj:IsA("ScreenGui") then
-                table.insert(itemsToSave, obj)
-                totalItems = totalItems + 1
-            end
-        end
-    end
-    
-    if saveTools then
-        for _, obj in ipairs(workspace:GetDescendants()) do
-            if obj:IsA("Tool") then
-                table.insert(itemsToSave, obj)
-                totalItems = totalItems + 1
-            end
-        end
-    end
-    
-    updateProgress(10, "Collected " .. totalItems .. " items")
-    
-    -- Save Terrain
-    if saveTerrain then
-        updateProgress(15, "Saving Terrain...")
-        local terrainFolder = Instance.new("Folder")
-        terrainFolder.Name = "Terrain"
-        terrainFolder.Parent = mapFolder
-        
-        local terrain = workspace.Terrain
-        if terrain then
-            local terrainClone = terrain:Clone()
-            terrainClone.Parent = terrainFolder
-        end
-        
-        terrainInfo.Text = "🌍 Terrain: Yes"
-    else
-        terrainInfo.Text = "🌍 Terrain: No"
-    end
-    
-    -- Save all items with progress
-    local savedCount = 0
-    local startProgress = 20
-    local progressPerItem = totalItems > 0 and 60 / totalItems or 0
-    
-    for _, obj in ipairs(itemsToSave) do
-        savedCount = savedCount + 1
-        local percent = startProgress + (savedCount * progressPerItem)
-        
-        local objType = obj.ClassName
-        if obj:IsA("BasePart") then
-            objType = "Part"
-        elseif obj:IsA("Model") then
-            objType = "Model"
-        elseif obj:IsA("LocalScript") or obj:IsA("Script") then
-            objType = "Script"
-        elseif obj:IsA("ScreenGui") then
-            objType = "GUI"
-        elseif obj:IsA("Tool") then
-            objType = "Tool"
-        end
-        
-        updateProgress(percent, "Saving " .. objType .. ": " .. obj.Name)
-        
-        local clone = obj:Clone()
-        
-        if obj:IsA("ScreenGui") then
-            local guiFolder = mapFolder:FindFirstChild("GUIs")
-            if not guiFolder then
-                guiFolder = Instance.new("Folder")
-                guiFolder.Name = "GUIs"
-                guiFolder.Parent = mapFolder
-            end
-            clone.Parent = guiFolder
-        else
-            clone.Parent = mapFolder
-        end
-        
-        if savedCount % 10 == 0 then
-            task.wait()
-        end
-    end
-    
-    updateProgress(85, "Finalizing...")
-    
-    -- Create info file
-    local infoFile = Instance.new("StringValue")
-    infoFile.Name = "SaveInfo"
-    infoFile.Value = string.format([[Map Save: %s
-Date: %s
-Items Saved: %d
-Terrain: %s
-Parts: %s
-Models: %s
-Scripts: %s
-GUI: %s
-Tools: %s
-Executor: %s]], 
-        mapName,
-        os.date("%Y-%m-%d %H:%M:%S"),
-        savedCount,
-        saveTerrain and "Yes" or "No",
-        saveParts and "Yes" or "No",
-        saveModels and "Yes" or "No",
-        saveScripts and "Yes" or "No",
-        saveGUI and "Yes" or "No",
-        saveTools and "Yes" or "No",
-        isMobile and "Mobile" or "PC"
-    )
-    infoFile.Parent = mapFolder
-    
-    updateProgress(95, "Saving metadata...")
-    
-    if hasClipboard then
-        pcall(function()
-            setclipboard("FIQQZR7SAVEMAP" .. saveName)
-        end)
-    end
-    
-    updateProgress(100, "Save complete!")
-    
-    statusText.Text = "SAVED!"
-    statusText.TextColor3 = Color3.fromRGB(0, 255, 0)
-    lastSave.Text = "Last save: " .. os.date("%H:%M:%S")
-    
-    print("✅ MAP SAVED: " .. saveName)
-    print("📁 Location: workspace.FIQQZR7_Saves." .. saveName)
-    print("📦 Items saved: " .. savedCount)
-    
-    task.wait(2)
-    
-    progressBar.Size = UDim2.new(0, 0, 1, 0)
-    progressPercent.Text = "0%"
-    progressText.Text = "Ready to save"
-    statusText.Text = "READY"
-end
-
--- Update counts periodically
-task.spawn(function()
-    while true do
-        countWorkspace()
-        task.wait(2)
-    end
-end)
-
-saveBtn.MouseButton1Click:Connect(saveMap)
-
--- Initial count
-task.wait(0.5)
-countWorkspace()
-
-print("✅ FIQQZR7 MAP SAVER - VERSION KECIK (360x550)")
-print("🗺️ Saves Terrain, Parts, Models, Scripts, GUI, Tools")
-print("📁 Output: workspace.FIQQZR7_Saves")
-print("⏳ Progress bar menunjukkan status saving")
-print("📏 UI dikecilkan untuk portable use")
+return G2L['1'], require
