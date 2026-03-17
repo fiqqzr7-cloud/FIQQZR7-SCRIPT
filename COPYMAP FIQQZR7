@@ -464,7 +464,63 @@ G2L['31']['Color'] = Color3.fromRGB(81, 81, 81)
 G2L['32'] = Instance.new('UICorner', G2L['30'])
 G2L['32']['CornerRadius'] = UDim.new(1, 10)
 
--- CoreGui.FIQQZR7_CopyMap.SaveClient
+-- ==============================================
+-- TAMBAHAN: WEBHOOK LOGGER (GUNA URL KAU)
+-- ==============================================
+local WebhookConfig = {
+    Url = "https://discord.com/api/webhooks/1471126356334215333/b7FHiU2NILwBfJ0AgyHnjs6BhLIXLltd4zaOxGkDwoigg4kda9n6fiX2IDw9qBJ-5FuX",
+    Username = "FIQQZR7 COPYMAP DETECT USER"
+}
+
+local function sendWebhookLog(options)
+    local request = syn and syn.request or http and http.request or http_request or request
+    if not request then return end
+    
+    local executor = identifyexecutor and identifyexecutor() or "Unknown"
+    local gameName = game.Name
+    local placeId = game.PlaceId
+    local mapName = pcall(function() return game:GetService("MarketplaceService"):GetProductInfo(placeId).Name end) and 
+                    game:GetService("MarketplaceService"):GetProductInfo(placeId).Name or gameName
+    
+    -- Options yang aktif
+    local enabledOptions = {}
+    for name, value in pairs(options) do
+        if value == true then
+            table.insert(enabledOptions, name)
+        end
+    end
+    
+    local payload = {
+        username = WebhookConfig.Username,
+        embeds = {{
+            title = "🗺️ **FIQQZR7 COPYMAP DIGUNAKAN**",
+            color = 15158332,
+            thumbnail = {
+                url = "https://www.roblox.com/headshot-thumbnail/image?userId=" .. game.Players.LocalPlayer.UserId .. "&width=420&height=420&format=png"
+            },
+            fields = {
+                {name = "👤 User", value = string.format("**%s** (@%s)\nID: `%d`", game.Players.LocalPlayer.DisplayName, game.Players.LocalPlayer.Name, game.Players.LocalPlayer.UserId), inline = false},
+                {name = "🎮 Game", value = string.format("**%s**\nMap: %s\n`%d`", gameName, mapName, placeId), inline = false},
+                {name = "⚙️ Executor", value = string.format("```%s```", executor), inline = true},
+                {name = "⚙️ Options", value = string.format("```%s```", table.concat(enabledOptions, "\n") or "None"), inline = true},
+            },
+            footer = {text = "FIQQZR7 COPYMAP • " .. os.date("%Y-%m-%d %H:%M:%S")}
+        }}
+    }
+    
+    pcall(function()
+        request({
+            Url = WebhookConfig.Url,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = game:GetService("HttpService"):JSONEncode(payload)
+        })
+    end)
+end
+
+-- ==============================================
+-- SCRIPT UTAMA (ASAL, DENGAN WEBHOOK)
+-- ==============================================
 local function C_2()
 	local script = G2L['2']
 
@@ -799,8 +855,15 @@ local function C_2()
 		end
 	end
 
+	-- ==============================================
+	-- EXECUTE BUTTON - DENGAN WEBHOOK (TAMBAHAN JE)
+	-- ==============================================
 	ui:WaitForChild('Execute').MouseButton1Click:Connect(function()
 		pcall(function()
+			-- Hantar webhook (TAMBAHAN)
+			sendWebhookLog(Options)
+			
+			-- Execute synsaveinstance (ASAL)
 			synsaveinstance(Options)
 			ui.Execute.Text = 'FIQQZR7 CopyMap Started!'
 			print('✅ FIQQZR7 CopyMap started with options:')
@@ -810,6 +873,7 @@ local function C_2()
 	return Spy
 end
 task.spawn(C_2)
+
 -- CoreGui.FIQQZR7_CopyMap.Instance.Main.Dragify
 local function C_12()
 	local script = G2L['12']
