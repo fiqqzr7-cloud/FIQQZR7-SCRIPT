@@ -1,0 +1,762 @@
+-- ============================================================
+-- FIQQZR7 SKY - HITAM TOTAL EDITION
+-- ============================================================
+-- [[ UI Hitam • Glow Hitam • Spin • Glitch • Jacket ]]
+-- ============================================================
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+
+-- Tunggu character
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local hrp = character:WaitForChild("HumanoidRootPart")
+
+-- ==============================================
+-- VARIABLES
+-- ==============================================
+local jacketAnimTrack = nil
+local jacketActive = false
+local spinActive = false
+local glitchActive = false
+local spinConnection = nil
+local glitchConnection = nil
+local spinSpeed = 10
+local glitchIntensity = 1.0
+local uiMinimized = false
+
+-- ==============================================
+-- CREATE UI (HITAM TOTAL + GLOW HITAM)
+-- ==============================================
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "FIQQZR7_Sky"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.DisplayOrder = 999
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+-- Main Container (HITAM PEKAT)
+local container = Instance.new("Frame")
+container.Size = UDim2.new(0, 320, 0, 380)
+container.Position = UDim2.new(0.5, -160, 0.5, -190)
+container.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- HITAM PEKAT
+container.BackgroundTransparency = 0.1
+container.Active = true
+container.Draggable = true
+container.ClipsDescendants = true
+container.Parent = screenGui
+
+-- Container Corner
+local containerCorner = Instance.new("UICorner")
+containerCorner.CornerRadius = UDim.new(0, 16)
+containerCorner.Parent = container
+
+-- ==============================================
+-- 4 GLOW EFFECTS (HITAM)
+-- ==============================================
+
+-- GLOW 1: Outer Glow (tepi luar) - HITAM
+local glow1 = Instance.new("ImageLabel")
+glow1.Size = UDim2.new(1, 24, 1, 24)
+glow1.Position = UDim2.new(0, -12, 0, -12)
+glow1.BackgroundTransparency = 1
+glow1.Image = "rbxassetid://1316045217"
+glow1.ImageColor3 = Color3.fromRGB(30, 30, 30)  -- Hitam glow
+glow1.ImageTransparency = 0.6
+glow1.ScaleType = Enum.ScaleType.Slice
+glow1.SliceCenter = Rect.new(10, 10, 118, 118)
+glow1.Parent = container
+glow1.ZIndex = -1
+
+-- GLOW 2: Inner Border (tepi dalam) - HITAM
+local glow2 = Instance.new("Frame")
+glow2.Size = UDim2.new(1, 4, 1, 4)
+glow2.Position = UDim2.new(0, -2, 0, -2)
+glow2.BackgroundColor3 = Color3.fromRGB(40, 40, 40)  -- Hitam lebih terang sikit
+glow2.BackgroundTransparency = 0.7
+glow2.BorderSizePixel = 0
+glow2.Parent = container
+
+local glow2Corner = Instance.new("UICorner")
+glow2Corner.CornerRadius = UDim.new(0, 17)
+glow2Corner.Parent = glow2
+
+-- GLOW 3: Top-Left Corner - HITAM
+local glow3 = Instance.new("Frame")
+glow3.Size = UDim2.new(0.25, 0, 0.25, 0)
+glow3.Position = UDim2.new(0, -8, 0, -8)
+glow3.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- Hitam sederhana
+glow3.BackgroundTransparency = 0.75
+glow3.BorderSizePixel = 0
+glow3.Parent = container
+
+local glow3Corner = Instance.new("UICorner")
+glow3Corner.CornerRadius = UDim.new(0, 10)
+glow3Corner.Parent = glow3
+
+-- GLOW 4: Bottom-Right Corner - HITAM
+local glow4 = Instance.new("Frame")
+glow4.Size = UDim2.new(0.25, 0, 0.25, 0)
+glow4.Position = UDim2.new(0.75, 8, 0.75, 8)
+glow4.BackgroundColor3 = Color3.fromRGB(50, 50, 50)  -- Hitam sederhana
+glow4.BackgroundTransparency = 0.75
+glow4.BorderSizePixel = 0
+glow4.Parent = container
+
+local glow4Corner = Instance.new("UICorner")
+glow4Corner.CornerRadius = UDim.new(0, 10)
+glow4Corner.Parent = glow4
+
+-- ==============================================
+-- TITLE BAR (HITAM)
+-- ==============================================
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, -20, 0, 38)
+titleBar.Position = UDim2.new(0, 10, 0, 8)
+titleBar.BackgroundColor3 = Color3.fromRGB(5, 5, 5)  -- Hitam sedikit terang
+titleBar.BackgroundTransparency = 0.2
+titleBar.BorderSizePixel = 0
+titleBar.Parent = container
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 10)
+titleCorner.Parent = titleBar
+
+local icon = Instance.new("TextLabel")
+icon.Size = UDim2.new(0, 28, 1, 0)
+icon.Position = UDim2.new(0, 8, 0, 0)
+icon.BackgroundTransparency = 1
+icon.Text = "🌀"
+icon.TextColor3 = Color3.fromRGB(150, 150, 150)  -- Kelabu (takde merah)
+icon.TextSize = 18
+icon.Font = Enum.Font.GothamBold
+icon.Parent = titleBar
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(0.5, 0, 1, 0)
+title.Position = UDim2.new(0, 40, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "FIQQZR7 LASER"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
+title.TextSize = 14
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
+
+-- Minimize Button
+local minBtn = Instance.new("TextButton")
+minBtn.Size = UDim2.new(0, 24, 0, 24)
+minBtn.Position = UDim2.new(1, -54, 0.5, -12)
+minBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+minBtn.BorderColor3 = Color3.fromRGB(80, 80, 80)  -- Border kelabu gelap
+minBtn.BorderSizePixel = 1
+minBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minBtn.Text = "−"
+minBtn.Font = Enum.Font.GothamBold
+minBtn.TextSize = 16
+minBtn.Parent = titleBar
+
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 6)
+minCorner.Parent = minBtn
+
+-- Close Button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 24, 0, 24)
+closeBtn.Position = UDim2.new(1, -26, 0.5, -12)
+closeBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)  -- Hitam
+closeBtn.BorderColor3 = Color3.fromRGB(80, 80, 80)
+closeBtn.BorderSizePixel = 1
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Text = "✕"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 12
+closeBtn.Parent = titleBar
+
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 6)
+closeCorner.Parent = closeBtn
+
+closeBtn.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- ==============================================
+-- CONTENT (SCROLLABLE)
+-- ==============================================
+local content = Instance.new("Frame")
+content.Size = UDim2.new(1, -20, 1, -58)
+content.Position = UDim2.new(0, 10, 0, 50)
+content.BackgroundTransparency = 1
+content.Parent = container
+
+local scrollFrame = Instance.new("ScrollingFrame")
+scrollFrame.Size = UDim2.new(1, 0, 1, 0)
+scrollFrame.BackgroundTransparency = 1
+scrollFrame.ScrollBarThickness = 4
+scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)  -- Kelabu gelap
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, 400)
+scrollFrame.Parent = content
+
+local scrollLayout = Instance.new("UIListLayout")
+scrollLayout.Padding = UDim.new(0, 8)
+scrollLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+scrollLayout.SortOrder = Enum.SortOrder.LayoutOrder
+scrollLayout.Parent = scrollFrame
+
+scrollLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, scrollLayout.AbsoluteContentSize.Y + 16)
+end)
+
+-- ==============================================
+-- BIG JACKET CARD
+-- ==============================================
+local jacketCard = Instance.new("Frame")
+jacketCard.Size = UDim2.new(0.95, 0, 0, 65)
+jacketCard.BackgroundColor3 = Color3.fromRGB(8, 8, 8)  -- Hitam
+jacketCard.BackgroundTransparency = 0.2
+jacketCard.Parent = scrollFrame
+
+local jacketCorner = Instance.new("UICorner")
+jacketCorner.CornerRadius = UDim.new(0, 10)
+jacketCorner.Parent = jacketCard
+
+local jacketIcon = Instance.new("TextLabel")
+jacketIcon.Size = UDim2.new(0, 35, 1, 0)
+jacketIcon.Position = UDim2.new(0, 8, 0, 0)
+jacketIcon.BackgroundTransparency = 1
+jacketIcon.Text = "🧥"
+jacketIcon.TextColor3 = Color3.fromRGB(150, 150, 150)  -- Kelabu
+jacketIcon.TextSize = 22
+jacketIcon.Font = Enum.Font.GothamBold
+jacketIcon.Parent = jacketCard
+
+local jacketTitle = Instance.new("TextLabel")
+jacketTitle.Size = UDim2.new(0.5, 0, 0.5, 0)
+jacketTitle.Position = UDim2.new(0, 48, 0, 8)
+jacketTitle.BackgroundTransparency = 1
+jacketTitle.Text = "Big Jacket"
+jacketTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+jacketTitle.Font = Enum.Font.GothamBold
+jacketTitle.TextSize = 14
+jacketTitle.TextXAlignment = Enum.TextXAlignment.Left
+jacketTitle.Parent = jacketCard
+
+local jacketStatus = Instance.new("TextLabel")
+jacketStatus.Size = UDim2.new(0.5, 0, 0.3, 0)
+jacketStatus.Position = UDim2.new(0, 48, 0, 30)
+jacketStatus.BackgroundTransparency = 1
+jacketStatus.Text = "OFF"
+jacketStatus.TextColor3 = Color3.fromRGB(150, 150, 150)
+jacketStatus.Font = Enum.Font.Gotham
+jacketStatus.TextSize = 11
+jacketStatus.TextXAlignment = Enum.TextXAlignment.Left
+jacketStatus.Parent = jacketCard
+
+local jacketBtn = Instance.new("TextButton")
+jacketBtn.Size = UDim2.new(0, 50, 0, 26)
+jacketBtn.Position = UDim2.new(1, -60, 0.5, -13)
+jacketBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+jacketBtn.Text = "OFF"
+jacketBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+jacketBtn.Font = Enum.Font.GothamBold
+jacketBtn.TextSize = 11
+jacketBtn.Parent = jacketCard
+
+local jacketBtnCorner = Instance.new("UICorner")
+jacketBtnCorner.CornerRadius = UDim.new(0, 8)
+jacketBtnCorner.Parent = jacketBtn
+
+-- ==============================================
+-- SPIN CARD
+-- ==============================================
+local spinCard = Instance.new("Frame")
+spinCard.Size = UDim2.new(0.95, 0, 0, 80)
+spinCard.BackgroundColor3 = Color3.fromRGB(8, 8, 8)  -- Hitam
+spinCard.BackgroundTransparency = 0.2
+spinCard.Parent = scrollFrame
+
+local spinCorner = Instance.new("UICorner")
+spinCorner.CornerRadius = UDim.new(0, 10)
+spinCorner.Parent = spinCard
+
+local spinIcon = Instance.new("TextLabel")
+spinIcon.Size = UDim2.new(0, 35, 1, 0)
+spinIcon.Position = UDim2.new(0, 8, 0, 0)
+spinIcon.BackgroundTransparency = 1
+spinIcon.Text = "🌀"
+spinIcon.TextColor3 = Color3.fromRGB(150, 150, 150)  -- Kelabu
+spinIcon.TextSize = 22
+spinIcon.Font = Enum.Font.GothamBold
+spinIcon.Parent = spinCard
+
+local spinTitle = Instance.new("TextLabel")
+spinTitle.Size = UDim2.new(0.5, 0, 0.5, 0)
+spinTitle.Position = UDim2.new(0, 48, 0, 8)
+spinTitle.BackgroundTransparency = 1
+spinTitle.Text = "Spin Mode"
+spinTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+spinTitle.Font = Enum.Font.GothamBold
+spinTitle.TextSize = 14
+spinTitle.TextXAlignment = Enum.TextXAlignment.Left
+spinTitle.Parent = spinCard
+
+local spinStatus = Instance.new("TextLabel")
+spinStatus.Size = UDim2.new(0.5, 0, 0.3, 0)
+spinStatus.Position = UDim2.new(0, 48, 0, 30)
+spinStatus.BackgroundTransparency = 1
+spinStatus.Text = "OFF"
+spinStatus.TextColor3 = Color3.fromRGB(150, 150, 150)
+spinStatus.Font = Enum.Font.Gotham
+spinStatus.TextSize = 11
+spinStatus.TextXAlignment = Enum.TextXAlignment.Left
+spinStatus.Parent = spinCard
+
+local spinBtn = Instance.new("TextButton")
+spinBtn.Size = UDim2.new(0, 50, 0, 26)
+spinBtn.Position = UDim2.new(1, -60, 0.5, -13)
+spinBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+spinBtn.Text = "OFF"
+spinBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+spinBtn.Font = Enum.Font.GothamBold
+spinBtn.TextSize = 11
+spinBtn.Parent = spinCard
+
+local spinBtnCorner = Instance.new("UICorner")
+spinBtnCorner.CornerRadius = UDim.new(0, 8)
+spinBtnCorner.Parent = spinBtn
+
+local spinSpeedLabel = Instance.new("TextLabel")
+spinSpeedLabel.Size = UDim2.new(0.5, 0, 0, 20)
+spinSpeedLabel.Position = UDim2.new(0, 48, 0, 48)
+spinSpeedLabel.BackgroundTransparency = 1
+spinSpeedLabel.Text = "Speed: 10"
+spinSpeedLabel.TextColor3 = Color3.fromRGB(200, 200, 200)  -- Putih kelabu
+spinSpeedLabel.Font = Enum.Font.GothamBold
+spinSpeedLabel.TextSize = 12
+spinSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
+spinSpeedLabel.Parent = spinCard
+
+local spinDown = Instance.new("TextButton")
+spinDown.Size = UDim2.new(0, 26, 0, 22)
+spinDown.Position = UDim2.new(0.7, -10, 0, 48)
+spinDown.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+spinDown.Text = "-"
+spinDown.TextColor3 = Color3.fromRGB(255, 255, 255)
+spinDown.Font = Enum.Font.GothamBold
+spinDown.TextSize = 16
+spinDown.Parent = spinCard
+
+local spinDownCorner = Instance.new("UICorner")
+spinDownCorner.CornerRadius = UDim.new(0, 5)
+spinDownCorner.Parent = spinDown
+
+local spinUp = Instance.new("TextButton")
+spinUp.Size = UDim2.new(0, 26, 0, 22)
+spinUp.Position = UDim2.new(0.85, -10, 0, 48)
+spinUp.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+spinUp.Text = "+"
+spinUp.TextColor3 = Color3.fromRGB(255, 255, 255)
+spinUp.Font = Enum.Font.GothamBold
+spinUp.TextSize = 16
+spinUp.Parent = spinCard
+
+local spinUpCorner = Instance.new("UICorner")
+spinUpCorner.CornerRadius = UDim.new(0, 5)
+spinUpCorner.Parent = spinUp
+
+-- ==============================================
+-- GLITCH CARD
+-- ==============================================
+local glitchCard = Instance.new("Frame")
+glitchCard.Size = UDim2.new(0.95, 0, 0, 80)
+glitchCard.BackgroundColor3 = Color3.fromRGB(8, 8, 8)  -- Hitam
+glitchCard.BackgroundTransparency = 0.2
+glitchCard.Parent = scrollFrame
+
+local glitchCorner = Instance.new("UICorner")
+glitchCorner.CornerRadius = UDim.new(0, 10)
+glitchCorner.Parent = glitchCard
+
+local glitchIcon = Instance.new("TextLabel")
+glitchIcon.Size = UDim2.new(0, 35, 1, 0)
+glitchIcon.Position = UDim2.new(0, 8, 0, 0)
+glitchIcon.BackgroundTransparency = 1
+glitchIcon.Text = "⚡"
+glitchIcon.TextColor3 = Color3.fromRGB(150, 150, 150)  -- Kelabu
+glitchIcon.TextSize = 22
+glitchIcon.Font = Enum.Font.GothamBold
+glitchIcon.Parent = glitchCard
+
+local glitchTitle = Instance.new("TextLabel")
+glitchTitle.Size = UDim2.new(0.5, 0, 0.5, 0)
+glitchTitle.Position = UDim2.new(0, 48, 0, 8)
+glitchTitle.BackgroundTransparency = 1
+glitchTitle.Text = "Glitch Mode"
+glitchTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+glitchTitle.Font = Enum.Font.GothamBold
+glitchTitle.TextSize = 14
+glitchTitle.TextXAlignment = Enum.TextXAlignment.Left
+glitchTitle.Parent = glitchCard
+
+local glitchStatus = Instance.new("TextLabel")
+glitchStatus.Size = UDim2.new(0.5, 0, 0.3, 0)
+glitchStatus.Position = UDim2.new(0, 48, 0, 30)
+glitchStatus.BackgroundTransparency = 1
+glitchStatus.Text = "OFF"
+glitchStatus.TextColor3 = Color3.fromRGB(150, 150, 150)
+glitchStatus.Font = Enum.Font.Gotham
+glitchStatus.TextSize = 11
+glitchStatus.TextXAlignment = Enum.TextXAlignment.Left
+glitchStatus.Parent = glitchCard
+
+local glitchBtn = Instance.new("TextButton")
+glitchBtn.Size = UDim2.new(0, 50, 0, 26)
+glitchBtn.Position = UDim2.new(1, -60, 0.5, -13)
+glitchBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+glitchBtn.Text = "OFF"
+glitchBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+glitchBtn.Font = Enum.Font.GothamBold
+glitchBtn.TextSize = 11
+glitchBtn.Parent = glitchCard
+
+local glitchBtnCorner = Instance.new("UICorner")
+glitchBtnCorner.CornerRadius = UDim.new(0, 8)
+glitchBtnCorner.Parent = glitchBtn
+
+local glitchIntensityLabel = Instance.new("TextLabel")
+glitchIntensityLabel.Size = UDim2.new(0.5, 0, 0, 20)
+glitchIntensityLabel.Position = UDim2.new(0, 48, 0, 48)
+glitchIntensityLabel.BackgroundTransparency = 1
+glitchIntensityLabel.Text = "Intensity: 1.0"
+glitchIntensityLabel.TextColor3 = Color3.fromRGB(200, 200, 200)  -- Putih kelabu
+glitchIntensityLabel.Font = Enum.Font.GothamBold
+glitchIntensityLabel.TextSize = 12
+glitchIntensityLabel.TextXAlignment = Enum.TextXAlignment.Left
+glitchIntensityLabel.Parent = glitchCard
+
+local glitchDown = Instance.new("TextButton")
+glitchDown.Size = UDim2.new(0, 26, 0, 22)
+glitchDown.Position = UDim2.new(0.7, -10, 0, 48)
+glitchDown.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+glitchDown.Text = "-"
+glitchDown.TextColor3 = Color3.fromRGB(255, 255, 255)
+glitchDown.Font = Enum.Font.GothamBold
+glitchDown.TextSize = 16
+glitchDown.Parent = glitchCard
+
+local glitchDownCorner = Instance.new("UICorner")
+glitchDownCorner.CornerRadius = UDim.new(0, 5)
+glitchDownCorner.Parent = glitchDown
+
+local glitchUp = Instance.new("TextButton")
+glitchUp.Size = UDim2.new(0, 26, 0, 22)
+glitchUp.Position = UDim2.new(0.85, -10, 0, 48)
+glitchUp.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+glitchUp.Text = "+"
+glitchUp.TextColor3 = Color3.fromRGB(255, 255, 255)
+glitchUp.Font = Enum.Font.GothamBold
+glitchUp.TextSize = 16
+glitchUp.Parent = glitchCard
+
+local glitchUpCorner = Instance.new("UICorner")
+glitchUpCorner.CornerRadius = UDim.new(0, 5)
+glitchUpCorner.Parent = glitchUp
+
+-- ==============================================
+-- INFO CARD
+-- ==============================================
+local infoCard = Instance.new("Frame")
+infoCard.Size = UDim2.new(0.95, 0, 0, 45)
+infoCard.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+infoCard.BackgroundTransparency = 0.3
+infoCard.Parent = scrollFrame
+
+local infoCorner = Instance.new("UICorner")
+infoCorner.CornerRadius = UDim.new(0, 10)
+infoCorner.Parent = infoCard
+
+local infoText = Instance.new("TextLabel")
+infoText.Size = UDim2.new(1, -10, 1, 0)
+infoText.Position = UDim2.new(0, 5, 0, 0)
+infoText.BackgroundTransparency = 1
+infoText.Text = "SORRY LASERNYA NGAK BAGUS"
+infoText.TextColor3 = Color3.fromRGB(150, 150, 150)  -- Kelabu
+infoText.Font = Enum.Font.Gotham
+infoText.TextSize = 11
+infoText.TextWrapped = true
+infoText.Parent = infoCard
+
+-- ==============================================
+-- FUNCTIONS
+-- ==============================================
+
+-- Big Jacket Animation
+local function toggleJacket()
+    jacketActive = not jacketActive
+    
+    if jacketActive then
+        local anim = Instance.new("Animation")
+        anim.AnimationId = "rbxassetid://70883871260184"
+        
+        if humanoid then
+            local success, track = pcall(function()
+                return humanoid:LoadAnimation(anim)
+            end)
+            if success then
+                jacketAnimTrack = track
+                jacketAnimTrack.Looped = true
+                jacketAnimTrack.Priority = Enum.AnimationPriority.Movement
+                jacketAnimTrack:Play()
+            end
+        end
+        
+        jacketBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)  -- Hitam
+        jacketBtn.Text = "ON"
+        jacketBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        jacketStatus.Text = "ON"
+        jacketStatus.TextColor3 = Color3.fromRGB(200, 200, 200)
+    else
+        if jacketAnimTrack then
+            pcall(function() jacketAnimTrack:Stop() end)
+            jacketAnimTrack = nil
+        end
+        
+        jacketBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        jacketBtn.Text = "OFF"
+        jacketBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+        jacketStatus.Text = "OFF"
+        jacketStatus.TextColor3 = Color3.fromRGB(150, 150, 150)
+    end
+end
+
+-- Spin Function
+local function toggleSpin()
+    spinActive = not spinActive
+    
+    if spinActive then
+        spinBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)  -- Hitam
+        spinBtn.Text = "ON"
+        spinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        spinStatus.Text = "ON"
+        spinStatus.TextColor3 = Color3.fromRGB(200, 200, 200)
+        
+        spinConnection = RunService.Heartbeat:Connect(function()
+            if spinActive and hrp and hrp.Parent then
+                hrp.RotVelocity = Vector3.new(0, spinSpeed * 15, 0)
+            end
+        end)
+    else
+        spinBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        spinBtn.Text = "OFF"
+        spinBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+        spinStatus.Text = "OFF"
+        spinStatus.TextColor3 = Color3.fromRGB(150, 150, 150)
+        
+        if spinConnection then
+            spinConnection:Disconnect()
+            spinConnection = nil
+        end
+        if hrp and hrp.Parent then
+            hrp.RotVelocity = Vector3.new(0, 0, 0)
+        end
+    end
+end
+
+-- Glitch Function
+local function toggleGlitch()
+    glitchActive = not glitchActive
+    
+    if glitchActive then
+        glitchBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)  -- Hitam
+        glitchBtn.Text = "ON"
+        glitchBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        glitchStatus.Text = "ON"
+        glitchStatus.TextColor3 = Color3.fromRGB(200, 200, 200)
+        
+        glitchConnection = RunService.Heartbeat:Connect(function()
+            if glitchActive and hrp and hrp.Parent then
+                hrp.Velocity = Vector3.new(
+                    (math.random() * 2 - 1) * glitchIntensity * 80,
+                    (math.random() * 2 - 1) * glitchIntensity * 50,
+                    (math.random() * 2 - 1) * glitchIntensity * 80
+                )
+                
+                hrp.RotVelocity = Vector3.new(
+                    (math.random() * 2 - 1) * glitchIntensity * 30,
+                    (math.random() * 2 - 1) * glitchIntensity * 30,
+                    (math.random() * 2 - 1) * glitchIntensity * 30
+                )
+            end
+        end)
+    else
+        glitchBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        glitchBtn.Text = "OFF"
+        glitchBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+        glitchStatus.Text = "OFF"
+        glitchStatus.TextColor3 = Color3.fromRGB(150, 150, 150)
+        
+        if glitchConnection then
+            glitchConnection:Disconnect()
+            glitchConnection = nil
+        end
+        if hrp and hrp.Parent then
+            hrp.Velocity = Vector3.new(0, 0, 0)
+            hrp.RotVelocity = Vector3.new(0, 0, 0)
+        end
+    end
+end
+
+-- ==============================================
+-- BUTTON CLICKS
+-- ==============================================
+jacketBtn.MouseButton1Click:Connect(toggleJacket)
+spinBtn.MouseButton1Click:Connect(toggleSpin)
+glitchBtn.MouseButton1Click:Connect(toggleGlitch)
+
+-- Spin speed controls
+spinDown.MouseButton1Click:Connect(function()
+    spinSpeed = math.max(1, spinSpeed - 1)
+    spinSpeedLabel.Text = "Speed: " .. spinSpeed
+end)
+
+spinUp.MouseButton1Click:Connect(function()
+    spinSpeed = math.min(30, spinSpeed + 1)
+    spinSpeedLabel.Text = "Speed: " .. spinSpeed
+end)
+
+-- Glitch intensity controls
+glitchDown.MouseButton1Click:Connect(function()
+    glitchIntensity = math.max(0.5, glitchIntensity - 0.1)
+    glitchIntensityLabel.Text = string.format("Intensity: %.1f", glitchIntensity)
+end)
+
+glitchUp.MouseButton1Click:Connect(function()
+    glitchIntensity = math.min(3.0, glitchIntensity + 0.1)
+    glitchIntensityLabel.Text = string.format("Intensity: %.1f", glitchIntensity)
+end)
+
+-- ==============================================
+-- MINIMIZE FUNCTION
+-- ==============================================
+minBtn.MouseButton1Click:Connect(function()
+    uiMinimized = not uiMinimized
+    
+    if uiMinimized then
+        container.Size = UDim2.new(0, 320, 0, 38)
+        content.Visible = false
+        minBtn.Text = "+"
+    else
+        container.Size = UDim2.new(0, 320, 0, 380)
+        content.Visible = true
+        minBtn.Text = "−"
+    end
+end)
+
+-- ==============================================
+-- DRAG FUNCTION
+-- ==============================================
+local dragging = false
+local dragStart
+local startPos
+
+container.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = container.Position
+    end
+end)
+
+container.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        container.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- ==============================================
+-- TOGGLE KEY (INSERT)
+-- ==============================================
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.Insert then
+        screenGui.Enabled = not screenGui.Enabled
+    end
+end)
+
+-- ==============================================
+-- CHARACTER RESPAWN
+-- ==============================================
+player.CharacterAdded:Connect(function(newChar)
+    task.wait(1)
+    character = newChar
+    humanoid = newChar:WaitForChild("Humanoid")
+    hrp = newChar:WaitForChild("HumanoidRootPart")
+    
+    if jacketActive and humanoid then
+        toggleJacket()
+        toggleJacket()  -- Restart
+    end
+end)
+
+-- ==============================================
+-- NOTIFICATION
+-- ==============================================
+local notif = Instance.new("TextLabel")
+notif.Size = UDim2.new(0, 200, 0, 30)
+notif.Position = UDim2.new(0.5, -100, 0, 20)
+notif.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+notif.Text = "⚫ FIQQZR7 SKY HITAM"
+notif.TextColor3 = Color3.fromRGB(200, 200, 200)
+notif.Font = Enum.Font.GothamBold
+notif.TextSize = 11
+notif.Parent = screenGui
+
+local notifCorner = Instance.new("UICorner")
+notifCorner.CornerRadius = UDim.new(0, 6)
+notifCorner.Parent = notif
+
+-- Simple animation
+notif.Position = UDim2.new(0.5, -100, 0, -40)
+for i = 1, 20 do
+    notif.Position = notif.Position + UDim2.new(0, 0, 0, 2)
+    task.wait(0.01)
+end
+
+task.wait(2)
+
+for i = 1, 20 do
+    notif.Position = notif.Position - UDim2.new(0, 0, 0, 2)
+    task.wait(0.01)
+end
+
+notif:Destroy()
+
+-- ==============================================
+-- CONSOLE LOG
+-- ==============================================
+print("======================================")
+print("⚫ FIQQZR7 SKY - HITAM TOTAL EDITION")
+print("======================================")
+print("✨ 4 Hitam Glow Effects")
+print("🖤 UI Hitam Pekat")
+print("🧥 Big Jacket - ON/OFF")
+print("🌀 Spin Mode - Speed 1-30")
+print("⚡ Glitch Mode - Intensity 0.5-3.0")
+print("======================================")
+print("📌 Tekan INSERT untuk hide/show")
+print("======================================")
